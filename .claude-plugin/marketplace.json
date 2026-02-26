@@ -1,0 +1,20 @@
+{
+  "name": "spencergo-marketplace",
+  "description": "Spencer's personal marketplace for Claude Code skills - daily life and work productivity tools",
+  "owner": {
+    "name": "Spencer",
+    "email": ""
+  },
+  "plugins": [
+    {
+      "name": "naming",
+      "description": "通用AI命名技能，为任意场景生成合适的名称（项目名、产品名、人名、宠物名、品牌名、小说角色名、游戏ID等）",
+      "version": "1.0.0",
+      "source": "./skills/naming",
+      "author": {
+        "name": "Spencer",
+        "email": ""
+      }
+    }
+  ]
+}
