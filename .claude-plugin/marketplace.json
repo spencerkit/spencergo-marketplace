@@ -1,5 +1,5 @@
 {
-  "name": "spencergo-marketplace",
+  "name": "spencergo",
   "description": "Spencer's personal marketplace for Claude Code skills - daily life and work productivity tools",
   "owner": {
     "name": "Spencer",
@@ -7,20 +7,10 @@
   },
   "plugins": [
     {
-      "name": "yi",
-      "description": "周易占卜技能，通过摇铜钱模拟起卦，为用户提供卦象解读和 AI 分析",
+      "name": "spencergo",
+      "description": "Spencer's personal skills bundle: yi (I Ching Divination) and naming (AI Naming Assistant)",
       "version": "1.0.0",
-      "source": "./skills/yi-skill",
-      "author": {
-        "name": "Spencer",
-        "email": ""
-      }
-    },
-    {
-      "name": "naming",
-      "description": "通用AI命名技能，为任意场景生成合适的名称（项目名、产品名、人名、宠物名、品牌名、小说角色名、游戏ID等）",
-      "version": "1.0.0",
-      "source": "./skills/naming",
+      "source": "./",
       "author": {
         "name": "Spencer",
         "email": ""

@@ -1,42 +1,42 @@
-# spencergo-marketplace
+# spencergo
 
-> Spencer's personal marketplace for Claude Code skills
+> Spencer's personal skills bundle for Claude Code
 
-个人维护的 Claude Code 插件市场，汇集生活工作中常用的 AI 技能。
+A collection of Claude Code skills for daily life and productivity.
 
-## 安装
+## Installation
 
 ```bash
-# 添加市场
+# Add the marketplace
 /plugin marketplace add spencerkit/spencergo-marketplace
 
-# 安装 skill
-/plugin install naming@spencerkit/spencergo-marketplace
+# Install the skills bundle
+/plugin install spencergo@spencergo-marketplace
 ```
 
-## 可用 Skills
+## Available Skills
 
-### [yi - 周易占卜](./skills/yi-skill/README.md)
+### yi - I Ching Divination
 
-周易占卜技能，通过摇铜钱模拟起卦，为用户提供卦象解读和 AI 分析。
+I Ching divination skill using coin tossing to generate hexagrams, providing interpretations and AI analysis.
 
-**使用方式：**
+**Usage:**
 ```bash
 /yi
 ```
 
-### [naming - 命名技能](./skills/naming/README.md)
+### naming - AI Naming Assistant
 
-通用 AI 命名技能，为任意场景生成合适的名称。支持 26+ 种命名场景。
+Universal AI naming skill for generating suitable names in any scenario. Supports 26+ naming scenarios including project names, product names, character names, brand names, pet names, and more.
 
-**使用方式：**
+**Usage:**
 ```bash
 /naming
 ```
 
-## 添加新 Skill
+## Adding New Skills
 
-欢迎提交 PR 添加更多实用的 skills！
+Feel free to submit PRs to add more useful skills!
 
 ## License
 
