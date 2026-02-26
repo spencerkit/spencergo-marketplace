@@ -16,6 +16,15 @@
 
 ## 可用 Skills
 
+### [yi - 周易占卜](./skills/yi-skill/README.md)
+
+周易占卜技能，通过摇铜钱模拟起卦，为用户提供卦象解读和 AI 分析。
+
+**使用方式：**
+```bash
+/yi
+```
+
 ### [naming - 命名技能](./skills/naming/README.md)
 
 通用 AI 命名技能，为任意场景生成合适的名称。支持 26+ 种命名场景。
