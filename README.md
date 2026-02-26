@@ -8,10 +8,10 @@
 
 ```bash
 # 添加市场
-/plugin marketplace add 你的用户名/spencergo-marketplace
+/plugin marketplace add spencerkit/spencergo-marketplace
 
 # 安装 skill
-/plugin install naming@你的用户名/spencergo-marketplace
+/plugin install naming@spencerkit/spencergo-marketplace
 ```
 
 ## 可用 Skills
