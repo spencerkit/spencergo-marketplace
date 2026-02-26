@@ -31,7 +31,16 @@ Universal AI naming skill for generating suitable names in any scenario. Support
 
 **Usage:**
 ```bash
-/naming
+/命名
+```
+
+### writing - AI 写作助手
+
+综合写作技能，支持公众号文章、小红书笔记、短视频脚本、故事小说、诗歌、技术文章等多种写作类型。
+
+**Usage:**
+```bash
+/写作
 ```
 
 ## Adding New Skills
