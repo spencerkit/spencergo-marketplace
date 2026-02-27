@@ -1,87 +1,105 @@
-# Writing 写作技能 V2
+# Writing Skill V3
 
-> 综合写作技能 V2，支持协作式6阶段写作流程
+> Comprehensive writing skill with Fast/Standard dual modes and 6-stage collaborative workflow
 
-## 功能
+## Features
 
-### 核心特性
+### Core Features
 
-- **6阶段协作写作** - 从单向输出变为全程协作
-- **Demo预览确认** - 风格确定前先输出小样预览
-- **分节确认机制** - 用户选择确认粒度（A/B/C模式）
-- **AI审核机制** - 模拟读者提问验证内容完整性
-- **风格一致性复核** - 对比Demo与最终文章确保风格一致
+- **Smart Mode Selection** - Auto-detect Fast mode vs Standard mode
+- **6-Stage Collaborative Writing** - Shift from one-way output to full collaboration
+- **Dynamic Demo** - Adjust demo length and format based on content type
+- **Real-time Style Check** - Continuously compare against demo style during writing
+- **Progress Visualization** - Show progress indicator for each stage
+- **Flexible Rollback** - Return to previous step at any stage
+- **Embedded Self-Check** - Lightweight quality checks during writing
 
-### 内容类型
+### Supported Content Types
 
-- 公众号/博客文章
-- 小红书/微博笔记
-- 短视频脚本
-- B站视频脚本
-- 技术教程/分析
-- 故事/短篇小说
+- WeChat Official Account / Blog Articles
+- Xiaohongshu / Weibo Posts
+- Short Video Scripts
+- Bilibili Video Scripts
+- Technical Tutorials / Analysis
+- Stories / Short Fiction
 
-## 写作流程（6阶段）
+## Mode Selection
 
-| 阶段 | 名称 | 核心内容 |
-|------|------|----------|
-| 1 | 需求理解 | 目的、背景、观点、读者、内容概要 |
-| 2 | 大纲讨论 | 3-5个大纲选项 → 选择 → 确认 |
-| 3 | 风格确认 | 偏好提问 + Demo生成 + 用户确认 |
-| 4 | 分节写作 | 用户选择确认粒度（A/B/C） |
-| 5 | 审核 | AI推测问题 + 用户补充 + 修改 |
-| 6 | 风格复核 + 交付 | 风格对比 + 自动修正 + 最终审核 |
+**Fast Mode** (triggers when ANY condition is met):
+- Word count < 500
+- User says "简单写写" / "随便写写" (quick write)
+- Content type is Xiaohongshu / Weibo / Moments
 
-## 使用方法
+**Fast Mode Workflow**: Requirements → Style Check → One-shot Writing → Delivery
+
+**Standard Mode Workflow**: Full 6 stages (with progress indicators [1/6] ~ [6/6])
+
+---
+
+## Writing Workflow (6 Stages)
+
+| Stage | Name | Core Content | Progress |
+|-------|------|--------------|----------|
+| 1 | Requirements | Purpose, background, viewpoint, audience, writing pace | [1/6] |
+| 2 | Outline | 3-5 outline options → Select → Confirm | [2/6] |
+| 3 | Style Check | Preferences + Dynamic Demo + User Approval | [3/6] |
+| 4 | Section Writing | Write by pace + Real-time style check + Self-check | [4/6] |
+| 5 | Review | AI questions + User additions + Revisions | [5/6] |
+| 6 | Style Review + Delivery | Style comparison + Auto-fix + Final review | [6/6] |
+
+## Usage
 
 ```bash
 /写作
 ```
 
-或直接描述需求：
-- "帮我写一篇公众号文章，主题是..."
-- "写一个科幻短故事"
-- "一篇Python入门教程"
+Or describe your需求 directly:
+- "帮我写一篇公众号文章，主题是..." (Write a WeChat article about...)
+- "写一个科幻短故事" (Write a sci-fi short story)
+- "一篇Python入门教程" (A Python beginner tutorial)
 
-## 使用流程
+## Workflow
 
-1. 输入 `/写作` 或描述写作需求
-2. **阶段1 - 需求理解**：回答关于目的、背景、观点、读者等问题
-3. **阶段2 - 大纲讨论**：从3-5个大纲选项中选择
-4. **阶段3 - 风格确认**：回答风格偏好问题，查看Demo预览并确认
-5. **阶段4 - 分节写作**：选择确认模式（A.每节/B.部分/C.整体）
-6. **阶段5 - 审核**：AI推测问题，补充后修改
-7. **阶段6 - 风格复核 + 交付**：风格对比审核，最终交付
+1. Type `/写作` or describe your writing needs
+2. **Auto-detect mode**: Short content (<500 words) → Fast mode, otherwise → Standard mode
+3. **Stage 1 - Requirements [1/6]**: Answer questions about type, purpose, background, viewpoint, audience; choose writing pace
+4. **Stage 2 - Outline [2/6]** (Standard): Select from 3-5 outline options
+5. **Stage 3 - Style Check [3/6]**: Answer style preferences, generate dynamic demo based on content type, confirm
+6. **Stage 4 - Section Writing [4/6]**: Write according to chosen pace, compare with demo style in real-time, self-check after each section
+7. **Stage 5 - Review [5/6]** (Standard): AI anticipates questions, user adds input, revisions made
+8. **Stage 6 - Style Review + Delivery [6/6]**: Final style review, deliver
 
-## 示例
+> 💡 Type "返回上一步" (return to previous step) at any stage to adjust
 
-### 公众号文章
+## Examples
+
+### WeChat Article
 ```
-用户：/写作
-技能：你想写什么类型的文章？
-用户：公众号文章
-技能：文章主题是什么？
-用户：关于AI对未来工作的影响
-技能：目标读者是谁？
+User: /写作
+Skill: What type of article do you want to write?
+User: WeChat article
+Skill: What's the topic?
+User: About AI's impact on future work
+Skill: Who is the target audience?
 ...
 ```
 
-### 故事创作
+### Story Writing
 ```
-用户：写一个科幻故事
-技能：什么类型的科幻？硬科幻/软科幻/赛博朋克？
-用户：赛博朋克
-技能：主要人物是谁？
+User: Write a sci-fi story
+Skill: What type of sci-fi? Hard sci-fi/Soft sci-fi/Cyberpunk?
+User: Cyberpunk
+Skill: Who are the main characters?
 ...
 ```
 
-## 优化选项
+## Refinement Options
 
-生成后可以：
-- 换个风格
-- 缩短/加长
-- 调整语气
-- 重新生成
+After generation, you can:
+- Change style
+- Shorten/expand
+- Adjust tone
+- Regenerate
 
 ## License
 
