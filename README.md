@@ -43,6 +43,22 @@ Universal AI naming skill for generating suitable names in any scenario. Support
 /写作
 ```
 
+## Rules
+
+This repository includes TypeScript/JavaScript coding standards that can be used with Claude Code.
+
+### Installation
+
+```bash
+# Install common rules (required)
+cp -r rules/common ~/.claude/rules/common
+
+# Install JavaScript rules
+cp -r rules/javascript ~/.claude/rules/javascript
+```
+
+For more details, see [rules/README.md](rules/README.md).
+
 ## Adding New Skills
 
 Feel free to submit PRs to add more useful skills!
