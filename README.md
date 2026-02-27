@@ -1,68 +1,68 @@
 # spencergo
 
-> Spencer 的 Claude Code 个人技能包
+> Spencer's personal skills bundle for Claude Code
 
-日常生活和生产力工具的 Claude Code 技能集合。
+A collection of Claude Code skills for daily life and productivity.
 
-## 安装
+## Installation
 
 ```bash
-# 添加市场
+# Add the marketplace
 /plugin marketplace add spencerkit/spencergo-marketplace
 
-# 安装技能包
+# Install the skills bundle
 /plugin install spencergo@spencergo-marketplace
 ```
 
-## 可用技能
+## Available Skills
 
-### yi - 易经占卜
+### yi - I Ching Divination
 
-使用投币方式生成易经卦象的占卜技能，提供解释和 AI 分析。
+I Ching divination skill using coin tossing to generate hexagrams, providing interpretations and AI analysis.
 
-**使用方法：**
+**Usage:**
 ```bash
 /yi
 ```
 
-### naming - AI 命名助手
+### naming - AI Naming Assistant
 
-通用 AI 命名技能，可在任何场景下生成合适的名称。支持 26+ 种命名场景，包括项目名称、产品名称、角色名称、品牌名称、宠物名称等。
+Universal AI naming skill for generating suitable names in any scenario. Supports 26+ naming scenarios including project names, product names, character names, brand names, pet names, and more.
 
-**使用方法：**
+**Usage:**
 ```bash
 /命名
 ```
 
-### writing - AI 写作助手
+### writing - AI Writing Assistant
 
-综合写作技能，支持公众号文章、小红书笔记、短视频脚本、故事小说、诗歌、技术文章等多种写作类型。
+Comprehensive writing skill supporting multiple writing types including WeChat articles, Little Red Book notes, short video scripts, stories, novels, poetry, technical articles, and more.
 
-**使用方法：**
+**Usage:**
 ```bash
 /写作
 ```
 
-## 规范
+## Rules
 
-本仓库包含可与 Claude Code 一起使用的 TypeScript/JavaScript 编码规范。
+This repository includes TypeScript/JavaScript coding standards that can be used with Claude Code.
 
-### 安装
+### Installation
 
 ```bash
-# 安装通用规范（必需）
+# Install common rules (required)
 cp -r rules/common ~/.claude/rules/common
 
-# 安装 JavaScript 规范
+# Install JavaScript rules
 cp -r rules/javascript ~/.claude/rules/javascript
 ```
 
-更多详情，请参阅 [rules/README.md](rules/README.md)。
+For more details, see [rules/README.md](rules/README.md).
 
-## 添加新技能
+## Adding New Skills
 
-欢迎提交 PR 来添加更多有用的技能！
+Feel free to submit PRs to add more useful skills!
 
-## 许可证
+## License
 
 MIT
