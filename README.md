@@ -1,35 +1,35 @@
 # spencergo
 
-> Spencer's personal skills bundle for Claude Code
+> Spencer 的 Claude Code 个人技能包
 
-A collection of Claude Code skills for daily life and productivity.
+日常生活和生产力工具的 Claude Code 技能集合。
 
-## Installation
+## 安装
 
 ```bash
-# Add the marketplace
+# 添加市场
 /plugin marketplace add spencerkit/spencergo-marketplace
 
-# Install the skills bundle
+# 安装技能包
 /plugin install spencergo@spencergo-marketplace
 ```
 
-## Available Skills
+## 可用技能
 
-### yi - I Ching Divination
+### yi - 易经占卜
 
-I Ching divination skill using coin tossing to generate hexagrams, providing interpretations and AI analysis.
+使用投币方式生成易经卦象的占卜技能，提供解释和 AI 分析。
 
-**Usage:**
+**使用方法：**
 ```bash
 /yi
 ```
 
-### naming - AI Naming Assistant
+### naming - AI 命名助手
 
-Universal AI naming skill for generating suitable names in any scenario. Supports 26+ naming scenarios including project names, product names, character names, brand names, pet names, and more.
+通用 AI 命名技能，可在任何场景下生成合适的名称。支持 26+ 种命名场景，包括项目名称、产品名称、角色名称、品牌名称、宠物名称等。
 
-**Usage:**
+**使用方法：**
 ```bash
 /命名
 ```
@@ -38,31 +38,31 @@ Universal AI naming skill for generating suitable names in any scenario. Support
 
 综合写作技能，支持公众号文章、小红书笔记、短视频脚本、故事小说、诗歌、技术文章等多种写作类型。
 
-**Usage:**
+**使用方法：**
 ```bash
 /写作
 ```
 
-## Rules
+## 规范
 
-This repository includes TypeScript/JavaScript coding standards that can be used with Claude Code.
+本仓库包含可与 Claude Code 一起使用的 TypeScript/JavaScript 编码规范。
 
-### Installation
+### 安装
 
 ```bash
-# Install common rules (required)
+# 安装通用规范（必需）
 cp -r rules/common ~/.claude/rules/common
 
-# Install JavaScript rules
+# 安装 JavaScript 规范
 cp -r rules/javascript ~/.claude/rules/javascript
 ```
 
-For more details, see [rules/README.md](rules/README.md).
+更多详情，请参阅 [rules/README.md](rules/README.md)。
 
-## Adding New Skills
+## 添加新技能
 
-Feel free to submit PRs to add more useful skills!
+欢迎提交 PR 来添加更多有用的技能！
 
-## License
+## 许可证
 
 MIT
