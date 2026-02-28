@@ -36,17 +36,30 @@ writing (主Skill)
 
 ## 流程指引（Claude 自动串联）
 
-**每个模块完成后，Claude 会根据上下文自动建议下一步：**
+**按照以下顺序调用子模块，每个阶段完成后必须明确引导用户进入下一步：**
 
-1. **writing-style** → "继续写大纲" → 调用 `/writing-outline`
-2. **writing-outline** → "开始写作" → 调用 `/writing-content`
-3. **writing-content** → "帮我审核" → 调用 `/writing-review`
-4. **writing-review** → "润色一下" → 调用 `/writing-polish`
-5. **writing-polish** → "可以了" → 交付
+### 完整流程
+1. **风格分析阶段** → 用户确认风格后 → 说"继续"或"下一步" → **invoke /writing-outline**
+2. **大纲编写阶段** → 用户确认大纲后 → 说"继续"或"开始写作" → **invoke /writing-content**
+3. **内容编写阶段** → 用户确认初稿后 → 说"继续"或"帮我审核" → **invoke /writing-review**
+4. **内容审核阶段** → 用户确认审核结果后 → 说"继续"或"润色" → **invoke /writing-polish**
+5. **润色阶段** → 用户确认润色结果后 → 交付完成
 
-**用户只需说出下一步意图，Claude 就会自动调用对应的 skill。**
+### 关键规则
+
+- **不要跳过任何阶段**（除非用户明确要求快速模式）
+- **每个阶段必须获得用户确认**后才能进入下一阶段
+- **不要在内容编写阶段就调用审核**，必须等用户确认初稿
+- **不要在审核阶段就自动润色**，必须等用户确认审核结果
 
 ---
+
+<CRITICAL>
+当用户说"继续"、"下一步"、"开始"等意图时，你必须：
+1. 明确告诉用户要进入哪个阶段
+2. 使用 Skill tool 调用对应的子模块 skill
+3. 例如：用户说"继续写大纲" → 你必须调用 `/writing-outline`（通过 Skill tool）
+</CRITICAL>
 
 ## 核心改进
 
