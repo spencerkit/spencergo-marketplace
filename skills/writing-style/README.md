@@ -1,18 +1,18 @@
-# Writing Style (风格分析)
+# Writing Style
 
-独立风格分析模块。
+Standalone style analysis module.
 
-## 功能
+## Features
 
-- 风格样本分析
-- 量化指标计算
-- 风格冲突检测
-- 内容类型适配
+- Style sample analysis
+- Quantitative metrics
+- Style conflict detection
+- Content type adaptation
 
-## 使用
+## Usage
 
+```bash
+/spencergo:writing-style
 ```
-/风格分析
-```
 
-或直接提供内容让 AI 分析风格。
+Or provide content directly for style analysis.

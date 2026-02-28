@@ -167,3 +167,18 @@ End with powerful statement
 6. User confirmation
 7. Continue or submit whole
 8. Final review
+
+---
+
+## Next Step Guide (MUST FOLLOW)
+
+When user confirms the content draft, you MUST guide them to the review phase:
+
+1. Tell user: "Content draft ready. Moving to review phase."
+2. Use Skill tool to invoke /spencergo:writing-review
+3. Pass context: completed content and any notes
+
+DO NOT skip the review phase
+
+User can say:
+- "continue" / "next" / "review"

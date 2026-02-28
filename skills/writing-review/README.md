@@ -1,16 +1,16 @@
-# Writing Review (内容审核)
+# Writing Review
 
-独立内容审核模块。
+Standalone content review module.
 
-## 功能
+## Features
 
-- AI 推测读者问题
-- 多维度审核（逻辑/读者视角/情感/结构/AI痕迹）
-- 量化评分
-- 改进建议
+- AI predicts reader questions
+- Multi-dimensional review (logic/reader perspective/emotion/structure/AI patterns)
+- Quantitative scoring
+- Improvement suggestions
 
-## 使用
+## Usage
 
-```
-/审核
+```bash
+/spencergo:writing-review
 ```

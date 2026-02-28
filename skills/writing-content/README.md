@@ -1,16 +1,16 @@
-# Writing Content (内容编写)
+# Writing Content
 
-独立内容编写模块。
+Standalone content writing module.
 
-## 功能
+## Features
 
-- 按大纲写作
-- 实时风格对比
-- 嵌入式自检（AI痕迹/节奏/逻辑）
-- 多种写作节奏
+- Write according to outline
+- Real-time style comparison
+- Embedded self-check (AI patterns/rhythm/logic)
+- Multiple writing rhythms
 
-## 使用
+## Usage
 
-```
-/写作
+```bash
+/spencergo:writing-content
 ```

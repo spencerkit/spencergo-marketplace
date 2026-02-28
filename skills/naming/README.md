@@ -41,10 +41,10 @@
 - 日语/韩语名字
 - 粤语/闽南语名字
 
-## 使用方式
+## Usage
 
 ```bash
-/naming
+/spencergo:naming
 ```
 
 ## 对话流程
@@ -101,12 +101,12 @@
 
 ## 安装
 
-此 skill 是 spencergo-marketplace 的一部分。
+This skill is part of spencergo-marketplace.
 
-安装命令：
+Installation:
 ```bash
 /plugin marketplace add spencerkit/spencergo-marketplace
-/plugin install naming@spencerkit/spencergo-marketplace
+/plugin install spencergo@spencerkit/spencergo-marketplace
 ```
 
 ## License

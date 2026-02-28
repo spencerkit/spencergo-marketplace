@@ -1,18 +1,16 @@
-# Writing Skill V3
+# Writing Skill V4
 
-> Comprehensive writing skill with Fast/Standard dual modes and 6-stage collaborative workflow
+> Comprehensive writing skill with hybrid mode - supports independent module invocation or preset template combinations
 
 ## Features
 
 ### Core Features
 
-- **Smart Mode Selection** - Auto-detect Fast mode vs Standard mode
-- **6-Stage Collaborative Writing** - Shift from one-way output to full collaboration
-- **Dynamic Demo** - Adjust demo length and format based on content type
-- **Real-time Style Check** - Continuously compare against demo style during writing
-- **Progress Visualization** - Show progress indicator for each stage
-- **Flexible Rollback** - Return to previous step at any stage
-- **Embedded Self-Check** - Lightweight quality checks during writing
+- **Hybrid Mode** - Use preset templates or invoke modules independently
+- **5 Independent Sub-modules** - style, outline, content, review, polish
+- **Preset Templates** - Full, Quick, Polish only, Review + Polish
+- **Flow Guidance** - Clear next step instructions after each phase
+- **Quantitative Metrics** - Style analysis, scoring, quality checks
 
 ### Supported Content Types
 
@@ -23,83 +21,55 @@
 - Technical Tutorials / Analysis
 - Stories / Short Fiction
 
-## Mode Selection
+## Architecture
 
-**Fast Mode** (triggers when ANY condition is met):
-- Word count < 500
-- User says "简单写写" / "随便写写" (quick write)
-- Content type is Xiaohongshu / Weibo / Moments
+```
+writing (Main Skill)
+├── writing-style    → Style analysis
+├── writing-outline  → Outline generation
+├── writing-content  → Content writing
+├── writing-review   → Content review
+└── writing-polish   → Polish
+```
 
-**Fast Mode Workflow**: Requirements → Style Check → One-shot Writing → Delivery
+## Preset Templates
 
-**Standard Mode Workflow**: Full 6 stages (with progress indicators [1/6] ~ [6/6])
+| Template | Modules | Use Case |
+|----------|---------|----------|
+| Full writing | style → outline → content → review → polish | Complete article from scratch |
+| Quick writing | style → content | Short content, familiar topic |
+| Polish only | polish | Already have draft, just polish |
+| Review + polish | review → polish | Written, want review + polish |
 
----
+## Independent Invocation
 
-## Writing Workflow (6 Stages)
-
-| Stage | Name | Core Content | Progress |
-|-------|------|--------------|----------|
-| 1 | Requirements | Purpose, background, viewpoint, audience, writing pace | [1/6] |
-| 2 | Outline | 3-5 outline options → Select → Confirm | [2/6] |
-| 3 | Style Check | Preferences + Dynamic Demo + User Approval | [3/6] |
-| 4 | Section Writing | Write by pace + Real-time style check + Self-check | [4/6] |
-| 5 | Review | AI questions + User additions + Revisions | [5/6] |
-| 6 | Style Review + Delivery | Style comparison + Auto-fix + Final review | [6/6] |
+User can invoke any sub-module directly:
+```bash
+/spencergo:writing-style    # Style analysis
+/spencergo:writing-outline  # Outline generation
+/spencergo:writing-content  # Content writing
+/spencergo:writing-review   # Content review
+/spencergo:writing-polish   # Polish
+```
 
 ## Usage
 
 ```bash
-/写作
+/spencergo:writing
 ```
 
-Or describe your需求 directly:
-- "帮我写一篇公众号文章，主题是..." (Write a WeChat article about...)
-- "写一个科幻短故事" (Write a sci-fi short story)
-- "一篇Python入门教程" (A Python beginner tutorial)
+Or describe your requirements directly:
+- "Write a WeChat article about AI's impact on future work"
+- "Write a sci-fi short story"
+- "A Python beginner tutorial"
 
 ## Workflow
 
-1. Type `/写作` or describe your writing needs
-2. **Auto-detect mode**: Short content (<500 words) → Fast mode, otherwise → Standard mode
-3. **Stage 1 - Requirements [1/6]**: Answer questions about type, purpose, background, viewpoint, audience; choose writing pace
-4. **Stage 2 - Outline [2/6]** (Standard): Select from 3-5 outline options
-5. **Stage 3 - Style Check [3/6]**: Answer style preferences, generate dynamic demo based on content type, confirm
-6. **Stage 4 - Section Writing [4/6]**: Write according to chosen pace, compare with demo style in real-time, self-check after each section
-7. **Stage 5 - Review [5/6]** (Standard): AI anticipates questions, user adds input, revisions made
-8. **Stage 6 - Style Review + Delivery [6/6]**: Final style review, deliver
+1. Type `/spencergo:writing` or describe your writing needs
+2. **Select template**: Full / Quick / Polish only / Review + Polish
+3. **Full workflow**: Style → Outline → Content → Review → Polish → Delivery
 
-> 💡 Type "返回上一步" (return to previous step) at any stage to adjust
-
-## Examples
-
-### WeChat Article
-```
-User: /写作
-Skill: What type of article do you want to write?
-User: WeChat article
-Skill: What's the topic?
-User: About AI's impact on future work
-Skill: Who is the target audience?
-...
-```
-
-### Story Writing
-```
-User: Write a sci-fi story
-Skill: What type of sci-fi? Hard sci-fi/Soft sci-fi/Cyberpunk?
-User: Cyberpunk
-Skill: Who are the main characters?
-...
-```
-
-## Refinement Options
-
-After generation, you can:
-- Change style
-- Shorten/expand
-- Adjust tone
-- Regenerate
+> 💡 Say "continue" to move to next phase after each step
 
 ## License
 

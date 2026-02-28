@@ -1,18 +1,18 @@
-# Writing Outline (大纲编写)
+# Writing Outline
 
-独立大纲编写模块。
+Standalone outline generation module.
 
-## 功能
+## Features
 
-- 3-5 个大纲选项生成
-- 内容类型结构库（公众号/小红书/技术教程/故事/短视频）
-- 智能结构推荐
-- 大纲调整和确认
+- 3-5 outline options generation
+- Content type structure library (WeChat/Xiaohongshu/Technical/Stories/Video)
+- Smart structure recommendation
+- Outline adjustment and confirmation
 
-## 使用
+## Usage
 
+```bash
+/spencergo:writing-outline
 ```
-/大纲
-```
 
-或描述需求："帮我列个公众号文章大纲"
+Or describe requirements: "Help me outline a WeChat article"

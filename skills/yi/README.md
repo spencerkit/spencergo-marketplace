@@ -22,10 +22,10 @@
 - "周易占卜"
 - "问卦"
 
-## 使用方式
+## Usage
 
 ```bash
-/yi
+/spencergo:yi
 ```
 
 ## 占卜流程
@@ -73,12 +73,12 @@
 
 ## 安装
 
-此 skill 是 spencergo-marketplace 的一部分。
+This skill is part of spencergo-marketplace.
 
-安装命令：
+Installation:
 ```bash
 /plugin marketplace add spencerkit/spencergo-marketplace
-/plugin install yi@spencerkit/spencergo-marketplace
+/plugin install spencergo@spencerkit/spencergo-marketplace
 ```
 
 ## License

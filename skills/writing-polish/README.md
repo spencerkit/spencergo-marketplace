@@ -1,16 +1,16 @@
-# Writing Polish (润色)
+# Writing Polish
 
-独立润色模块。
+Standalone polish module.
 
-## 功能
+## Features
 
-- 改写：不同风格/语气重写
-- 优化：改进内容质量
-- 校对：语法/错别字/格式
-- 去AI化：去除AI写作痕迹
+- Rewrite: Different style/tone
+- Optimize: Improve quality
+- Proofread: Grammar/spelling/format
+- De-AI-ify: Remove AI writing patterns
 
-## 使用
+## Usage
 
-```
-/润色
+```bash
+/spencergo:writing-polish
 ```
