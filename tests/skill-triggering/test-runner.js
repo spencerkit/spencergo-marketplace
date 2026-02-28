@@ -6,6 +6,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 const { execSync } = require("child_process");
 
 const SCRIPT_DIR = process.argv[1] ? path.dirname(process.argv[1]) : __dirname;
@@ -93,7 +94,7 @@ function runTestCase(skillName, testCase) {
     // Find session file - Claude encodes paths with leading hyphen
     const projectEscaped = "-" + testDir.replace(/\//g, "-");
     const sessionDir = path.join(
-      process.env.HOME || "",
+      os.homedir(),
       ".claude/projects",
       projectEscaped,
     );
