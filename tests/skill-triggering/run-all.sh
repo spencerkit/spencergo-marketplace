@@ -3,8 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CASES_DIR="$SCRIPT_DIR/cases"
-PLUGIN_DIR="$PROJECT_ROOT/.claude-plugin"
+SKILLS_DIR="$PROJECT_ROOT/skills"
 TEST_RESULTS_DIR="$PROJECT_ROOT/tests/test-results"
 
 # Colors
@@ -35,8 +34,8 @@ fi
 echo "  ✓ Node.js found"
 
 echo ""
-echo "Running skill triggering tests..."
+echo "Running universal skill tests..."
 echo ""
 
-# Run Node.js test runner
-node "$SCRIPT_DIR/test-runner.js"
+# Run Node.js test runner with skills directory
+node "$SCRIPT_DIR/universal-test-runner.js" "$SKILLS_DIR"

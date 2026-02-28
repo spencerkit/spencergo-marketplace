@@ -13,6 +13,8 @@ Thumbs.db
 
 # Test results
 tests/test-results/
+tests/output.md
+tests-output.md
 
 # Design docs
 docs/plans/
