@@ -15,7 +15,7 @@ Standalone content review module:
 
 ## Usage
 
-/writing-review
+/spencergo:writing-review
 
 Or provide content:
 - "Help me review this article: {content}"
@@ -177,7 +177,7 @@ Need me to make changes based on suggestions?
 When user confirms the review, you MUST guide them to the polish phase:
 
 1. Tell user: "Review complete. Moving to polish phase."
-2. Use Skill tool to invoke /writing-polish
+2. Use Skill tool to invoke /spencergo:writing-polish
 3. Pass context: review report and suggestions
 
 User can say:

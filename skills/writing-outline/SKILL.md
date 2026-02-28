@@ -15,7 +15,7 @@ Standalone outline generation module:
 
 ## Usage
 
-/writing-outline
+/spencergo:writing-outline
 
 Or describe requirements:
 - "Help me outline a WeChat article about xxx"
@@ -162,7 +162,7 @@ Auto-recommend based on:
 When user confirms the outline, you MUST guide them to the writing phase:
 
 1. Tell user: "Outline confirmed. Moving to writing phase."
-2. Use Skill tool to invoke /writing-content
+2. Use Skill tool to invoke /spencergo:writing-content
 3. Pass context: confirmed outline structure
 
 DO NOT skip the writing phase and go directly to review

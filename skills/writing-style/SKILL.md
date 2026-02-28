@@ -15,7 +15,7 @@ Standalone style analysis module:
 
 ## Usage
 
-/writing-style
+/spencergo:writing-style
 
 Or provide content directly:
 - "Write in this style: {article}"
@@ -117,7 +117,7 @@ Questions:
 When user confirms the style, you MUST guide them to the outline phase:
 
 1. Tell user: "Style confirmed. Moving to outline phase."
-2. Use Skill tool to invoke /writing-outline
+2. Use Skill tool to invoke /spencergo:writing-outline
 3. Pass context: confirmed style characteristics
 
 DO NOT skip the outline phase and go directly to writing

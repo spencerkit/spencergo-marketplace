@@ -31,7 +31,7 @@ Universal AI naming skill for generating suitable names in any scenario. Support
 
 **Usage:**
 ```bash
-/命名
+/naming
 ```
 
 ### writing - AI Writing Assistant
@@ -40,7 +40,7 @@ Comprehensive writing skill supporting multiple writing types including WeChat a
 
 **Usage:**
 ```bash
-/写作
+/writing
 ```
 
 ## Rules

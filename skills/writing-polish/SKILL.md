@@ -15,7 +15,7 @@ Standalone polish module:
 
 ## Usage
 
-/writing-polish
+/spencergo:writing-polish
 
 Or provide content:
 - "Help me rewrite, different style"

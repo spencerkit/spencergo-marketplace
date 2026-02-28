@@ -15,7 +15,7 @@ Standalone content writing module:
 
 ## Usage
 
-/writing-content
+/spencergo:writing-content
 
 Or describe requirements:
 - "Help me write an article about xxx"
