@@ -1,0 +1,13 @@
+{
+  "skill": "spencergo:yi",
+  "description": "I Ching divination test cases",
+  "test_cases": [
+    {
+      "name": "basic-divination",
+      "prompt": "帮我起一卦",
+      "expected_contains": ["卦", "易", "六十四"],
+      "not_expected": ["错误", "失败"],
+      "timeout": 60
+    }
+  ]
+}

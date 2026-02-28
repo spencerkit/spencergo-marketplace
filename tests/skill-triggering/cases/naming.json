@@ -1,0 +1,20 @@
+{
+  "skill": "spencergo:naming",
+  "description": "AI naming assistant test cases",
+  "test_cases": [
+    {
+      "name": "project-naming",
+      "prompt": "帮我起一个项目名称",
+      "expected_contains": ["项目", "名称", "命名"],
+      "not_expected": ["错误", "失败", "无法"],
+      "timeout": 60
+    },
+    {
+      "name": "pet-naming",
+      "prompt": "帮我起一个宠物名字",
+      "expected_contains": ["宠物", "名字", "猫", "狗"],
+      "not_expected": ["错误", "失败"],
+      "timeout": 60
+    }
+  ]
+}

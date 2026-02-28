@@ -1,0 +1,13 @@
+{
+  "skill": "spencergo:writing-outline",
+  "description": "Writing outline generation test cases",
+  "test_cases": [
+    {
+      "name": "wechat-article-outline",
+      "prompt": "帮我列个公众号文章大纲",
+      "expected_contains": ["大纲", "章节", "结构"],
+      "not_expected": ["错误", "失败"],
+      "timeout": 60
+    }
+  ]
+}
