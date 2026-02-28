@@ -165,21 +165,13 @@ description: 内容编写技能 - 按大纲写作，实时风格对比，嵌入�
 
 1. 接收大纲和风格要求
 2. 选择写作节奏
-3. 按章节写作
-4. 每节进行自检
-5. 实时风格对比
 
 ---
 
-## 下一步指引（必须遵循）
-
-**当用户确认初稿后，你必须引导用户进入审核阶段：**
-
-1. 告诉用户："初稿已确认，接下来进入审核阶段"
-2. 调用 Skill tool：`/writing-review`
-3. 传递上下文：已完成的初稿内容
-
-**不要跳过审核阶段直接润色**
-
-用户可以说：
-- "继续" / "下一步" / "帮我审核"
+## Next Step Guide (MUST FOLLOW)
+When user confirms the draft, you MUST guide them to the review phase:
+1. Tell user: Draft confirmed. Moving to review phase.
+2. Use Skill tool to invoke /writing-review
+3. Pass context: completed draft content
+DO NOT skip the review phase and go directly to polish
+User can say: continue / next / review

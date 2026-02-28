@@ -166,20 +166,11 @@ description: 内容审核技能 - AI推测问题，多维度审核，量化评�
 
 ---
 
-## 5. 审核类型
-
-| 类型 | 说明 |
-|------|------|
-
 ---
 
-## 下一步指引（必须遵循）
-
-**当用户确认审核结果后，你必须引导用户进入润色阶段：**
-
-1. 告诉用户："审核完成，接下来进入润色阶段"
-2. 调用 Skill tool：`/writing-polish`
-3. 传递上下文：审核报告和改进建议
-
-用户可以说：
-- "继续" / "下一步" / "润色一下"
+## Next Step Guide (MUST FOLLOW)
+When user confirms the review, you MUST guide them to the polish phase:
+1. Tell user: Review confirmed. Moving to polish phase.
+2. Use Skill tool to invoke /writing-polish
+3. Pass context: review report and suggestions
+User can say: continue / next / polish

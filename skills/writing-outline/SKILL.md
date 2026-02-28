@@ -158,21 +158,13 @@ description: 大纲编写技能 - 根据需求生成结构化大纲，提供内�
 
 根据以下因素自动推荐：
 
-| 因素 | 权重 | 考虑内容 |
-|------|------|----------|
-| 内容类型 | 高 | 不同类型匹配不同结构 |
 
 ---
 
-## 下一步指引（必须遵循）
-
-**当用户确认大纲后，你必须引导用户进入内容编写阶段：**
-
-1. 告诉用户："大纲已确认，接下来进入写作阶段"
-2. 调用 Skill tool：`/writing-content`
-3. 传递上下文：已确认的大纲结构
-
-**不要跳过写作阶段直接进入审核**
-
-用户可以说：
-- "继续" / "下一步" / "开始写作"
+## Next Step Guide (MUST FOLLOW)
+When user confirms the outline, you MUST guide them to the writing phase:
+1. Tell user: Outline confirmed. Moving to writing phase.
+2. Use Skill tool to invoke /writing-content
+3. Pass context: confirmed outline structure
+DO NOT skip the writing phase and go directly to review
+User can say: continue / next / start writing

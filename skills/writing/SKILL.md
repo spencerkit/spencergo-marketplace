@@ -70,22 +70,23 @@ writing (主Skill)
 4. **内容审核** → 用户确认后 → **invoke /writing-polish**
 5. **润色完成** → 交付
 
-### 关键规则
+### Key Rules
 
-- **不要跳过任何阶段**（除非用户明确要求快速模式）
-- **每个阶段必须获得用户确认**后才能进入下一阶段
-- **不要在内容编写阶段就调用审核**，必须等用户确认初稿
-- **不要在审核阶段就自动润色**，必须等用户确认审核结果
+- **DO NOT skip any phase** (unless user explicitly requests quick mode)
+- **MUST get user confirmation** before moving to next phase
+- **DO NOT invoke review** during content writing - wait for user to confirm draft
+- **DO NOT auto-polish** after review - wait for user to confirm review results
 
 ---
 
-**The terminal state is delivery.** Do NOT skip any phase. The ONLY flow is style → outline → content → review → polish → delivery.
+**The terminal state is delivery.** Do NOT skip any phase. The ONLY flow is: style → outline → content → review → polish → delivery.
 
 <CRITICAL>
-当用户说"继续"、"下一步"、"开始"等意图时，你必须：
-1. 明确告诉用户要进入哪个阶段
-2. 使用 Skill tool 调用对应的子模块 skill
-3. 例如：用户说"继续写大纲" → 你必须调用 `/writing-outline`（通过 Skill tool）
+When user says "continue", "next", "start", etc., you MUST:
+
+1. Tell user which phase you're entering
+2. Use Skill tool to invoke the corresponding sub-skill
+3. Example: user says "continue with outline" → you MUST invoke `/writing-outline` via Skill tool
 </CRITICAL>
 
 

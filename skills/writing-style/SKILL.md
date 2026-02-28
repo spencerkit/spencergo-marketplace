@@ -128,21 +128,18 @@ description: 风格分析技能 - 分析、提取、应用风格。提供风格�
 
 ## 6. 快速风格识别
 
-当用户没有提供样本，通过提问快速确定：
-1. 语气：严肃专业/轻松活泼/温暖治愈/犀利深刻/幽默俏皮
-2. 句式：长句详细/短句有力/长短交替
 
 ---
 
-## 下一步指引（必须遵循）
+## Next Step Guide (MUST FOLLOW)
 
-**当用户确认风格后，你必须引导用户进入大纲编写阶段：**
+**When user confirms the style, you MUST guide them to the outline phase:**
 
-1. 告诉用户："风格已确认，接下来进入大纲编写阶段"
-2. 调用 Skill tool：`/writing-outline`
-3. 传递上下文：当前已确认的风格特点
+1. Tell user: "Style confirmed. Moving to outline phase."
+2. Use Skill tool to invoke `/writing-outline`
+3. Pass context: confirmed style characteristics
 
-**不要跳过大纲阶段直接进入写作**
+**DO NOT skip the outline phase and go directly to writing**
 
-用户可以说：
-- "继续" / "下一步" / "开始写大纲"
+User can say:
+- "continue" / "next" / "start outline"
