@@ -8,12 +8,18 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Test project directory
-TEST_PROJECT_DIR=""
+# Test results directory
+TEST_RESULTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/test-results"
+
+# Create test-results directory if not exists
+mkdir -p "$TEST_RESULTS_DIR"
 
 # Create a temporary test project
 create_test_project() {
-    local test_dir=$(mktemp -d)
+    local test_name="${1:-test}"
+    local timestamp=$(date +%s)
+    local test_dir="$TEST_RESULTS_DIR/${test_name}-${timestamp}"
+    mkdir -p "$test_dir"
     echo "$test_dir"
 }
 
@@ -44,11 +50,24 @@ run_claude_skill() {
 # Find the most recent session file for a project
 find_session_file() {
     local project_dir="$1"
+    # Claude encodes path by replacing / with -
     local project_escaped=$(echo "$project_dir" | sed 's/\//-/g' | sed 's/^-//')
     local session_dir="$HOME/.claude/projects/$project_escaped"
 
     if [ -d "$session_dir" ]; then
         find "$session_dir" -name "*.jsonl" -type f -mmin -60 2>/dev/null | sort -r | head -1
+    fi
+}
+
+# Copy session file to test-results for analysis
+save_session() {
+    local session_file="$1"
+    local dest_dir="$2"
+
+    if [ -f "$session_file" ]; then
+        local basename=$(basename "$session_file")
+        cp "$session_file" "$dest_dir/$basename"
+        echo "$dest_dir/$basename"
     fi
 }
 
@@ -119,21 +138,19 @@ load_test_case() {
     local json_file="$1"
     local test_name="$2"
 
-    # Simple jq alternative using grep and sed
-    python3 -c "
-import json
-with open('$json_file', 'r') as f:
-    data = json.load(f)
-    test = next((t for t in data.get('test_cases', []) if t.get('name') == '$test_name'), None)
-    if test:
-        print(json.dumps(test))
-" 2>/dev/null
+    node -e "
+const fs = require('fs');
+const data = JSON.parse(fs.readFileSync('$json_file', 'utf-8'));
+const test = data.test_cases?.find(t => t.name === '$test_name');
+if (test) console.log(JSON.stringify(test));
+"
 }
 
 export -f create_test_project
 export -f cleanup_test_project
 export -f run_claude_skill
 export -f find_session_file
+export -f save_session
 export -f check_session_contains
 export -f check_session_not_contains
 export -f check_skill_invoked

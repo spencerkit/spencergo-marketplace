@@ -11,5 +11,8 @@ Thumbs.db
 # Logs
 *.log
 
+# Test results
+tests/test-results/
+
 # Design docs
 docs/plans/

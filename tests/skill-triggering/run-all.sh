@@ -33,12 +33,12 @@ run_test_case() {
     echo -e "\n${BLUE}[$test_name]${NC}"
     echo "Prompt: $prompt"
 
-    # Create temp project
-    local test_dir=$(mktemp -d)
+    # Create test project in test-results directory
+    local test_dir=$(create_test_project "${skill}-${test_name}")
+    local output_file="$test_dir/output.txt"
 
     # Run Claude
     cd "$test_dir"
-    local output_file="/tmp/skill-test-$skill-$test_name.out"
 
     if timeout "$timeout" claude -p "$prompt" \
         --permission-mode bypassPermissions \
@@ -52,9 +52,12 @@ run_test_case() {
         if [ -z "$session_file" ]; then
             echo -e "${YELLOW}[SKIP]${NC} Could not find session file"
             SKIPPED_TESTS=$((SKIPPED_TESTS + 1))
-            rm -rf "$test_dir"
+            cleanup_test_project "$test_dir"
             return
         fi
+
+        # Copy session to test-results for analysis
+        save_session "$session_file" "$test_dir"
 
         # Check expected contains
         local all_passed=true
@@ -80,19 +83,21 @@ run_test_case() {
 
         if [ "$all_passed" = true ]; then
             echo -e "${GREEN}[PASS]${NC}"
+            echo "  Session saved: $test_dir"
             PASSED_TESTS=$((PASSED_TESTS + 1))
         else
             echo -e "${RED}[FAIL]${NC}"
+            echo "  Session saved: $test_dir"
             FAILED_TESTS=$((FAILED_TESTS + 1))
         fi
     else
         echo -e "${RED}[FAIL]${NC} Test timed out or failed"
+        echo "  Output saved: $test_dir"
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
 
-    # Cleanup
-    rm -rf "$test_dir"
-    rm -f "$output_file"
+    # Keep test results for analysis
+    echo "  Results: $test_dir"
 }
 
 # Parse test cases from JSON
