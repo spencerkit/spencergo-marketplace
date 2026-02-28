@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Test runner for spencergo skills
- * Runs test cases defined in JSON files
+ * Runs test cases and saves results to output.md
  */
 
 const fs = require("fs");
@@ -13,7 +13,7 @@ const SCRIPT_DIR = process.argv[1] ? path.dirname(process.argv[1]) : __dirname;
 const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "../..");
 const CASES_DIR = path.join(SCRIPT_DIR, "cases");
 const PLUGIN_DIR = path.join(PROJECT_ROOT, ".claude-plugin");
-const TEST_RESULTS_DIR = path.join(PROJECT_ROOT, "tests/test-results");
+const OUTPUT_FILE = path.join(PROJECT_ROOT, "tests/output.md");
 
 // Colors
 const RED = "\x1b[31m";
@@ -26,6 +26,7 @@ let totalTests = 0;
 let passedTests = 0;
 let failedTests = 0;
 let skippedTests = 0;
+let results = [];
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
@@ -43,6 +44,47 @@ function printHeader(text) {
   console.log(`${BLUE}========================================${NC}`);
 }
 
+function addResult(skillName, testName, status, prompt, details) {
+  results.push({
+    skill: skillName,
+    test: testName,
+    status,
+    prompt,
+    details
+  });
+}
+
+function saveOutputMd() {
+  let md = `# Test Results\n\n`;
+  md += `Generated: ${new Date().toISOString()}\n\n`;
+  md += `## Summary\n\n`;
+  md += `- Total: ${totalTests}\n`;
+  md += `- Passed: ${passedTests}\n`;
+  md += `- Failed: ${failedTests}\n`;
+  md += `- Skipped: ${skippedTests}\n\n`;
+  md += `---\n\n`;
+
+  let currentSkill = "";
+  for (const r of results) {
+    if (r.skill !== currentSkill) {
+      currentSkill = r.skill;
+      md += `## ${r.skill}\n\n`;
+    }
+
+    const statusIcon = r.status === "PASS" ? "✅" : r.status === "FAIL" ? "❌" : "⏭️";
+    md += `### ${statusIcon} ${r.test}\n\n`;
+    md += `**Prompt:** ${r.prompt}\n\n`;
+    md += `**Status:** ${r.status}\n\n`;
+    if (r.details) {
+      md += `**Details:**\n\`\`\`\n${r.details}\n\`\`\`\n\n`;
+    }
+    md += `---\n\n`;
+  }
+
+  fs.writeFileSync(OUTPUT_FILE, md);
+  console.log(`\n${GREEN}Results saved to: ${OUTPUT_FILE}${NC}`);
+}
+
 function runTestCase(skillName, testCase) {
   const testName = testCase.name;
   const prompt = testCase.prompt;
@@ -55,20 +97,14 @@ function runTestCase(skillName, testCase) {
   console.log(`\n${BLUE}[${testName}]${NC}`);
   console.log(`Prompt: ${prompt}`);
 
-  // Create test directory
+  // Create temp directory
   const timestamp = Date.now();
-  const testDir = path.join(
-    TEST_RESULTS_DIR,
-    `${skillName}-${testName}-${timestamp}`,
-  );
+  const testDir = path.join(os.tmpdir(), `claude-test-${timestamp}`);
   ensureDir(testDir);
 
-  const outputFile = path.join(testDir, "output.txt");
-
   try {
-    // Run Claude - unset CLAUDECODE to allow nested sessions
+    // Run Claude
     const promptEscaped = escapeShell(prompt);
-
     const cmd = `env -u CLAUDECODE claude -p '${promptEscaped}' \
       --permission-mode bypassPermissions \
       --add-dir '${testDir}' \
@@ -80,64 +116,51 @@ function runTestCase(skillName, testCase) {
         cwd: testDir,
         timeout: timeout * 1000,
         stdio: "pipe",
-        env: { ...process.env, CLAUDECODE: undefined },
+        env: { ...process.env, CLAUDECODE: undefined }
       });
     } catch (e) {
-      // Ignore timeout errors, continue to check session
+      // Ignore timeout/error, continue
     }
 
-    // Write output (if any)
-    if (fs.existsSync(outputFile)) {
-      // Output already written by stdio
-    }
-
-    // Find session file - Claude encodes paths by replacing / with - and adding leading -
+    // Find session file
     const projectEscaped = testDir.replace(/\//g, "-").replace(/^-/, "-");
-    const sessionDir = path.join(
-      os.homedir(),
-      ".claude/projects",
-      projectEscaped,
-    );
+    const sessionDir = path.join(os.homedir(), ".claude/projects", projectEscaped);
 
+    let sessionContent = "";
     let sessionFile = "";
+
     if (fs.existsSync(sessionDir)) {
-      const files = fs
-        .readdirSync(sessionDir)
-        .filter((f) => f.endsWith(".jsonl"))
+      const files = fs.readdirSync(sessionDir)
+        .filter(f => f.endsWith(".jsonl"))
         .sort()
         .reverse();
       if (files.length > 0) {
         sessionFile = path.join(sessionDir, files[0]);
+        sessionContent = fs.readFileSync(sessionFile, "utf-8");
       }
     }
 
-    if (!sessionFile) {
-      console.log(`${YELLOW}[SKIP]${NC} Could not find session file`);
-      console.log(`  Results: ${testDir}`);
+    if (!sessionContent) {
+      console.log(`${YELLOW}[SKIP]${NC} Could not find session`);
       skippedTests++;
+      addResult(skillName, testName, "SKIP", prompt, "Session file not found");
       return;
     }
 
-    // Copy session to test results
-    fs.copyFileSync(sessionFile, path.join(testDir, "session.jsonl"));
-
-    // Read session content
-    const sessionContent = fs.readFileSync(sessionFile, "utf-8");
-
     // Check expected contains
     let allPassed = true;
+    let details = "";
 
     for (const expected of expectedContains) {
       if (!sessionContent.toLowerCase().includes(expected.toLowerCase())) {
-        console.log(`${RED}  Missing expected: ${expected}${NC}`);
+        details += `Missing expected: ${expected}\n`;
         allPassed = false;
       }
     }
 
-    // Check not expected
     for (const unexpected of notExpected) {
       if (sessionContent.toLowerCase().includes(unexpected.toLowerCase())) {
-        console.log(`${RED}  Found unexpected: ${unexpected}${NC}`);
+        details += `Found unexpected: ${unexpected}\n`;
         allPassed = false;
       }
     }
@@ -145,22 +168,28 @@ function runTestCase(skillName, testCase) {
     if (allPassed) {
       console.log(`${GREEN}[PASS]${NC}`);
       passedTests++;
+      addResult(skillName, testName, "PASS", prompt, "");
     } else {
       console.log(`${RED}[FAIL]${NC}`);
+      console.log(details);
       failedTests++;
+      addResult(skillName, testName, "FAIL", prompt, details);
     }
 
-    console.log(`  Results: ${testDir}`);
   } catch (error) {
-    console.log(`${RED}[FAIL]${NC} Test error: ${error.message}`);
-    console.log(`  Results: ${testDir}`);
+    console.log(`${RED}[FAIL]${NC} Error: ${error.message}`);
     failedTests++;
+    addResult(skillName, testName, "FAIL", prompt, error.message);
+  } finally {
+    // Cleanup
+    try {
+      fs.rmSync(testDir, { recursive: true, force: true });
+    } catch (e) {}
   }
 }
 
 function runSkillTests(caseFile) {
   const skillName = path.basename(caseFile, ".json");
-  printHeader(`Testing: ${skillName}`);
 
   const content = fs.readFileSync(caseFile, "utf-8");
   const data = JSON.parse(content);
@@ -172,17 +201,29 @@ function runSkillTests(caseFile) {
 }
 
 function main() {
-  ensureDir(TEST_RESULTS_DIR);
+  console.log(`${BLUE}========================================${NC}`);
+  console.log(`${BLUE}spencergo Skills Test Suite${NC}`);
+  console.log(`${BLUE}========================================${NC}`);
+
+  // Check prerequisites
+  if (!fs.existsSync(CASES_DIR)) {
+    console.log(`${RED}Error: cases directory not found: ${CASES_DIR}${NC}`);
+    process.exit(1);
+  }
 
   // Get all case files
-  const caseFiles = fs
-    .readdirSync(CASES_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => path.join(CASES_DIR, f));
+  const caseFiles = fs.readdirSync(CASES_DIR)
+    .filter(f => f.endsWith(".json"))
+    .map(f => path.join(CASES_DIR, f));
 
   for (const caseFile of caseFiles) {
+    const skillName = path.basename(caseFile, ".json");
+    printHeader(`Testing: ${skillName}`);
     runSkillTests(caseFile);
   }
+
+  // Save output.md
+  saveOutputMd();
 
   // Print summary
   printHeader("Test Summary");
