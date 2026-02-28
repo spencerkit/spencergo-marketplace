@@ -12,7 +12,7 @@ const { execSync } = require("child_process");
 const SCRIPT_DIR = process.argv[1] ? path.dirname(process.argv[1]) : __dirname;
 const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "../..");
 const CASES_DIR = path.join(SCRIPT_DIR, "cases");
-const PLUGIN_DIR = path.join(PROJECT_ROOT, ".claude-plugin");
+const PLUGIN_DIR = PROJECT_ROOT; // skills are in root/skills/
 const OUTPUT_FILE = path.join(PROJECT_ROOT, "tests/output.md");
 
 // Colors
@@ -45,14 +45,15 @@ function printHeader(text) {
 }
 
 function formatConversation(messages) {
-  let text = '';
+  let text = "";
   for (const msg of messages) {
-    const prefix = msg.role === 'user' ? '👤 User' : '🤖 Claude';
-    const content = msg.content.length > 1500
-      ? msg.content.substring(0, 1500) + '\n[...truncated...]'
-      : msg.content;
+    const prefix = msg.role === "user" ? "👤 User" : "🤖 Claude";
+    const content =
+      msg.content.length > 1500
+        ? msg.content.substring(0, 1500) + "\n[...truncated...]"
+        : msg.content;
     text += `${prefix}:\n${content}\n\n`;
-    text += '---\n\n';
+    text += "---\n\n";
   }
   return text;
 }
@@ -64,7 +65,7 @@ function addResult(skillName, testName, status, prompt, details, conversation) {
     status,
     prompt,
     details,
-    conversation
+    conversation,
   });
 }
 
@@ -85,7 +86,8 @@ function saveOutputMd() {
       md += `## ${r.skill}\n\n`;
     }
 
-    const statusIcon = r.status === "PASS" ? "✅" : r.status === "FAIL" ? "❌" : "⏭️";
+    const statusIcon =
+      r.status === "PASS" ? "✅" : r.status === "FAIL" ? "❌" : "⏭️";
     md += `### ${statusIcon} ${r.test}\n\n`;
     md += `**Prompt:** ${r.prompt}\n\n`;
     md += `**Status:** ${r.status}\n\n`;
@@ -106,17 +108,17 @@ function saveOutputMd() {
 // Check if response is asking a question (needs follow-up)
 function isAskingQuestion(text) {
   const questionIndicators = [
-    /\?$/m,                    // ends with ?
-    /问题：/i,                 // question:
-    /请问/i,                  // please tell me
-    /是什么？/i,              // what is?
-    /怎么样？/i,              // how is?
-    /为什么？/i,              // why?
-    /可以告诉我/i,            // can you tell me
-    /需要先/i,                // need to first
-    /请先/i,                  // please first
-    /先问/i,                  // first ask
-    /\n\d+\./,                  // numbered list (likely questions)
+    /\?$/m, // ends with ?
+    /问题：/i, // question:
+    /请问/i, // please tell me
+    /是什么？/i, // what is?
+    /怎么样？/i, // how is?
+    /为什么？/i, // why?
+    /可以告诉我/i, // can you tell me
+    /需要先/i, // need to first
+    /请先/i, // please first
+    /先问/i, // first ask
+    /\n\d+\./, // numbered list (likely questions)
   ];
 
   for (const pattern of questionIndicators) {
@@ -130,39 +132,46 @@ function isAskingQuestion(text) {
 // Generate auto-answer based on question content
 function generateAutoAnswer(questionText) {
   // Common patterns for naming questions
-  if (questionText.includes('核心功能') || questionText.includes('功能是什么')) {
-    return '是一个AI助手，帮助开发者提高效率';
+  if (
+    questionText.includes("核心功能") ||
+    questionText.includes("功能是什么")
+  ) {
+    return "是一个AI助手，帮助开发者提高效率";
   }
-  if (questionText.includes('目标用户') || questionText.includes('用户是谁')) {
-    return '开发者和技术团队';
+  if (questionText.includes("目标用户") || questionText.includes("用户是谁")) {
+    return "开发者和技术团队";
   }
-  if (questionText.includes('风格') || questionText.includes('想要什么风格')) {
-    return '科技感、简洁、英文';
+  if (questionText.includes("风格") || questionText.includes("想要什么风格")) {
+    return "科技感、简洁、英文";
   }
-  if (questionText.includes('关键词')) {
-    return 'AI、效率、代码';
+  if (questionText.includes("关键词")) {
+    return "AI、效率、代码";
   }
-  if (questionText.includes('语言') || questionText.includes('中英')) {
-    return '英文';
+  if (questionText.includes("语言") || questionText.includes("中英")) {
+    return "英文";
   }
-  if (questionText.includes('宠物') || questionText.includes('猫') || questionText.includes('狗')) {
-    return '猫';
+  if (
+    questionText.includes("宠物") ||
+    questionText.includes("猫") ||
+    questionText.includes("狗")
+  ) {
+    return "猫";
   }
-  if (questionText.includes('公众号') || questionText.includes('文章')) {
-    return '关于AI技术趋势的内容';
+  if (questionText.includes("公众号") || questionText.includes("文章")) {
+    return "关于AI技术趋势的内容";
   }
-  if (questionText.includes('占卜') || questionText.includes('卦')) {
-    return '我的事业发展如何';
+  if (questionText.includes("占卜") || questionText.includes("卦")) {
+    return "我的事业发展如何";
   }
 
   // Default answer
-  return '继续';
+  return "继续";
 }
 
 function runMultiTurnTest(prompt, maxTurns = 5) {
   const messages = [];
   let currentPrompt = prompt;
-  let fullOutput = '';
+  let fullOutput = "";
 
   for (let turn = 0; turn < maxTurns; turn++) {
     console.log(`  Turn ${turn + 1}...`);
@@ -172,7 +181,7 @@ function runMultiTurnTest(prompt, maxTurns = 5) {
     const testDir = path.join(os.tmpdir(), `claude-test-${timestamp}`);
     ensureDir(testDir);
 
-    let output = '';
+    let output = "";
     try {
       const promptEscaped = escapeShell(currentPrompt);
       const cmd = `env -u CLAUDECODE claude -p '${promptEscaped}' \
@@ -185,7 +194,7 @@ function runMultiTurnTest(prompt, maxTurns = 5) {
         cwd: testDir,
         timeout: 30000,
         encoding: "utf-8",
-        env: { ...process.env, CLAUDECODE: undefined }
+        env: { ...process.env, CLAUDECODE: undefined },
       });
     } catch (e) {
       output = e.stdout || e.message || "";
@@ -196,9 +205,9 @@ function runMultiTurnTest(prompt, maxTurns = 5) {
       fs.rmSync(testDir, { recursive: true, force: true });
     } catch (e) {}
 
-    fullOutput += output + '\n\n';
-    messages.push({ role: 'user', content: currentPrompt });
-    messages.push({ role: 'assistant', content: output });
+    fullOutput += output + "\n\n";
+    messages.push({ role: "user", content: currentPrompt });
+    messages.push({ role: "assistant", content: output });
 
     // Check if AI is asking a question
     if (!isAskingQuestion(output) || turn >= maxTurns - 1) {
@@ -258,7 +267,6 @@ function runTestCase(skillName, testCase) {
       failedTests++;
       addResult(skillName, testName, "FAIL", prompt, details, messages);
     }
-
   } catch (error) {
     console.log(`${RED}[FAIL]${NC} Error: ${error.message}`);
     failedTests++;
@@ -288,9 +296,10 @@ function main() {
     process.exit(1);
   }
 
-  const caseFiles = fs.readdirSync(CASES_DIR)
-    .filter(f => f.endsWith(".json"))
-    .map(f => path.join(CASES_DIR, f));
+  const caseFiles = fs
+    .readdirSync(CASES_DIR)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => path.join(CASES_DIR, f));
 
   for (const caseFile of caseFiles) {
     const skillName = path.basename(caseFile, ".json");
