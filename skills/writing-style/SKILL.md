@@ -15,7 +15,7 @@ description: 风格分析技能 - 分析、提取、应用风格。提供风格�
 
 ## 使用方法
 
-/风格分析
+/writing-style
 
 或直接提供内容：
 - "按这个风格写：{文章内容}"
@@ -141,9 +141,9 @@ description: 风格分析技能 - 分析、提取、应用风格。提供风格�
 
 风格分析完成后，建议：
 
-- **继续写大纲** → 调用 `/大纲` (writing-outline)
-- **直接写作** → 调用 `/写作` (writing-content)  
-- **查看完整流程** → 调用 `/写作` 从头开始
+- **继续写大纲** → 调用 `/writing-outline` (writing-outline)
+- **直接写作** → 调用 `/writing-content` (writing-content)  
+- **查看完整流程** → 调用 `/writing-content` 从头开始
 
 你可以说：
 - "帮我列个大纲"

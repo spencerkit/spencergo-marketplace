@@ -16,7 +16,7 @@ description: 大纲编写技能 - 根据需求生成结构化大纲，提供内�
 ## 使用方法
 
 ```
-/大纲
+/writing-outline
 ```
 
 或直接描述需求：
@@ -171,9 +171,9 @@ description: 大纲编写技能 - 根据需求生成结构化大纲，提供内�
 
 大纲确认完成后，建议：
 
-- **开始写作** → 调用 `/写作` (writing-content)
-- **审核内容** → 调用 `/审核` (writing-review)
-- **完整流程** → 调用 `/写作` 从大纲开始继续
+- **开始写作** → 调用 `/writing-content` (writing-content)
+- **审核内容** → 调用 `/writing-review` (writing-review)
+- **完整流程** → 调用 `/writing-content` 从大纲开始继续
 
 你可以说：
 - "开始写作"

@@ -28,21 +28,21 @@ writing (主Skill)
 ## 独立调用
 
 用户也可以直接调用任意子模块：
-- `/风格分析` → writing-style
-- `/大纲` → writing-outline
-- `/写作` → writing-content
-- `/审核` → writing-review
-- `/润色` → writing-polish
+- `/writing-style` - 风格分析
+- `/writing-outline` - 大纲编写
+- `/writing-content` - 内容编写
+- `/writing-review` - 内容审核
+- `/writing-polish` - 润色
 
 ## 流程指引（Claude 自动串联）
 
 **每个模块完成后，Claude 会根据上下文自动建议下一步：**
 
-1. **风格分析** → "继续写大纲" → 调用 `/大纲`
-2. **大纲确认** → "开始写作" → 调用 `/写作`
-3. **写作完成** → "帮我审核" → 调用 `/审核`
-4. **审核完成** → "润色一下" → 调用 `/润色`
-5. **润色完成** → "可以了" → 交付
+1. **writing-style** → "继续写大纲" → 调用 `/writing-outline`
+2. **writing-outline** → "开始写作" → 调用 `/writing-content`
+3. **writing-content** → "帮我审核" → 调用 `/writing-review`
+4. **writing-review** → "润色一下" → 调用 `/writing-polish`
+5. **writing-polish** → "可以了" → 交付
 
 **用户只需说出下一步意图，Claude 就会自动调用对应的 skill。**
 

@@ -16,7 +16,7 @@ description: 内容编写技能 - 按大纲写作，实时风格对比，嵌入�
 ## 使用方法
 
 ```
-/写作
+/writing-content
 ```
 
 或直接描述需求：
@@ -178,9 +178,9 @@ description: 内容编写技能 - 按大纲写作，实时风格对比，嵌入�
 
 写作完成后，建议：
 
-- **审核内容** → 调用 `/审核` (writing-review)
-- **润色优化** → 调用 `/润色` (writing-polish)
-- **完整流程** → 调用 `/审核` 继续
+- **审核内容** → 调用 `/writing-review` (writing-review)
+- **润色优化** → 调用 `/writing-polish` (writing-polish)
+- **完整流程** → 调用 `/writing-review` 继续
 
 你可以说：
 - "帮我审核"
