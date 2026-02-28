@@ -1,9 +1,40 @@
 ---
 name: writing
-description: 综合写作技能 V3，支持快速/标准双模式，6阶段协作流程：需求理解 → 大纲讨论 → 风格确认（含Demo） → 分节写作 → 审核 → 风格复核交付
+description: 综合写作技能 V4（混合模式），支持模块独立调用或预设模板组合。子模块：writing-style/writing-outline/writing-content/writing-review/writing-polish
 ---
 
-# 写作技能 V3 (Writing Skill)
+# 写作技能 V4 (Writing Skill - 混合模式)
+
+## 模块架构
+
+```
+writing (主Skill)
+├── writing-style    → 风格分析
+├── writing-outline  → 大纲编写
+├── writing-content  → 内容编写
+├── writing-review   → 内容审核
+└── writing-polish   → 润色
+```
+
+## 预设模板
+
+| 模板 | 包含模块 | 适用场景 |
+|------|----------|----------|
+| 完整写作 | style → outline → content → review → polish | 从头写完整文章 |
+| 快速写作 | style → content | 短内容、熟悉主题 |
+| 仅润色 | polish | 已有初稿只需润色 |
+| 审核+润色 | review → polish | 写完了想审核+优化 |
+
+## 独立调用
+
+用户也可以直接调用任意子模块：
+- `/风格分析` → writing-style
+- `/大纲` → writing-outline
+- `/写作` → writing-content
+- `/审核` → writing-review
+- `/润色` → writing-polish
+
+---
 
 ## 核心改进
 
