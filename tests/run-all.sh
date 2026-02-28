@@ -34,11 +34,11 @@ main() {
     fi
     echo "  ✓ Claude CLI found"
 
-    if ! command -v python3 &> /dev/null; then
-        echo -e "${RED}Error: python3 not found${NC}"
+    if ! command -v node &> /dev/null; then
+        echo -e "${RED}Error: node not found${NC}"
         exit 1
     fi
-    echo "  ✓ Python3 found"
+    echo "  ✓ Node.js found"
 
     # Run skill triggering tests
     echo ""

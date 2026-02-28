@@ -104,17 +104,17 @@ run_skill_tests() {
     echo -e "${YELLOW}Testing: $skill_name${NC}"
     echo -e "${YELLOW}========================================${NC}"
 
-    # Use Python to parse JSON
-    local test_cases=$(python3 -c "
-import json
-with open('$skill_file', 'r') as f:
-    data = json.load(f)
-    for tc in data.get('test_cases', []):
-        print(tc.get('name', '') + '||' +
-              tc.get('prompt', '') + '||' +
-              ','.join(tc.get('expected_contains', [])) + '||' +
-              ','.join(tc.get('not_expected', [])) + '||' +
-              str(tc.get('timeout', 60)))
+    # Use Node.js to parse JSON
+    local test_cases=$(node -e "
+const fs = require('fs');
+const data = JSON.parse(fs.readFileSync('$skill_file', 'utf-8'));
+for (const tc of data.test_cases || []) {
+  console.log((tc.name || '') + '||' +
+    (tc.prompt || '') + '||' +
+    ((tc.expected_contains || []).join(',')) + '||' +
+    ((tc.not_expected || []).join(',')) + '||' +
+    (tc.timeout || 60));
+}
 " 2>/dev/null || true)
 
     if [ -z "$test_cases" ]; then

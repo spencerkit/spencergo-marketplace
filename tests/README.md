@@ -73,16 +73,16 @@ After running tests, analyze session transcripts:
 ls ~/.claude/projects/
 
 # Analyze a session
-python3 tests/analyze-session.py ~/.claude/projects/<session-id>.jsonl
+node tests/analyze-session.js ~/.claude/projects/<session-id>.jsonl
 
 # Check if specific skill was invoked
-python3 tests/analyze-session.py <session>.jsonl --check-skill spencergo:naming
+node tests/analyze-session.js <session>.jsonl --check-skill spencergo:naming
 ```
 
 ## Requirements
 
 - Claude Code CLI installed (`claude` command)
-- Python 3.6+
+- Node.js 14+
 - Test project directory in `~/.claude/projects/`
 
 ## Test Types
