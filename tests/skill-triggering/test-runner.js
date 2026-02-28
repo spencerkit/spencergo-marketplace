@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Test runner for spencergo skills
- * Runs test cases and saves results to output.md with full conversation
+ * Runs test cases and saves results to output.md with conversation
  */
 
 const fs = require("fs");
@@ -44,62 +44,21 @@ function printHeader(text) {
   console.log(`${BLUE}========================================${NC}`);
 }
 
-function extractConversation(sessionContent) {
-  // Extract text from JSONL session
-  const lines = sessionContent.split('\n').filter(l => l.trim());
-  let conversation = [];
-
-  for (const line of lines) {
-    try {
-      const msg = JSON.parse(line);
-      if (msg.type === 'user') {
-        // User message
-        const content = msg.message?.content;
-        if (Array.isArray(content)) {
-          for (const c of content) {
-            if (c.type === 'text') {
-              conversation.push({ role: 'user', text: c.text });
-            }
-          }
-        }
-      } else if (msg.type === 'assistant') {
-        // Assistant message
-        const content = msg.message?.content;
-        if (Array.isArray(content)) {
-          let text = '';
-          for (const c of content) {
-            if (c.type === 'text') {
-              text += c.text;
-            }
-          }
-          if (text) {
-            conversation.push({ role: 'assistant', text: text.substring(0, 2000) });
-          }
-        }
-      }
-    } catch (e) {}
-  }
-
-  return conversation;
-}
-
-function formatConversation(conversation) {
+function formatConversation(userPrompt, claudeOutput) {
   let text = '';
-  for (const msg of conversation) {
-    const prefix = msg.role === 'user' ? '👤 User' : '🤖 Assistant';
-    text += `${prefix}:\n${msg.text}\n\n`;
-  }
+  text += `👤 User:\n${userPrompt}\n\n`;
+  text += `🤖 Claude:\n${claudeOutput}\n\n`;
   return text;
 }
 
-function addResult(skillName, testName, status, prompt, details, conversation) {
+function addResult(skillName, testName, status, prompt, details, claudeOutput) {
   results.push({
     skill: skillName,
     test: testName,
     status,
     prompt,
     details,
-    conversation
+    claudeOutput
   });
 }
 
@@ -127,9 +86,9 @@ function saveOutputMd() {
     if (r.details) {
       md += `**Details:**\n\`\`\`\n${r.details}\n\`\`\`\n\n`;
     }
-    if (r.conversation && r.conversation.length > 0) {
+    if (r.claudeOutput) {
       md += `**Conversation:**\n\n`;
-      md += formatConversation(r.conversation);
+      md += formatConversation(r.prompt, r.claudeOutput);
     }
     md += `---\n\n`;
   }
@@ -155,7 +114,7 @@ function runTestCase(skillName, testCase) {
   const testDir = path.join(os.tmpdir(), `claude-test-${timestamp}`);
   ensureDir(testDir);
 
-  let conversation = [];
+  let claudeOutput = "";
 
   try {
     // Run Claude
@@ -167,53 +126,36 @@ function runTestCase(skillName, testCase) {
       --dangerously-skip-permissions`;
 
     try {
-      execSync(cmd, {
+      claudeOutput = execSync(cmd, {
         cwd: testDir,
         timeout: timeout * 1000,
-        stdio: "pipe",
+        encoding: "utf-8",
         env: { ...process.env, CLAUDECODE: undefined }
       });
     } catch (e) {
-      // Ignore timeout/error, continue
+      // Capture output even on error
+      claudeOutput = e.stdout || e.message || "";
     }
 
-    // Find session file
-    const projectEscaped = testDir.replace(/\//g, "-").replace(/^-/, "-");
-    const sessionDir = path.join(os.homedir(), ".claude/projects", projectEscaped);
-
-    let sessionContent = "";
-
-    if (fs.existsSync(sessionDir)) {
-      const files = fs.readdirSync(sessionDir)
-        .filter(f => f.endsWith(".jsonl"))
-        .sort()
-        .reverse();
-      if (files.length > 0) {
-        sessionContent = fs.readFileSync(path.join(sessionDir, files[0]), "utf-8");
-        conversation = extractConversation(sessionContent);
-      }
-    }
-
-    if (!sessionContent) {
-      console.log(`${YELLOW}[SKIP]${NC} Could not find session`);
-      skippedTests++;
-      addResult(skillName, testName, "SKIP", prompt, "Session file not found", []);
-      return;
+    // Truncate long output
+    if (claudeOutput.length > 5000) {
+      claudeOutput = claudeOutput.substring(0, 5000) + "\n\n[... output truncated ...]";
     }
 
     // Check expected contains
     let allPassed = true;
     let details = "";
+    const checkContent = (claudeOutput || "").toLowerCase();
 
     for (const expected of expectedContains) {
-      if (!sessionContent.toLowerCase().includes(expected.toLowerCase())) {
+      if (!checkContent.includes(expected.toLowerCase())) {
         details += `Missing expected: ${expected}\n`;
         allPassed = false;
       }
     }
 
     for (const unexpected of notExpected) {
-      if (sessionContent.toLowerCase().includes(unexpected.toLowerCase())) {
+      if (checkContent.includes(unexpected.toLowerCase())) {
         details += `Found unexpected: ${unexpected}\n`;
         allPassed = false;
       }
@@ -222,18 +164,18 @@ function runTestCase(skillName, testCase) {
     if (allPassed) {
       console.log(`${GREEN}[PASS]${NC}`);
       passedTests++;
-      addResult(skillName, testName, "PASS", prompt, "", conversation);
+      addResult(skillName, testName, "PASS", prompt, "", claudeOutput);
     } else {
       console.log(`${RED}[FAIL]${NC}`);
       console.log(details);
       failedTests++;
-      addResult(skillName, testName, "FAIL", prompt, details, conversation);
+      addResult(skillName, testName, "FAIL", prompt, details, claudeOutput);
     }
 
   } catch (error) {
     console.log(`${RED}[FAIL]${NC} Error: ${error.message}`);
     failedTests++;
-    addResult(skillName, testName, "FAIL", prompt, error.message, conversation);
+    addResult(skillName, testName, "FAIL", prompt, error.message, claudeOutput);
   } finally {
     // Cleanup
     try {
