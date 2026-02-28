@@ -1,205 +1,187 @@
 ---
 name: writing-polish
-description: 润色技能 - 改写/优化/校对/去AI化，提供增强的去AI化检测和优化方向细化
+description: Polish skill - rewrite/optimize/proofread/de-AI-ify. Provides enhanced AI detection and optimization direction refinement.
 ---
 
-# Writing Polish (润色)
+# Writing Polish
 
-## 概述
+## Overview
 
-独立润色模块，负责：
-1. 改写 - 不同风格/语气重写
-2. 优化 - 改进内容质量
-3. 校对 - 语法/错别字/格式
-4. 去AI化 - 去除AI写作痕迹
+Standalone polish module:
+1. Rewrite - Different style/tone
+2. Optimize - Improve quality
+3. Proofread - Grammar/spelling/format
+4. De-AI-ify - Remove AI writing痕迹
 
-## 使用方法
+## Usage
 
-```
 /writing-polish
-```
 
-或直接提供内容：
-- "帮我改写一下，换个风格"
-- "优化一下这篇文章"
-- "校对一下有没有错别字"
-- "去一下AI味"
-
----
-
-## 1. 润色类型
-
-### 1.1 改写
-
-不同风格/语气重写：
-- 严肃 → 轻松
-- 专业 → 通俗
-- 正式 → 口语化
-
-### 1.2 优化
-
-改进内容质量：
-- 更有说服力
-- 更简洁
-- 更有趣
-- 更有逻辑
-
-### 1.3 校对
-
-检查修正：
-- 错别字
-- 标点错误
-- 语法错误
-- 格式问题
-
-### 1.4 去AI化
-
-去除AI写作痕迹，注入人性
+Or provide content:
+- "Help me rewrite, different style"
+- "Optimize this article"
+- "Proofread for errors"
+- "Remove AI味道"
 
 ---
 
-## 2. 去AI化增强
+## 1. Polish Types
 
-### 2.1 检测项
+### 1.1 Rewrite
 
-| 维度 | 检测/处理 |
-|------|-----------|
-| 填充短语 | 此外、然而、值得注意的是、总的来说、需要注意的是 |
-| 公式结构 | 不仅...而且...、第一/第二/第三三段式 |
-| 句子节奏 | 检测长度一致性、强制变化 |
-| 浮夸表达 | 是...的证明/体现/标志、关键转折点 |
-| 模糊归因 | 专家表示、多项研究表明、行业观察者 |
-| 破折号 | 超过2个标红 |
-| 聊天机器人语气 | 希望对您有帮助、请告诉我、如果... |
-| 人性缺失 | 无观点、中立报道、过度解释 |
+Different style/tone:
+- Serious → Casual
+- Professional → Accessible
+- Formal → Conversational
 
-### 2.2 人性注入
+### 1.2 Optimize
 
-| 维度 | 做法 |
-|------|------|
-| 有观点 | 不只是中立报道，有明确立场 |
-| 承认复杂性 | 不只是简单总结 |
-| 第一人称 | 适当使用"我" |
-| 允许混乱 | 轻微跑题、题外话更真实 |
+Improve quality:
+- More persuasive
+- More concise
+- More interesting
+- More logical
 
-### 2.3 去AI化质量评分
+### 1.3 Proofread
 
-| 维度 | 评估标准 | 得分 |
-|------|----------|------|
-| 直接性 | 直接陈述还是绕圈 | /10 |
-| 节奏 | 句子长度变化 | /10 |
-| 信任度 | 尊重读者，不过度解释 | /10 |
-| 真实性 | 听起来像真人 | /10 |
-| 精炼度 | 可删减内容 | /10 |
-| **总分** | | **/50** |
+Check and fix:
+- Spelling errors
+- Punctuation errors
+- Grammar errors
+- Format issues
 
-**标准**：45-50优秀，35-44良好，<35需重修
+### 1.4 De-AI-ify
+
+Remove AI writing痕迹, inject humanity
 
 ---
 
-## 3. 优化方向细化
+## 2. Enhanced De-AI-ify
 
-### 3.1 说服力优化
+### 2.1 Detection Items
 
-- 论点强度检查
-- 论据相关性
-- 逻辑漏洞检测
-- 反驳预设
+| Dimension | Detection |
+|-----------|-----------|
+| Filler phrases | 此外、然而、值得注意的是 |
+| Formula structure | 不仅...而且...、第一/第二/第三 |
+| Sentence rhythm | Detect uniform length, force variation |
+| Bombastic expressions | 是...的证明/体现/标志 |
+| Vague attribution | 专家表示、多项研究表明 |
+| Dashes | >2 flagged |
+| Bot tone | 希望对您有帮助 |
+| Lack of humanity | No opinions, neutral reporting, over-explanation |
 
-### 3.2 可读性优化
+### 2.2 Humanity Injection
 
-- 信息密度
-- 句子复杂度
-- 过渡流畅度
-- 重点突出
+| Dimension | Action |
+|-----------|--------|
+| Have opinions | Not just neutral reporting |
+| Acknowledge complexity | Not just simple summary |
+| First person | Appropriate use of "I" |
+| Allow messiness | Minor tangents, side notes are human |
 
-### 3.3 记忆点优化
+### 2.3 De-AI-ify Quality Score
 
-- 金句提取
-- 重复强调
-- 节奏感
-- 情感高点
+| Dimension | Criteria | Score |
+|-----------|----------|-------|
+| Directness | Direct or roundabout? | /10 |
+| Rhythm | Sentence length variation? | /10 |
+| Trust | Respect reader intelligence? | /10 |
+| Authenticity | Sound like a real person? | /10 |
+| Conciseness | Anything to cut? | /10 |
+| Total | | /50 |
 
----
-
-## 4. 各类型润色要点
-
-### 公众号/博客
-- 标题吸引力
-- 开头抓人程度
-- 内容深度
-- 结尾引导
-
-### 小红书
-- emoji使用
-- 话题标签
-- 情感共鸣
-- 互动引导
-
-### 技术文章
-- 代码准确性
-- 解释清晰度
-- 步骤完整性
-
-### 故事/小说
-- 人物刻画
-- 情节张力
-- 语言风格
+Standard: 45-50 excellent, 35-44 good, <35 needs work
 
 ---
 
-## 5. 润色流程
+## 3. Optimization Directions
 
-### 5.1 确认润色类型
+### 3.1 Persuasion
+- Argument strength
+- Evidence relevance
+- Logic gap detection
 
-1. 改写？优化？校对？去AI化？
-2. 目标风格是什么？
-3. 有没有参考样本？
+### 3.2 Readability
+- Information density
+- Sentence complexity
+- Transition smoothness
+- Highlight key points
 
-### 5.2 执行润色
-
-- 改写：按目标风格重写
-- 优化：针对目标改进
-- 校对：全面检查
-- 去AI化：去除痕迹 + 注入人性
-
-### 5.3 输出结果
-
-```
-## 润色结果
-
-### 修改说明
-{列出主要修改点}
+### 3.3 Memorability
+- Extract punchlines
+- Repetition emphasis
+- Rhythm
+- Emotional peaks
 
 ---
 
-### 润色后正文
-{完整内容}
+## 4. Polish by Content Type
+
+### WeChat/Blog
+- Title appeal
+- Opening hook
+- Content depth
+- Ending CTA
+
+### Xiaohongshu
+- Emoji usage
+- Hashtags
+- Emotional resonance
+- Interaction guidance
+
+### Technical
+- Code accuracy
+- Explanation clarity
+- Step completeness
+
+### Story/Novel
+- Character development
+- Plot tension
+- Language style
 
 ---
 
-### 质量评分（如去AI化）
-总分：XX/50
+## 5. Polish Process
+
+### 5.1 Confirm Polish Type
+
+1. Rewrite? Optimize? Proofread? De-AI-ify?
+2. Target style?
+3. Reference sample?
+4. Focus areas?
+
+### 5.2 Execute Polish
+
+- Rewrite: Rewrite in target style
+- Optimize: Improve toward goal
+- Proofread: Full check
+- De-AI-ify: Remove痕迹 + inject humanity
+
+### 5.3 Output Result
+
+## Polish Result
+
+### Changes
+{list main changes}
+
+---
+
+### Polished Content
+{full content}
+
+---
+
+### Quality Score (if De-AI-ify)
+XX/50
 ```
 
 ---
 
-## 6. 继续优化选项
+## 6. Continue Options
 
-润色完成后，用户可以：
-- "再改一次"
-
----
-
-## 下一步指引（必须遵循）
-
-**润色完成后：**
-
-1. 询问用户是否还需要调整
-2. 如果用户说"可以了"或"不需要了"，交付最终版本
-3. 如果用户要求修改，调整后再次提交
-
-**如果用户要求审核，可以调用 /writing-review**
-
-用户可以说：
-- "可以了" / "再改一次" / "帮我审核"
+After polish, user can:
+- "Polish again"
+- "Back to original"
+- "Adjust specific part"
+- "Different style"

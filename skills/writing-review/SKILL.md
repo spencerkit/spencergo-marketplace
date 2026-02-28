@@ -1,176 +1,184 @@
 ---
 name: writing-review
-description: 内容审核技能 - AI推测问题，多维度审核，量化评分，提供改进建议
+description: Content review skill - AI predicts questions, multi-dimensional review, quantitative scoring, provides improvement suggestions.
 ---
 
-# Writing Review (内容审核)
+# Writing Review
 
-## 概述
+## Overview
 
-独立内容审核模块，负责：
-1. AI 推测读者可能问的问题
-2. 多维度审核（逻辑/读者视角/情感/结构/AI痕迹）
-3. 量化评分
-4. 提供改进建议
+Standalone content review module:
+1. AI predicts reader questions
+2. Multi-dimensional review (logic/reader perspective/emotion/structure/AI痕迹)
+3. Quantitative scoring
+4. Improvement suggestions
 
-## 使用方法
+## Usage
 
-```
 /writing-review
-```
 
-或直接提供内容：
-- "帮我审核一下这篇文章：{内容}"
-- "这篇文章有什么问题？"
-
----
-
-## 1. 审核维度
-
-### 1.1 逻辑完整性
-
-| 检查项 | 说明 |
-|--------|------|
-| 观点清晰 | 核心观点是否明确 |
-| 论据充分 | 论证是否有足够支撑 |
-| 逻辑连贯 | 段落之间是否顺畅 |
-
-### 1.2 读者视角
-
-| 检查项 | 说明 |
-|--------|------|
-| 概念解释 | 是否有未解释的专业术语 |
-| 难度匹配 | 是否符合读者水平 |
-| 推测问题 | 读者可能有哪些疑问 |
-
-### 1.3 情感共鸣
-
-| 检查项 | 说明 |
-|--------|------|
-| 吸引力 | 开头是否抓人 |
-| 共鸣度 | 是否能打动读者 |
-| 记忆点 | 是否有让人记住的点 |
-
-### 1.4 结构合理性
-
-| 检查项 | 说明 |
-|--------|------|
-| 开头 | 是否吸引人往下读 |
-| 过渡 | 章节之间是否自然 |
-| 结尾 | 是否有力 |
-
-### 1.5 AI 痕迹检测
-
-同 writing-content 自检项
+Or provide content:
+- "Help me review this article: {content}"
+- "Any issues with this piece?"
 
 ---
 
-## 2. 审核流程
+## 1. Review Dimensions
 
-### Step 1: AI 推测问题
+### 1.1 Logic Completeness
 
-根据文章内容，推测读者可能问的 3-5 个问题
+| Check | Description |
+|-------|-------------|
+| Clear viewpoint | Is main point clear? |
+| Sufficient evidence | Enough support for arguments? |
+| Logical flow | Smooth transitions between paragraphs? |
 
-### Step 2: 检查覆盖
+### 1.2 Reader Perspective
 
-对照文章，检查是否回答了这些问题
+| Check | Description |
+|-------|-------------|
+| Concepts explained | Unexplained technical terms? |
+| Difficulty match | Match reader level? |
+| Predicted questions | What questions might readers have? |
 
-### Step 3: 多维度审核
+### 1.3 Emotional Resonance
 
-逐项检查各维度
+| Check | Description |
+|-------|-------------|
+| Attraction | Opening hook? |
+| Empathy | Connect with reader? |
+| Memorable | Any memorable points? |
 
-### Step 4: 量化评分
+### 1.4 Structure
 
-给出各维度评分
+| Check | Description |
+|-------|-------------|
+| Opening | Hook to continue reading? |
+| Transitions | Natural between sections? |
+| Ending | Strong conclusion? |
 
-### Step 5: 改进建议
+### 1.5 AI Pattern Detection
 
-列出问题 + 改进方向
-
----
-
-## 3. 量化评分
-
-### 评分标准
-
-每维度 1-5 分：
-
-| 分数 | 说明 |
-|------|------|
-| 5 | 优秀 |
-| 4 | 良好 |
-| 3 | 合格 |
-| 2 | 需改进 |
-| 1 | 严重问题 |
-
-### 评分维度
-
-| 维度 | 权重 |
-|------|------|
-| 逻辑完整性 | 25% |
-| 读者视角 | 25% |
-| 情感共鸣 | 20% |
-| 结构合理性 | 15% |
-| AI 痕迹 | 15% |
-
-### 评分输出
-
-```
-## 审核结果
-
-### 总体评分
-| 维度 | 评分 |
-|------|------|
-| 逻辑完整性 | 4/5 |
-| 读者视角 | 3/5 |
-| 情感共鸣 | 4/5 |
-| 结构合理性 | 5/5 |
-| AI 痕迹 | 3/5 |
-| **总分** | **3.8/5** |
-
-### 推测问题检查
-1. 问题1 - ✓ 已回答
-2. 问题2 - ✓ 已回答
-3. 问题3 - ✗ 未充分回答
-
-### 问题列表
-1. [中等] 某些段落过渡不够自然
-2. [低] 可以增加更多案例
-
-### 改进建议
-- 建议在第二章增加一个实际案例
-- 开头可以更抓人一些
-```
+Same as writing-content self-check
 
 ---
 
-## 4. 审核输出格式
+## 2. Review Process
 
-```
-## 审核完成
+### Step 1: AI Predicts Questions
 
-### 评分
-总分：X.X / 5.0
+Based on content, predict 3-5 questions readers might ask
 
-### 主要问题
+### Step 2: Check Coverage
+
+Compare content against questions
+Mark answered/unanswered
+
+### Step 3: Multi-dimensional Review
+
+Check each dimension
+
+### Step 4: Quantitative Scoring
+
+Score each dimension
+
+### Step 5: Improvement Suggestions
+
+List issues + improvement directions
+
+---
+
+## 3. Quantitative Scoring
+
+### Scoring Standard
+
+Each dimension 1-5:
+
+| Score | Description |
+|-------|-------------|
+| 5 | Excellent |
+| 4 | Good |
+| 3 | Acceptable |
+| 2 | Needs improvement |
+| 1 | Serious issues |
+
+### Dimensions
+
+| Dimension | Weight |
+|-----------|--------|
+| Logic | 25% |
+| Reader perspective | 25% |
+| Emotion | 20% |
+| Structure | 15% |
+| AI patterns | 15% |
+
+### Scoring Output
+
+## Review Result
+
+### Overall Score
+| Dimension | Score |
+|-----------|-------|
+| Logic | 4/5 |
+| Reader perspective | 3/5 |
+| Emotion | 4/5 |
+| Structure | 5/5 |
+| AI patterns | 3/5 |
+| Total | 3.8/5 |
+
+### Question Check
+1. Question 1 - ✓ Answered
+2. Question 2 - ✓ Answered
+3. Question 3 - ✗ Not fully answered
+
+### Issues
+1. [Medium] Some transitions not smooth
+2. [Low] Could add more examples
+
+### Suggestions
+- Suggest adding real example in Chapter 2
+- Opening could be more engaging
+
+---
+
+## 4. Review Output Format
+
+## Review Complete
+
+### Score
+Total: X.X / 5.0
+
+### Main Issues
 1. xxx
 2. xxx
 
-### 改进建议
+### Suggestions
 1. xxx
 2. xxx
 
 ---
-需要我根据建议修改吗？
+Need me to make changes based on suggestions?
 ```
 
 ---
+
+## 5. Review Types
+
+| Type | Description |
+|------|-------------|
+| Full review | All dimensions |
+| Focused review | Specific dimensions only |
+| Quick review | Key issues only |
 
 ---
 
 ## Next Step Guide (MUST FOLLOW)
+
 When user confirms the review, you MUST guide them to the polish phase:
-1. Tell user: Review confirmed. Moving to polish phase.
+
+1. Tell user: "Review complete. Moving to polish phase."
 2. Use Skill tool to invoke /writing-polish
 3. Pass context: review report and suggestions
-User can say: continue / next / polish
+
+User can say:
+- "continue" / "next" / "polish"

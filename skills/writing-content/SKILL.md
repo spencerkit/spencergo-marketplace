@@ -1,177 +1,169 @@
 ---
 name: writing-content
-description: 内容编写技能 - 按大纲写作，实时风格对比，嵌入式自检，支持多种写作节奏
+description: Content writing skill - writes based on outline, real-time style comparison, embedded self-check, supports multiple writing rhythms.
 ---
 
-# Writing Content (内容编写)
+# Writing Content
 
-## 概述
+## Overview
 
-独立内容编写模块，负责：
-1. 按大纲逐节写作
-2. 实时风格对比
-3. 嵌入式自检（AI痕迹/节奏/逻辑）
-4. 按用户选择的节奏确认
+Standalone content writing module:
+1. Write section by section based on outline
+2. Real-time style comparison
+3. Embedded self-check (AI痕迹/节奏/逻辑)
+4. User-confirmed writing rhythm
 
-## 使用方法
+## Usage
 
-```
 /writing-content
-```
 
-或直接描述需求：
-- "帮我写一篇关于xxx的文章"
-- "按这个大纲写：{大纲内容}"
-
----
-
-## 1. 写作节奏
-
-用户选择写作节奏：
-
-| 节奏 | 说明 | 适用场景 |
-|------|------|----------|
-| 每节确认 | 写一章确认一节 | 长文章、重要内容 |
-| 分段确认 | 写几节后确认一次 | 中等长度 |
-| 整体确认 | 一次性写完再确认 | 短文、熟悉主题 |
+Or describe requirements:
+- "Help me write an article about xxx"
+- "Write based on this outline: {outline}"
 
 ---
 
-## 2. 嵌入式自检
+## 1. Writing Rhythm
 
-### 2.1 AI 痕迹检测
+User chooses writing rhythm:
 
-| 检测项 | 问题表现 | 处理 |
-|--------|----------|------|
-| 填充短语 | 此外、然而、值得注意的是 | 删除或替换 |
-| 三段式列举 | 连续"第一/第二/第三" | 打破结构 |
-| 浮夸表达 | 是...的证明/体现/标志 | 改为具体描述 |
-| 模糊归因 | 专家表示、多项研究表明 | 删除或具体化 |
-| 破折号过度 | 超过2个破折号 | 精简 |
-| 聊天机器人语气 | 希望对您有帮助、请告诉我 | 删除 |
+| Rhythm | Description | Use Case |
+|--------|------------|----------|
+| Per-section | Confirm each section | Long articles, important content |
+| By-phase | Confirm after several sections | Medium length |
+| Whole | Write all at once, then confirm | Short, familiar topics |
 
-### 2.2 节奏检测
+---
 
-| 检测项 | 问题表现 | 处理 |
-|--------|----------|------|
-| 句子长度一致 | 每句都15-20字 | 长短交替 |
-| 段落长度一致 | 每段都100字左右 | 变化段落长度 |
-| 情感曲线平直 | 无起伏变化 | 增强情感变化 |
+## 2. Embedded Self-Check
 
-### 2.3 逻辑检测
+### 2.1 AI Pattern Detection
 
-| 检测项 | 问题表现 | 处理 |
-|--------|----------|------|
-| 概念未解释 | 出现读者不懂的术语 | 添加解释 |
-| 逻辑跳跃 | 结论突然 | 添加过渡 |
-| 读者水平不匹配 | 太深/太浅 | 调整难度 |
+| Check | Issue | Action |
+|-------|-------|--------|
+| Filler phrases | 此外、然而、值得注意的是 | Remove or replace |
+| Triple listing | 连续"第一/第二/第三" | Break structure |
+| Bombastic expressions | 是...的证明/体现/标志 | Make concrete |
+| Vague attribution | 专家表示、多项研究表明 | Remove or specify |
+| Excessive dashes | >2 dashes | Simplify |
+| Bot tone | 希望对您有帮助 | Remove |
 
-### 2.4 内容类型检测
+### 2.2 Rhythm Detection
 
-| 类型 | 检测项 |
+| Check | Issue | Action |
+|-------|-------|--------|
+| Uniform sentence length | All 15-20 chars | Mix lengths |
+| Uniform paragraph length | All ~100 chars | Vary paragraph length |
+| Flat emotion curve | No起伏 | Enhance variation |
+
+### 2.3 Logic Detection
+
+| Check | Issue | Action |
+|-------|-------|--------|
+| Unexplained concepts | Terms reader wont understand | Add explanation |
+| Logic jump | Sudden conclusion | Add transition |
+| Audience mismatch | Too deep/shallow | Adjust difficulty |
+
+### 2.4 Content Type Checks
+
+| Type | Checks |
 |------|--------|
-| 技术教程 | 代码准确性、步骤完整性 |
-| 故事 | 人物一致性、情节合理性 |
-| 小红书 | emoji密度、标签合规 |
-| 公众号 | 标题吸引力、开头抓人 |
+| Technical | Code accuracy, step completeness |
+| Story | Character consistency, plot logic |
+| Xiaohongshu | Emoji density, tag compliance |
+| WeChat | Title appeal, opening hook |
 
 ---
 
-## 3. 实时风格对比
+## 3. Real-time Style Comparison
 
-写作过程中，持续对比：
-- 用词风格
-- 句式特点
-- 语气一致性
-- 开头/结尾风格
+During writing, continuously compare:
+- Vocabulary style
+- Sentence patterns
+- Tone consistency
+- Opening/closing style
 
-如有偏离，自动微调。
+If deviation detected, auto-adjust.
 
 ---
 
-## 4. 写作输出
+## 4. Writing Output
 
-### 单节输出格式
+### Single Section Output
 
+## Chapter 1: xxx
+
+{content}
+
+---
+[Style check passed ✓]
+[Characters: xxx]
 ```
-## 第一章：xxx
 
-{内容}
+### Full Draft Output
 
----
-[风格检查通过 ✓]
-[字数：xxx]
-```
+## Full Draft
 
-### 整体输出格式
-
-```
-## 完整初稿
-
-{全文}
+{full text}
 
 ---
-字数统计：约 xxx 字
-阅读时间：约 x 分钟
+Character count: ~xxx
+Reading time: ~x min
 
 ---
-请审核，如有修改意见告诉我。
+Please review. Feedback welcome.
 ```
 
 ---
 
-## 5. 开头写法库
+## 5. Opening Library
 
-### 5.1 故事引入
-从一个相关的小故事开始，吸引读者
+### 5.1 Story Introduction
+Start with relevant story to hook reader
 
-### 5.2 提问引发思考
-用一个发人深省的问题开启
+### 5.2 Question
+Start with thought-provoking question
 
-### 5.3 数据冲击
-用惊人数据或事实抓住注意力
+### 5.3 Data Impact
+Use surprising data or facts
 
-### 5.4 结论先行
-先给结论，再解释原因
+### 5.4 Conclusion First
+Give conclusion first, then explain
 
-### 5.5 悬念吸引
-设置悬念，引发好奇
+### 5.5 Suspense
+Create curiosity with suspense
 
-### 5.6 场景描写
-用场景让读者代入
-
----
-
-## 6. 结尾写法库
-
-### 6.1 总结要点
-回顾文章核心要点
-
-### 6.2 升华主题
-把内容提升到更高层次
-
-### 6.3 开放讨论
-留问题给读者思考
-
-### 6.4 互动引导
-引导评论、转发、收藏
-
-### 6.5 金句点睛
-用一句有力的话结束
+### 5.6 Scene Description
+Immerse reader with scene
 
 ---
 
-## 7. 写作流程
+## 6. Closing Library
 
-1. 接收大纲和风格要求
-2. 选择写作节奏
+### 6.1 Summary
+Review main points
+
+### 6.2 Elevation
+Elevate to higher level
+
+### 6.3 Open Discussion
+Leave questions for reader
+
+### 6.4 Interactive CTA
+Guide comments/share/bookmark
+
+### 6.5 Punchline
+End with powerful statement
 
 ---
 
-## Next Step Guide (MUST FOLLOW)
-When user confirms the draft, you MUST guide them to the review phase:
-1. Tell user: Draft confirmed. Moving to review phase.
-2. Use Skill tool to invoke /writing-review
-3. Pass context: completed draft content
-DO NOT skip the review phase and go directly to polish
-User can say: continue / next / review
+## 7. Writing Process
+
+1. Receive outline and style requirements
+2. Choose writing rhythm
+3. Write by section
+4. Self-check each section
+5. Real-time style comparison
+6. User confirmation
+7. Continue or submit whole
+8. Final review

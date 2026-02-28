@@ -1,145 +1,126 @@
 ---
 name: writing-style
-description: 风格分析技能 - 分析、提取、应用风格。提供风格样本分析、量化指标、风格冲突检测、内容类型适配
+description: Style analysis skill - analyzes, extracts, and applies writing style. Provides style sample analysis, quantitative metrics, style conflict detection, and content type adaptation.
 ---
 
-# Writing Style (风格分析)
+# Writing Style
 
-## 概述
+## Overview
 
-独立风格分析模块，负责：
-1. 分析风格样本 - 提取用户提供的文章风格特点
-2. 量化指标 - 提供可量化的风格指标
-3. 风格冲突检测 - 预警原风格与目标风格差距过大的情况
-4. 内容类型适配 - 针对不同内容类型的风格优化
+Standalone style analysis module:
+1. Analyze style samples - Extract writing style characteristics
+2. Quantitative metrics - Provide quantifiable style indicators
+3. Style conflict detection - Warn when gap between original and target style is too large
+4. Content type adaptation - Optimize style for different content types
 
-## 使用方法
+## Usage
 
 /writing-style
 
-或直接提供内容：
-- "按这个风格写：{文章内容}"
-- "帮我分析这段文字的风格：{内容}"
-- "参考这个风格：{文章内容}"
+Or provide content directly:
+- "Write in this style: {article}"
+- "Analyze the style of: {content}"
 
-## 1. 输入方式
+## 1. Input Methods
 
-| 类型 | 识别方式 | 处理方式 |
-|------|----------|----------|
-| 直接粘贴 | 用户复制文章内容 | 直接分析 |
-| 文件路径 | 本地路径格式 | 读取文件内容 |
-| 仓库地址 | GitHub URL | 获取文件内容 |
+| Type | Recognition | Processing |
+|------|-------------|------------|
+| Direct paste | User copies text | Analyze directly |
+| File path | Local path format | Read file |
+| Repository | GitHub URL | Fetch and analyze |
 
-限制：
-- 样本数量：1-3篇
-- 每篇长度：建议 500-3000 字
-- 超出范围可以只分析部分内容
+Limits:
+- Samples: 1-3 articles
+- Length: 500-3000 chars recommended
 
-## 2. 风格分析要素
+## 2. Style Analysis Elements
 
-### 核心要素（必分析）
+### Core Elements (Required)
+- Vocabulary - Professional/Colloquial/Conversational/Literary/Mixed
+- Sentence length - Long/Short/Mixed
+- Paragraph structure - Length, hierarchy, spacing
 
-| 要素 | 说明 | 分析维度 |
-|------|------|----------|
-| 用词习惯 | 词汇选择倾向 | 专业术语 / 口语化 / 接地气 / 文言化 / 混合 |
-| 句子长短 | 句式长度特征 | 长句为主 / 短句为主 / 长短交替 |
-| 段落结构 | 段落组织方式 | 段落长度、层次安排、留白习惯 |
+### Extended Elements
+- Tone - Serious/Casual/Playful/Warm/Sharp/Calm
+- Opening - Direct/Story/Question/Conclusion-first/Suspense
+- Closing - Summary/Elevation/Open/Interactive/Punchline
+- Rhythm - Fast/Slow/Varied/Tight
+- Personal touch - Catchphrases/Unique perspective
 
-### 扩展要素（如有）
+## 3. Quantitative Metrics
 
-| 要素 | 选项 |
-|------|------|
-| 语气特点 | 严肃 / 轻松 / 俏皮 / 温暖 / 犀利 / 冷静 / 热情 |
-| 开头方式 | 直入主题 / 故事引入 / 提问引入 / 结论先行 / 悬念引入 / 场景描写 |
-| 结尾方式 | 总结 / 升华 / 开放 / 互动 / 金句点睛 / 留悬念 |
-| 叙事节奏 | 快节奏 / 慢节奏 / 张弛有度 / 散文式 / 紧凑 |
-| 个人特色 | 特色词 / 口头禅 / 习惯表达 / 特有视角 |
+### 3.1 Basic
+- Avg sentence: Short<15, Medium15-30, Long>30 chars
+- Avg paragraph: Short<80, Medium80-200, Long>200
+- Sentence variation: >0.6 rich, <0.3 monotone
 
-## 3. 风格量化指标
+### 3.2 Emotional
+- Emotional density: >0.1 high, <0.05 calm
+- Exclamation rate: >0.5/para expressive
+- Question ratio: >0.15 interactive
 
-### 3.1 基础指标
+### 3.3 Format
+- Emoji density (for Xiaohongshu)
+- Tag usage frequency
+- Code ratio (for technical)
 
-| 指标 | 计算方式 | 参考范围 |
-|------|----------|----------|
-| 平均句长 | 总字数 / 句子数 | 短句: <15字，中句: 15-30字，长句: >30字 |
-| 段落平均长度 | 总字数 / 段落数 | 短段: <80字，中段: 80-200字，长段: >200字 |
-| 句式变化系数 | 不同句型数 / 总句数 | >0.6 为丰富，<0.3 为单调 |
+## 4. Content Type Adaptation
 
-### 3.2 情感指标
+### 4.1 WeChat Articles
+- Formal but accessible vocabulary
+- Mixed sentence length
+- Catchy opening, CTA ending
 
-| 指标 | 计算方式 | 说明 |
-|------|----------|------|
-| 情感词汇密度 | 情感词数 / 总词数 | >0.1 为高情感，<0.05 为冷静 |
-| 感叹号使用率 | 感叹号数 / 段落数 | >0.5/段为高情感表达 |
-| 疑问句比例 | 疑问句数 / 总句数 | >0.15 为互动型 |
+### 4.2 Xiaohongshu
+- Conversational, youthful
+- 1-3 emojis per paragraph
+- 3-10 targeted hashtags
 
-### 3.3 格式指标
+### 4.3 Technical Tutorials
+- Professional vocabulary
+- Clear code with comments
+- Numbered steps
 
-| 指标 | 说明 |
-|------|------|
-| emoji密度 | emoji数 / 总字数（针对小红书等） |
-| 标签使用 | #话题标签 出现频率 |
-| 代码比例 | 代码块 / 总内容（针对技术文章） |
+### 4.4 Stories/Novels
+- Clear 1st/3rd person
+- Scene/character/psychology description
+- Natural dialogue
 
-## 4. 内容类型适配
+### 4.5 Short Video Scripts
+- 3-second hook
+- Fast rhythm
+- Conversational dialogue
 
-### 4.1 公众号文章
-- 用词：正式但不晦涩，允许适当口语化
-- 句式：长短交替，避免过短
-- 开头：抓人，有吸引力
-- 结尾：有引导，关注/转发/收藏
+## 5. Style Conflict Detection
 
-### 4.2 小红书
-- 用词：接地气，年轻化
-- emoji：适量使用，每段1-3个
-- 标签：精准话题标签 3-10个
-- 互动：引导评论、收藏
+### 5.1 Types
+- Sentence: Mixed→pure short >50% change
+- Tone: Serious↔Casual >2 levels gap
+- Structure: Essay→list format
 
-### 4.3 技术教程
-- 用词：专业准确
-- 代码：代码块清晰，有注释
-- 步骤：清晰 numbered 条列
-- 解释：原理说明充分
+### 5.2 Handling
+Prompt user with suggestions when conflict detected.
 
-### 4.4 故事/小说
-- 视角：第一/第三人称明确
-- 描写：场景、人物、心理描写
-- 节奏：有张力，有起伏
-- 对话：人物对话自然
+## 6. Quick Style Identification
 
-### 4.5 短视频脚本
-- 开头：黄金3秒，悬念/冲突/利益点
-- 节奏：快，15-60秒一个高潮
-- 镜头：画面描述清晰
-- 台词：口语化，易于记忆
-
-## 5. 风格冲突检测
-
-### 5.1 冲突类型
-| 冲突类型 | 描述 | 阈值 |
-|----------|------|------|
-| 句式冲突 | 从长短交替变为纯短句 | 变化 > 50% |
-| 语气冲突 | 严肃 ↔ 轻松跨度太大 | 中间间隔 > 2 档 |
-| 结构冲突 | 从散文式变为清单式 | 结构完全改变 |
-| 类型冲突 | 口语化用于正式长文 | 类型风格不匹配 |
-
-### 5.2 冲突处理
-检测到冲突时，提示用户并给出建议。
-
-## 6. 快速风格识别
-
+Questions:
+1. Tone: Serious/Casual/Warm/Sharp/Humorous
+2. Sentence: Long/Short/Mixed
+3. Opening: Direct/Story/Question/Conclusion-first
+4. Closing: Summary/Elevation/Open/Interactive
+5. Perspective: 1st/2nd/3rd/Neutral
 
 ---
 
 ## Next Step Guide (MUST FOLLOW)
 
-**When user confirms the style, you MUST guide them to the outline phase:**
+When user confirms the style, you MUST guide them to the outline phase:
 
 1. Tell user: "Style confirmed. Moving to outline phase."
-2. Use Skill tool to invoke `/writing-outline`
+2. Use Skill tool to invoke /writing-outline
 3. Pass context: confirmed style characteristics
 
-**DO NOT skip the outline phase and go directly to writing**
+DO NOT skip the outline phase and go directly to writing
 
 User can say:
 - "continue" / "next" / "start outline"

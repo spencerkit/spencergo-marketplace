@@ -1,170 +1,171 @@
 ---
 name: writing-outline
-description: 大纲编写技能 - 根据需求生成结构化大纲，提供内容类型结构库和智能推荐
+description: Outline generation skill - generates structured outlines based on requirements, provides content type structure library and smart recommendations.
 ---
 
-# Writing Outline (大纲编写)
+# Writing Outline
 
-## 概述
+## Overview
 
-独立大纲编写模块，负责：
-1. 根据需求生成 3-5 个大纲选项
-2. 内容类型结构库智能推荐
-3. 用户选择后确认大纲
-4. 支持大纲变体和调整
+Standalone outline generation module:
+1. Generate 3-5 outline options based on requirements
+2. Content type structure library with smart recommendations
+3. User selects and confirms outline
+4. Support outline variants and adjustments
 
-## 使用方法
+## Usage
 
-```
 /writing-outline
-```
 
-或直接描述需求：
-- "帮我列个公众号文章大纲：关于xxx"
-- "我要写一个小红书，关于xxx"
-- "帮我规划一下技术教程大纲"
+Or describe requirements:
+- "Help me outline a WeChat article about xxx"
+- "I want to write a Xiaohongshu post about xxx"
 
 ---
 
-## 1. 内容类型结构库
+## 1. Content Type Structure Library
 
-### 1.1 公众号文章
+### 1.1 WeChat Articles
 
-| 结构类型 | 适用场景 | 大纲模板 |
-|----------|----------|----------|
-| 结论先行 | 观点类、干货类 | 结论 → 理由1-3 → 案例 → 总结 |
-| 故事干货 | 经验分享类 | 故事引入 → 干货拆解 → 总结升华 |
-| 清单型 | 技巧合集类 | 痛点引入 → 清单列出 → 总结 |
-| 对比型 | 选择建议类 | 背景 → 方案A vs B → 建议 |
-| 答疑解惑 | 问题解答类 | 问题引入 → 逐个解答 → 延伸 |
+| Structure Type | Scenario | Template |
+|----------------|----------|----------|
+| Conclusion-first | Opinion/Tips | Conclusion → Reasons 1-3 → Cases → Summary |
+| Story + Tips | Experience sharing | Story intro → Tips breakdown → Summary |
+| List format | Tips collection | Pain point → List items → Summary |
+| Comparison | Selection advice | Background → A vs B → Recommendation |
+| Q&A | Q&A format | Question intro → Answers → Extension |
 
-### 1.2 小红书
+### 1.2 Xiaohongshu
 
-| 结构类型 | 适用场景 | 大纲模板 |
-|----------|----------|----------|
-| 干货合集 | 知识分享类 | 痛点/吸引点 → 1/2/3/4点 → 互动引导 |
-| 踩坑分享 | 经验教训类 | 踩坑经历 → 避坑指南 → 互动引导 |
-| 测评对比 | 产品选择类 | 引入 → 测评对象 → 优缺点 → 总结 |
-| 教程步骤 | 技能教学类 | 成果展示 → 步骤1/2/3 → 注意事项 |
+| Structure Type | Scenario | Template |
+|----------------|----------|----------|
+| Tips collection | Knowledge share | Hook → 1/2/3/4 points → CTA |
+| Pitfall sharing | Experience | Pitfall story → Avoid tips → CTA |
+| Review/Comparison | Product selection | Intro → Products → Pros/Cons → Summary |
+| Tutorial | Skill teaching | Result → Steps 1/2/3 → Notes |
 
-### 1.3 技术教程
+### 1.3 Technical Tutorials
 
-| 结构类型 | 适用场景 | 大纲模板 |
-|----------|----------|----------|
-| 问题驱动 | 解决问题类 | 问题背景 → 解决方案 → 代码示例 → 总结 |
-| 原理探索 | 深度理解类 | 现象 → 原理 → 实践 → 原理升华 |
-| 实战项目 | 动手实践类 | 项目介绍 → 环境准备 → 核心实现 → 扩展 |
-| 对比分析 | 技术选型类 | 背景 → 技术A → 技术B → 对比 → 建议 |
+| Structure Type | Scenario | Template |
+|----------------|----------|----------|
+| Problem-driven | Problem solving | Background → Solution → Code → Summary |
+| Principle exploration | Deep understanding | Phenomenon → Principle → Practice → Deep dive |
+| Practical project | Hands-on | Intro → Setup → Core → Extension |
+| Comparison | Tech selection | Background → Tech A → Tech B → Compare → Suggestion |
 
-### 1.4 故事/小说
+### 1.4 Stories/Novels
 
-| 结构类型 | 适用场景 | 大纲模板 |
-|----------|----------|----------|
-| 英雄之旅 | 成长故事类 | 日常 → 召唤 → 考验 → 深渊 → 蜕变 → 归来 |
-| 三幕式 | 完整故事类 | 建置 → 对抗 → 解决 |
-| 起承转合 | 传统叙事类 | 起 → 承 → 转 → 合 |
-| 悬念推进 | 悬疑推理类 | 悬念引入 → 线索铺垫 → 反转 → 真相 |
+| Structure Type | Scenario | Template |
+|----------------|----------|----------|
+| Hero's journey | Growth story | Ordinary → Call → Trials → Abyss → Transformation → Return |
+| Three-act | Complete story | Setup → Confrontation → Resolution |
+| Traditional | Classic narrative |起 → 承 → 转 → 合 |
+| Suspense | Mystery | Hook → Clues → Twist → Truth |
 
-### 1.5 短视频脚本
+### 1.5 Short Video Scripts
 
-| 结构类型 | 适用场景 | 大纲模板 |
-|----------|----------|----------|
-| 黄金3秒 | 吸引眼球类 | 悬念/冲突/利益点 → 内容展开 → 引导 |
-| 悬念设置 | 好奇驱动类 | 悬念抛出 → 层层递进 → 揭晓 |
-| 情感高潮 | 情感触达类 | 情感铺垫 → 高潮 → 总结/引导 |
-
----
-
-## 2. 大纲生成流程
-
-### Step 1: 识别内容类型
-
-根据用户描述判断：
-- 内容类型（公众号/小红书/技术/故事/短视频）
-- 主题领域
-- 目标读者
-
-### Step 2: 选择结构模板
-
-从结构库中选择最合适的模板：
-- 考虑内容特点
-- 考虑读者偏好
-- 考虑平台特性
-
-### Step 3: 生成大纲选项
-
-生成 3-5 个大纲选项：
-- 每个选项 3-5 个章节
-- 章节标题 + 简要描述
-- 推荐最合适的一个
-
-### Step 4: 用户确认
-
-- 用户选择某个大纲
-- 或提出修改意见
-- 确认后输出最终大纲
+| Structure Type | Scenario | Template |
+|----------------|----------|----------|
+| 3-second hook | Attention grab | Hook/Conflict/Benefit → Content → CTA |
+| Suspense设置 | Curiosity driven | Suspense → Buildup → Reveal |
+| Emotion climax | Emotional reach | Setup → Climax → Summary/CTA |
 
 ---
 
-## 3. 大纲输出格式
+## 2. Outline Generation Process
 
-```
-## 大纲选项
+### Step 1: Identify Content Type
 
-### 选项A（推荐）
-1. 第一章：xxx
-   - 小节：xxx
-2. 第二章：xxx
-   - 小节：xxx
-3. 第三章：xxx
-   - 小节：xxx
+Determine from user description:
+- Content type (WeChat/Xiaohongshu/Technical/Story/Video)
+- Topic area
+- Target audience
 
-### 选项B
-...
+### Step 2: Select Structure Template
 
-### 选项C
+Choose most suitable template from library:
+- Consider content characteristics
+- Consider audience preference
+- Consider platform specifics
+
+### Step 3: Generate Outline Options
+
+Generate 3-5 options:
+- Each option 3-5 sections
+- Section title + brief description
+- Recommend most suitable one
+
+### Step 4: User Confirmation
+
+- User selects or modifies
+- Confirm before proceeding
+
+---
+
+## 3. Outline Output Format
+
+## Outline Options
+
+### Option A (Recommended)
+1. Chapter 1: xxx
+   - Subsection: xxx
+2. Chapter 2: xxx
+   - Subsection: xxx
+3. Chapter 3: xxx
+
+### Option B
 ...
 
 ---
 
-请选择或提出修改意见。
+Please select or provide feedback.
 ```
 
-确认后：
-```
-## 确认的大纲
+Confirmed:
+## Confirmed Outline
 
-1. 第一章：xxx
-2. 第二章：xxx
-3. 第三章：xxx
+1. Chapter 1: xxx
+2. Chapter 2: xxx
+3. Chapter 3: xxx
 
 ---
-✅ 大纲已确认，可进入写作阶段
+Outline confirmed. Ready for writing phase.
 ```
-
----
-
-## 4. 大纲调整
-
-用户可以：
-- 调整章节顺序
-- 合并/拆分章节
-- 添加/删除章节
-- 修改章节标题
 
 ---
 
-## 5. 智能推荐逻辑
+## 4. Outline Adjustments
 
-根据以下因素自动推荐：
+User can:
+- Reorder sections
+- Merge/split sections
+- Add/remove sections
+- Modify section titles
 
+---
+
+## 5. Smart Recommendation Logic
+
+Auto-recommend based on:
+
+| Factor | Weight | Consideration |
+|--------|--------|---------------|
+| Content type | High | Different types match different structures |
+| Topic | Medium | Tech vs Emotional |
+| Audience | Medium | Professional vs General |
+| Platform | Low | WeChat vs Xiaohongshu |
 
 ---
 
 ## Next Step Guide (MUST FOLLOW)
+
 When user confirms the outline, you MUST guide them to the writing phase:
-1. Tell user: Outline confirmed. Moving to writing phase.
+
+1. Tell user: "Outline confirmed. Moving to writing phase."
 2. Use Skill tool to invoke /writing-content
 3. Pass context: confirmed outline structure
+
 DO NOT skip the writing phase and go directly to review
-User can say: continue / next / start writing
+
+User can say:
+- "continue" / "next" / "start writing"
