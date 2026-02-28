@@ -1,200 +1,172 @@
 ---
-  name: yi
-  description: 周易占卜技能，通过摇铜钱模拟起卦，为用户提供卦象解读和 AI 分析
-  ---
+name: yi
+description: Yi Jing divination skill - uses coin toss simulation to generate hexagrams, provides interpretation and AI analysis.
+---
 
-  # 周易占卜 (Yi Jing Divination)
+# Yi Jing Divination
 
-  ## 触发方式
+## Trigger
 
-  当用户需要占卜时使用此技能。支持以下触发方式：
-  - "帮我占卜"
-  - "起一卦"
-  - "算一卦"
-  - "周易占卜"
-  - "问卦"
+Use when user needs divination:
+- "Help me divine"
+- "Cast a hexagram"
+- "Do a reading"
+- "Yi Jing divination"
 
-  ## 占卜流程
+## Divination Process
 
-  ### 第一步：获取占卜问题
+### Step 1: Get Question
 
-  **方式一：用户直接输入**
-  询问："你想问什么问题？"
+Method 1: User input directly
+Ask: "What would you like to ask about?"
 
-  **方式二：提供问题模板**
-  如果用户不知道问什么，提供常见问题模板：
-  1. 事业（工作、创业、升职）
-  2. 财运（投资、理财、收入）
-  3. 感情（恋爱、婚姻、桃花）
-  4. 学业（考试、升学、留学）
-  5. 健康（身体、疾病、养生）
-  6. 出行（旅行、搬迁、出差）
-  7. 其他（自定义问题）
+Method 2: Provide templates
+If user unsure, offer common questions:
+1. Career (work, promotion, entrepreneurship)
+2. Wealth (investment, finances, income)
+3. Relationships (love, marriage)
+4. Academics (exams, education)
+5. Health
+6. Travel
+7. Other
 
-  ### 第二步：起卦
+### Step 2: Cast Hexagram
 
-  调用 `src/divination.js` 中的 `performDivination(question)` 函数：
-  1. 摇铜钱 6 次（模拟三枚铜钱投掷）
-  2. 记录每次结果（老阳、少阳、老阴、少阴）
-  3. 确定动爻（如有）
-  4. 计算主卦和变卦
+Call `performDivination(question)` from `src/divination.js`:
+1. Toss coins 6 times (simulate 3 coins)
+2. Record each result (old yang, young yang, old yin, young yin)
+3. Determine moving yao (if any)
+4. Calculate main hexagram and changing hexagram
 
-  ### 第三步：输出卦象
+### Step 3: Output Hexagram
 
-  调用 `formatOutput(divinationResult)` 输出：
-  - 占卜问题
-  - 起卦过程（6 次摇铜钱结果）
-  - 卦象符号（Unicode 卦符）
-  - 卦辞和爻辞
-  - 动爻说明（如有）
+Call `formatOutput(divinationResult)`:
+- Question
+- 6 toss results
+- Hexagram symbols (Unicode)
+- Gua ci (judgments) and yao ci (line judgments)
+- Moving yao explanation (if any)
 
-  ### 第四步：AI 解读
+### Step 4: AI Interpretation
 
-  调用 `generateAIPrompt(question, divinationResult)` 生成提示词，然后用大模型解读。
+Call `generateAIPrompt(question, divinationResult)`, then use LLM for interpretation.
 
-  **解读要求：**
-  1. 用文言文风格但现代人易懂的方式
-  2. 回答以下问题：
-     - 这个卦象的总体含义是什么？
-     - 针对用户的问题，吉凶如何？
-     - 有什么建议？
-     - （如有变卦）变卦意味着什么？
+Requirements:
+1. Classical Chinese style but modern understandable
+2. Answer:
+   - Overall meaning of hexagram
+   - Fortune for user's question
+   - Suggestions
+   - (If changing hexagram) What it means
 
-  ## 数据文件说明
+## Data Files
 
-  ### data/8-gua.json
-  八卦基础数据，包含：
-  - 乾、兑、离、震、巽、坎、艮、坤
-  - 符号 (symbol)
-  - 自然象征 (nature)
-  - 阴阳属性 (yinYang)
-  - 先天八卦数 (number)
+### data/8-gua.json
+8 trigrams:
+- 乾, 兑, 离, 震, 巽, 坎, 艮, 坤
+- Symbol, nature, yin/yang, number
 
-  ### data/64-gua.json
-  六十四卦完整数据，包含：
-  - 卦名 (name)
-  - 全称 (fullName)
-  - 卦辞 (guaCi)
-  - 象征意义 (xiang)
-  - 爻辞 (yaoCi)
-  - 六亲排布 (liuQin)
-  - 世应位置 (shi, ying)
+### data/64-gua.json
+64 hexagrams:
+- Name, full name, gua ci, xiang, yao ci, liu qin, shi/ying
 
-  ## 核心函数
+## Core Functions
 
-  | 函数 | 功能 |
-  |------|------|
-  | yaoGua() | 模拟摇一次铜钱，返回老阳/少阳/老阴/少阴 |
-  | yaoLiuCi() | 摇六次得到完整卦象数组 |
-  | calcGua(yaos) | 根据爻计算上下卦的先天八卦数 |
-  | getGuaName(yaos) | 获取卦象名称和符号 |
-  | getZhuAndBianGua(yaos) | 获取主卦和变卦信息 |
-  | getGuaData(guaInfo) | 获取卦象详细数据 |
-  | performDivination(question) | 执行完整占卜流程 |
-  | formatOutput(divinationResult) | 格式化输出结果 |
-  | generateAIPrompt(question, divinationResult) | 生成 AI 解读提示词 |
+| Function | Description |
+|----------|-------------|
+| yaoGua() | Simulate coin toss, return old/young yin/yang |
+| yaoLiuCi() | Toss 6 times for complete hexagram |
+| calcGua(yaos) | Calculate trigram numbers from yao |
+| getGuaName(yaos) | Get hexagram name and symbol |
+| getZhuAndBianGua(yaos) | Get main and changing hexagram |
+| getGuaData(guaInfo) | Get detailed hexagram data |
+| performDivination(question) | Execute full divination |
+| formatOutput(divinationResult) | Format output |
+| generateAIPrompt(question, result) | Generate AI prompt |
 
-  ## 输出示例
+## Output Example
 
-  ═══════════════════════════════════════
-           周 易 占 卜
-  ═══════════════════════════════════════
+═══════════════════════════════════════
+           YI JING DIVINATION
+═══════════════════════════════════════
 
-  【占卜问题】
-  "我的事业发展如何？"
+【Question】
+"My career development?"
 
-  【起卦过程】
-  第1次: ●●● → 阴爻（老阴）✦ 动爻
-  第2次: ○○● → 阴爻（少阴）
-  第3次: ○○○ → 阳爻（老阳）✦ 动爻
-  第4次: ○●○ → 阳爻（少阳）
-  第5次: ●○○ → 阴爻（少阴）
-  第6次: ○●○ → 阳爻（少阳）
+【Tossing Process】
+1st: ●●● → Yin (old yin) ✦ moving
+2nd: ○○● → Yin (young yin)
+3rd: ○○○ → Yang (old yang) ✦ moving
+4th: ○●○ → Yang (young yang)
+5th: ●○○ → Yin (young yin)
+6th: ○●○ → Yang (young yang)
 
-  【得卦】
-  主卦: 巽为风 ☴
-  变卦: 艮为山 ☶
-  动爻: 初、上（变为艮卦）
+【Hexagram】
+Main: Xun (Wind) ☴
+Change: Gen (Mountain) ☶
+Moving yao: First, Top (becomes Gen)
 
-  【上卦】
-  巽（风）☴
+【Interpretation】
+【Gua Ci】"Xiao Heng Li You Wang, Li Jian Da Ren"
+【Xiang】"Following wind, jun zi yi shen ming shi shi"
 
-  【下卦】
-  巽（风）☴
+═══════════════════════════════════════
 
-  【解卦】
-  【卦辞】小亨利有攸往，利见大人
-  【卦象征意】随风巽，君子以申命行事
+## AI Interpretation Example
 
-  【爻辞摘要】
-  初: 进退，利武人之贞
-  二: 巽在床下，用史巫纷若，吉无咎
-  三: 频巽，吝
-  四: 悔亡，田获三品
-  五: 贞吉悔亡，无不利，无初有终
-  上: 巽在床下，丧其资斧，贞凶
+Based on hexagram, AI should include:
 
-  ═══════════════════════════════════════
+### Hexagram Overview
+Xun (Wind) hexagram, above and below Xun, wind blows everywhere... Gua ci means "Gradual success, beneficial to see great person."
 
-  ## AI 解读示例
+### Analysis
+- Currently in "advance/retreat" phase - indicates hesitation in career choices
+- Xun represents wind, characteristic is "enter" - need to seize timing
+- Moving yao indicates transformation period
 
-  基于上述卦象，AI 解读应包含：
+### Fortune
+Overall: Good with challenges
+- Initial difficulties
+- Good outcome with proper approach
+- Key: "Li Jian Da Ren" - seek experienced guidance
 
-  ## 周易解读：巽为风卦
+### Suggestions
+1. Go with the flow - leverage external forces
+2. Balance flexibility with firm resolve
+3. Seize opportunities - wind goes everywhere
+4. Seek mentorship
 
-  ### 卦象总论
-  巽为风卦，上巽下巽，风行八方，无孔不入。卦辞曰"小亨利有攸往，利见大人"，意为对于事业发展，起初可能面临一些挑战和阻碍，但只要保持柔中带刚的态度，最终能够获得成功。   
+### Changed Hexagram (Gen)
+Gen means mountain - stability after changes. Stop and reflect before advancing.
 
-  ### 事业发展分析
-  你问的是事业发展。从卦象来看：
-  - 目前处于"进退"之象，暗示你在事业选择上可能有些犹豫不决
-  - 巽卦代表风，属性为"入"，意味着需要善于把握时机，审时度势
-  - 卦中有动爻（初爻和上爻），说明目前正处于变化转型期
+---
+Note: Yi Jing divination is for entertainment only. Major decisions require rational analysis.
 
-  ### 吉凶判断
-  **总体趋势：吉中带险**
-  - 初期可能有些困难和不确定性
-  - 但只要方法得当，坚持下去会有好的结果
-  - 关键是要"利见大人"，即寻找有经验的人指导
+## Notes
 
-  ### 建议
-  1. **顺势而为**：巽卦告诉我们要顺应形势，善于借助外力
-  2. **刚柔并济**：外表柔和，内心要有定见
-  3. **把握时机**：风的特点是"无孔不入"，要善于抓住机会
-  4. **贵人相助**：注意寻找行业前辈或导师的支持
+1. Entertainment only - not sole basis for major decisions
+2. Sincerity reminder - if same question asked repeatedly, note "lack of sincerity"
+3. Respect - maintain humble attitude
+4. Rational view - "do your best, leave rest to fate"
 
-  ### 变卦解读（艮为山）
-  变卦为艮为山，山重水复疑无路。动爻显示最终会稳定下来，但过程需要耐心。艮卦代表止，暗示在某个阶段需要停下来反思和调整，不要急于冒进。
+## Hexagram Symbols
 
-  ---
+| Name | Symbol | Represents |
+|------|--------|------------|
+| 乾 | ☰ | Heaven |
+| 兑 | ☱ | Lake |
+| 离 | ☲ | Fire |
+| 震 | ☳ | Thunder |
+| 巽 | ☴ | Wind |
+| 坎 | ☵ | Water |
+| 艮 | ☶ | Mountain |
+| 坤 | ☷ | Earth |
 
-  *注：周易占卜仅供娱乐参考，人生决策还需理性分析。*
+## Yao Explanations
 
-  ## 注意事项
+- Old Yang (○): Yang changes to Yin
+- Young Yang (○): Yang, unchanged
+- Old Yin (●): Yin changes to Yang
+- Young Yin (●): Yin, unchanged
 
-  1. **娱乐性质**：占卜结果仅供娱乐参考，不可作为重大决策的唯一依据
-  2. **心诚则灵**：如用户连续占卜同一问题，提醒"心不诚则不灵"，建议间隔一段时间
-  3. **尊重态度**：保持尊重和谦逊的态度，不可狂妄自大
-  4. **理性看待**：强调"尽人事，听天命"的态度，人生大事还需理性分析
-
-  ## 卦象符号参考
-
-  | 卦名 | 符号 | 象征 |
-  |------|------|------|
-  | 乾 | ☰ | 天 |
-  | 兑 | ☱ | 泽 |
-  | 离 | ☲ | 火 |
-  | 震 | ☳ | 雷 |
-  | 巽 | ☴ | 风 |
-  | 坎 | ☵ | 水 |
-  | 艮 | ☶ | 山 |
-  | 坤 | ☷ | 地 |
-
-  ## 爻辞说明
-
-  - **老阳（○）**：阳爻发动，变为阴爻
-  - **少阳（○）**：阳爻，不变
-  - **老阴（●）**：阴爻发动，变为阳爻
-  - **少阴（●）**：阴爻，不变
-
-  动爻代表变化的方向，是解卦的关键。
+Moving yao represents direction of change - key to interpretation.
