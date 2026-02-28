@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CASES_DIR="$SCRIPT_DIR/cases"
+PLUGIN_DIR="$PROJECT_ROOT/.claude-plugin"
 
 # Source helpers
 source "$PROJECT_ROOT/tests/test-helpers.sh"
@@ -37,12 +38,13 @@ run_test_case() {
     local test_dir=$(create_test_project "${skill}-${test_name}")
     local output_file="$test_dir/output.txt"
 
-    # Run Claude
+    # Run Claude with local plugin
     cd "$test_dir"
 
     if timeout "$timeout" claude -p "$prompt" \
         --permission-mode bypassPermissions \
         --add-dir "$test_dir" \
+        --plugin-dir "$PLUGIN_DIR" \
         --dangerously-skip-permissions \
         > "$output_file" 2>&1; then
 

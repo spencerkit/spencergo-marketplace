@@ -11,6 +11,9 @@ NC='\033[0m' # No Color
 # Test results directory
 TEST_RESULTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/test-results"
 
+# Plugin directory (local skills)
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.claude-plugin"
+
 # Create test-results directory if not exists
 mkdir -p "$TEST_RESULTS_DIR"
 
