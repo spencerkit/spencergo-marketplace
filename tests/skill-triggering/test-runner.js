@@ -91,8 +91,8 @@ function runTestCase(skillName, testCase) {
       // Output already written by stdio
     }
 
-    // Find session file - Claude encodes paths with leading hyphen
-    const projectEscaped = "-" + testDir.replace(/\//g, "-");
+    // Find session file - Claude encodes paths by replacing / with - and adding leading -
+    const projectEscaped = testDir.replace(/\//g, "-").replace(/^-/, "-");
     const sessionDir = path.join(
       os.homedir(),
       ".claude/projects",
