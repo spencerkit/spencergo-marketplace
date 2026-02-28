@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Test runner for spencergo skills
- * Runs test cases and saves results to output.md
+ * Runs test cases and saves results to output.md with full conversation
  */
 
 const fs = require("fs");
@@ -44,13 +44,62 @@ function printHeader(text) {
   console.log(`${BLUE}========================================${NC}`);
 }
 
-function addResult(skillName, testName, status, prompt, details) {
+function extractConversation(sessionContent) {
+  // Extract text from JSONL session
+  const lines = sessionContent.split('\n').filter(l => l.trim());
+  let conversation = [];
+
+  for (const line of lines) {
+    try {
+      const msg = JSON.parse(line);
+      if (msg.type === 'user') {
+        // User message
+        const content = msg.message?.content;
+        if (Array.isArray(content)) {
+          for (const c of content) {
+            if (c.type === 'text') {
+              conversation.push({ role: 'user', text: c.text });
+            }
+          }
+        }
+      } else if (msg.type === 'assistant') {
+        // Assistant message
+        const content = msg.message?.content;
+        if (Array.isArray(content)) {
+          let text = '';
+          for (const c of content) {
+            if (c.type === 'text') {
+              text += c.text;
+            }
+          }
+          if (text) {
+            conversation.push({ role: 'assistant', text: text.substring(0, 2000) });
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  return conversation;
+}
+
+function formatConversation(conversation) {
+  let text = '';
+  for (const msg of conversation) {
+    const prefix = msg.role === 'user' ? '👤 User' : '🤖 Assistant';
+    text += `${prefix}:\n${msg.text}\n\n`;
+  }
+  return text;
+}
+
+function addResult(skillName, testName, status, prompt, details, conversation) {
   results.push({
     skill: skillName,
     test: testName,
     status,
     prompt,
-    details
+    details,
+    conversation
   });
 }
 
@@ -78,6 +127,10 @@ function saveOutputMd() {
     if (r.details) {
       md += `**Details:**\n\`\`\`\n${r.details}\n\`\`\`\n\n`;
     }
+    if (r.conversation && r.conversation.length > 0) {
+      md += `**Conversation:**\n\n`;
+      md += formatConversation(r.conversation);
+    }
     md += `---\n\n`;
   }
 
@@ -101,6 +154,8 @@ function runTestCase(skillName, testCase) {
   const timestamp = Date.now();
   const testDir = path.join(os.tmpdir(), `claude-test-${timestamp}`);
   ensureDir(testDir);
+
+  let conversation = [];
 
   try {
     // Run Claude
@@ -127,7 +182,6 @@ function runTestCase(skillName, testCase) {
     const sessionDir = path.join(os.homedir(), ".claude/projects", projectEscaped);
 
     let sessionContent = "";
-    let sessionFile = "";
 
     if (fs.existsSync(sessionDir)) {
       const files = fs.readdirSync(sessionDir)
@@ -135,15 +189,15 @@ function runTestCase(skillName, testCase) {
         .sort()
         .reverse();
       if (files.length > 0) {
-        sessionFile = path.join(sessionDir, files[0]);
-        sessionContent = fs.readFileSync(sessionFile, "utf-8");
+        sessionContent = fs.readFileSync(path.join(sessionDir, files[0]), "utf-8");
+        conversation = extractConversation(sessionContent);
       }
     }
 
     if (!sessionContent) {
       console.log(`${YELLOW}[SKIP]${NC} Could not find session`);
       skippedTests++;
-      addResult(skillName, testName, "SKIP", prompt, "Session file not found");
+      addResult(skillName, testName, "SKIP", prompt, "Session file not found", []);
       return;
     }
 
@@ -168,18 +222,18 @@ function runTestCase(skillName, testCase) {
     if (allPassed) {
       console.log(`${GREEN}[PASS]${NC}`);
       passedTests++;
-      addResult(skillName, testName, "PASS", prompt, "");
+      addResult(skillName, testName, "PASS", prompt, "", conversation);
     } else {
       console.log(`${RED}[FAIL]${NC}`);
       console.log(details);
       failedTests++;
-      addResult(skillName, testName, "FAIL", prompt, details);
+      addResult(skillName, testName, "FAIL", prompt, details, conversation);
     }
 
   } catch (error) {
     console.log(`${RED}[FAIL]${NC} Error: ${error.message}`);
     failedTests++;
-    addResult(skillName, testName, "FAIL", prompt, error.message);
+    addResult(skillName, testName, "FAIL", prompt, error.message, conversation);
   } finally {
     // Cleanup
     try {
