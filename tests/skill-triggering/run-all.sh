@@ -37,5 +37,19 @@ echo ""
 echo "Running universal skill tests..."
 echo ""
 
+# Parse arguments
+SKILL_ARG=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --skill)
+            SKILL_ARG="--skill $2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
 # Run Node.js test runner with skills directory
-node "$SCRIPT_DIR/universal-test-runner.js" "$SKILLS_DIR"
+node "$SCRIPT_DIR/universal-test-runner.js" "$SKILLS_DIR" $SKILL_ARG

@@ -16,8 +16,8 @@ const os = require("os");
 const { execSync } = require("child_process");
 
 // Configuration
-const SCRIPT_DIR = __dirname;
-const PROJECT_ROOT = path.resolve(SCRIPT_DIR);
+const SCRIPT_DIR = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
 const DEFAULT_SKILLS_DIR = path.join(PROJECT_ROOT, "skills");
 const OUTPUT_FILE = path.join(PROJECT_ROOT, "tests-output.md");
 
@@ -98,9 +98,29 @@ function readSkillContent(skillMdPath) {
   }
 }
 
-// Run Claude
-function runClaude(prompt, testDir, pluginDir = null) {
-  const promptEscaped = prompt.replace(/'/g, "'\\''");
+// Run Claude with conversation history for context
+function runClaude(prompt, testDir, pluginDir = null, skillName = null, conversationHistory = []) {
+  // Prepend skill instruction and conversation history to prompt
+  let fullPrompt = prompt;
+  if (skillName) {
+    fullPrompt = `[测试模式] 请使用 "${skillName}" skill 来响应用户输入。\n\n`;
+
+    // Add conversation history for context
+    if (conversationHistory.length > 0) {
+      fullPrompt += `以下是之前的对话记录（供参考上下文）：\n\n`;
+      for (const msg of conversationHistory) {
+        fullPrompt += `${msg.role === 'user' ? '用户' : '助手'}: ${msg.content}\n\n`;
+      }
+      fullPrompt += `\n---\n\n`;
+    }
+
+    fullPrompt += `用户输入：${prompt}`;
+
+    console.log(`  ${MAGENTA}>>> Context: ${conversationHistory.length} messages${NC}`);
+    console.log(`  ${MAGENTA}>>> Prompt: ${prompt.slice(0, 80)}${prompt.length > 80 ? '...' : ''}${NC}`);
+  }
+
+  const promptEscaped = fullPrompt.replace(/'/g, "'\\''");
   let cmd = `env -u CLAUDECODE claude -p '${promptEscaped}' --permission-mode bypassPermissions --dangerously-skip-permissions`;
 
   if (pluginDir) {
@@ -221,8 +241,8 @@ async function testSkill(skill, maxTurns = 20) {
     ensureDir(testDir);
 
     try {
-      // Run skill (use PROJECT_ROOT as plugin-dir to find skills/)
-      const output = runClaude(currentPrompt, testDir, PROJECT_ROOT);
+      // Run skill with conversation history for context
+      const output = runClaude(currentPrompt, testDir, PROJECT_ROOT, skillName, messages);
       fullOutput += output + "\n\n";
 
       messages.push({ role: "user", content: currentPrompt });
@@ -311,7 +331,9 @@ async function main() {
   let skills = discoverSkills(skillsDir);
 
   if (targetSkill) {
-    skills = skills.filter(s => s.name === targetSkill);
+    // Handle both full name (spencergo:naming) and short name (naming)
+    const shortName = targetSkill.includes(":") ? targetSkill.split(":")[1] : targetSkill;
+    skills = skills.filter(s => s.name === targetSkill || s.name === shortName);
   }
 
   if (skills.length === 0) {

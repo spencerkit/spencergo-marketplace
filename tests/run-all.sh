@@ -47,7 +47,7 @@ main() {
 
     cd "$SCRIPT_DIR/skill-triggering"
     chmod +x run-all.sh
-    ./run-all.sh
+    ./run-all.sh "$@"
 
     print_header "All Tests Complete"
     echo "See results above for details"
