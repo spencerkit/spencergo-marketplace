@@ -46,14 +46,44 @@ let results = [];
 const args = process.argv.slice(2);
 let skillsDir = DEFAULT_SKILLS_DIR;
 let targetSkill = null;
+let parallel = false;
+let maxTurns = 5;
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--skill" && args[i + 1]) {
     targetSkill = args[i + 1];
     i++;
+  } else if (args[i] === "--parallel") {
+    parallel = true;
+  } else if (args[i] === "--turns" && args[i + 1]) {
+    maxTurns = parseInt(args[i + 1], 10) || 5;
+    i++;
+  } else if (args[i] === "--help") {
+    printHelp();
+    process.exit(0);
   } else if (!args[i].startsWith("--")) {
-    skillsDir = path.isAbsolute(args[i]) ? args[i] : path.join(PROJECT_ROOT, args[i]);
+    skillsDir = path.isAbsolute(args[i])
+      ? args[i]
+      : path.join(PROJECT_ROOT, args[i]);
   }
+}
+
+function printHelp() {
+  console.log(`
+Usage: node universal-test-runner.js [options] [skills-dir]
+
+Options:
+  --skill <name>    Test a specific skill (e.g., naming, writing-style)
+  --parallel        Run tests in parallel
+  --turns <n>       Max turns per skill (default: 5)
+  --help            Show this help message
+
+Examples:
+  node universal-test-runner.js
+  node universal-test-runner.js --skill naming
+  node universal-test-runner.js --parallel
+  node universal-test-runner.js --skill writing --parallel --turns 3
+`);
 }
 
 function ensureDir(dir) {
@@ -99,7 +129,13 @@ function readSkillContent(skillMdPath) {
 }
 
 // Run Claude with conversation history for context
-function runClaude(prompt, testDir, pluginDir = null, skillName = null, conversationHistory = []) {
+function runClaude(
+  prompt,
+  testDir,
+  pluginDir = null,
+  skillName = null,
+  conversationHistory = [],
+) {
   // Prepend skill instruction and conversation history to prompt
   let fullPrompt = prompt;
   if (skillName) {
@@ -109,15 +145,19 @@ function runClaude(prompt, testDir, pluginDir = null, skillName = null, conversa
     if (conversationHistory.length > 0) {
       fullPrompt += `以下是之前的对话记录（供参考上下文）：\n\n`;
       for (const msg of conversationHistory) {
-        fullPrompt += `${msg.role === 'user' ? '用户' : '助手'}: ${msg.content}\n\n`;
+        fullPrompt += `${msg.role === "user" ? "用户" : "助手"}: ${msg.content}\n\n`;
       }
       fullPrompt += `\n---\n\n`;
     }
 
     fullPrompt += `用户输入：${prompt}`;
 
-    console.log(`  ${MAGENTA}>>> Context: ${conversationHistory.length} messages${NC}`);
-    console.log(`  ${MAGENTA}>>> Prompt: ${prompt.slice(0, 80)}${prompt.length > 80 ? '...' : ''}${NC}`);
+    console.log(
+      `  ${MAGENTA}>>> Context: ${conversationHistory.length} messages${NC}`,
+    );
+    console.log(
+      `  ${MAGENTA}>>> Prompt: ${prompt.slice(0, 80)}${prompt.length > 80 ? "..." : ""}${NC}`,
+    );
   }
 
   const promptEscaped = fullPrompt.replace(/'/g, "'\\''");
@@ -242,7 +282,13 @@ async function testSkill(skill, maxTurns = 20) {
 
     try {
       // Run skill with conversation history for context
-      const output = runClaude(currentPrompt, testDir, PROJECT_ROOT, skillName, messages);
+      const output = runClaude(
+        currentPrompt,
+        testDir,
+        PROJECT_ROOT,
+        skillName,
+        messages,
+      );
       fullOutput += output + "\n\n";
 
       messages.push({ role: "user", content: currentPrompt });
@@ -253,11 +299,15 @@ async function testSkill(skill, maxTurns = 20) {
       console.log(`  ${CYAN}Skill: ${preview}...${NC}`);
 
       // Build conversation history for AI
-      const conversationHistory = messages.map(m => m.content);
+      const conversationHistory = messages.map((m) => m.content);
 
       // Ask AI to determine next step
       console.log(`  ${YELLOW}Determining next step...${NC}`);
-      const { nextQuestion, status } = determineNextQuestion(skillName, skillContent, conversationHistory);
+      const { nextQuestion, status } = determineNextQuestion(
+        skillName,
+        skillContent,
+        conversationHistory,
+      );
 
       if (status === "COMPLETED") {
         console.log(`  ${GREEN}✓ Skill completed!${NC}`);
@@ -268,12 +318,13 @@ async function testSkill(skill, maxTurns = 20) {
       // Continue with next question
       console.log(`  ${YELLOW}→ ${nextQuestion.slice(0, 50)}...${NC}`);
       currentPrompt = nextQuestion;
-
     } catch (e) {
       console.log(`  ${RED}Error: ${e.message}${NC}`);
       break;
     } finally {
-      try { fs.rmSync(testDir, { recursive: true, force: true }); } catch (e) { }
+      try {
+        fs.rmSync(testDir, { recursive: true, force: true });
+      } catch (e) {}
     }
   }
 
@@ -286,7 +337,9 @@ async function testSkill(skill, maxTurns = 20) {
     fullOutput,
   });
 
-  console.log(`\n  ${isCompleted ? GREEN + "✓ PASSED" : YELLOW + "⚠ INCOMPLETE"}${NC}`);
+  console.log(
+    `\n  ${isCompleted ? GREEN + "✓ PASSED" : YELLOW + "⚠ INCOMPLETE"}${NC}`,
+  );
   return isCompleted;
 }
 
@@ -296,8 +349,8 @@ function saveOutput() {
   md += `Generated: ${new Date().toISOString()}\n\n`;
   md += `## Summary\n\n`;
   md += `- Total: ${results.length}\n`;
-  md += `- Completed: ${results.filter(r => r.completed).length}\n`;
-  md += `- Incomplete: ${results.filter(r => !r.completed).length}\n\n`;
+  md += `- Completed: ${results.filter((r) => r.completed).length}\n`;
+  md += `- Incomplete: ${results.filter((r) => !r.completed).length}\n\n`;
   md += `---\n\n`;
 
   for (const r of results) {
@@ -311,9 +364,10 @@ function saveOutput() {
 
     for (const msg of r.messages) {
       const prefix = msg.role === "user" ? "👤 User" : "🤖 Skill";
-      const content = msg.content.length > 600
-        ? msg.content.substring(0, 600) + "\n[...truncated...]"
-        : msg.content;
+      const content =
+        msg.content.length > 600
+          ? msg.content.substring(0, 600) + "\n[...truncated...]"
+          : msg.content;
       md += `**${prefix}:**\n${content}\n\n---\n\n`;
     }
   }
@@ -332,8 +386,12 @@ async function main() {
 
   if (targetSkill) {
     // Handle both full name (spencergo:naming) and short name (naming)
-    const shortName = targetSkill.includes(":") ? targetSkill.split(":")[1] : targetSkill;
-    skills = skills.filter(s => s.name === targetSkill || s.name === shortName);
+    const shortName = targetSkill.includes(":")
+      ? targetSkill.split(":")[1]
+      : targetSkill;
+    skills = skills.filter(
+      (s) => s.name === targetSkill || s.name === shortName,
+    );
   }
 
   if (skills.length === 0) {
@@ -341,16 +399,23 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Found ${skills.length} skill(s): ${skills.map(s => s.name).join(", ")}`);
+  console.log(
+    `Found ${skills.length} skill(s): ${skills.map((s) => s.name).join(", ")}`,
+  );
 
-  for (const skill of skills) {
-    await testSkill(skill);
+  if (parallel) {
+    console.log(`${CYAN}Running tests in parallel...${NC}`);
+    await Promise.all(skills.map((skill) => testSkill(skill, maxTurns)));
+  } else {
+    for (const skill of skills) {
+      await testSkill(skill, maxTurns);
+    }
   }
 
   saveOutput();
 
-  const completed = results.filter(r => r.completed).length;
-  const incomplete = results.filter(r => !r.completed).length;
+  const completed = results.filter((r) => r.completed).length;
+  const incomplete = results.filter((r) => !r.completed).length;
 
   printHeader("Summary");
   console.log(`Total: ${results.length}`);
@@ -360,7 +425,7 @@ async function main() {
   if (incomplete > 0) process.exit(1);
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(`${RED}Error: ${e.message}${NC}`);
   process.exit(1);
 });
