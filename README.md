@@ -19,6 +19,11 @@
 | **writing** | Comprehensive writing assistant (V4 hybrid mode) | `/spencergo:writing` |
 | **naming** | AI naming assistant (26+ scenarios) | `/spencergo:naming` |
 | **yi** | I Ching divination (64 hexagrams) | `/spencergo:yi` |
+| **code-review** | Multi-language code review with security audit | `/spencergo:code-review` |
+
+## Documentation
+
+See [complete documentation](https://spencerkit.github.io/spencergo-marketplace/) for detailed usage guides and examples.
 
 ## Writing Sub-modules
 
