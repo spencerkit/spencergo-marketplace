@@ -71,6 +71,31 @@ Or describe your requirements directly:
 
 > 💡 Say "continue" to move to next phase after each step
 
+## 触发方式
+
+- 直接调用：`/spencergo:writing`
+- 描述式："帮我写作"、"写篇文章"
+
+## 完整模块调用
+
+| 模块 | 调用命令 | 功能 |
+|------|----------|------|
+| writing-style | `/spencergo:writing-style` | 风格分析 |
+| writing-outline | `/spencergo:writing-outline` | 大纲生成 |
+| writing-content | `/spencergo:writing-content` | 内容写作 |
+| writing-review | `/spencergo:writing-review` | 内容审核 |
+| writing-polish | `/spencergo:writing-polish` | 润色 |
+
+## 安装
+
+This skill is part of spencergo-marketplace.
+
+Installation:
+```bash
+/plugin marketplace add spencerkit/spencergo-marketplace
+/plugin install spencergo@spencerkit/spencergo-marketplace
+```
+
 ## License
 
 MIT
