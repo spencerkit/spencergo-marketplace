@@ -57,6 +57,19 @@ Use this as a quick reference for important `.novel-state.json` fields.
     "lastRevisionFocus": "加强主角吸引点和场景语气统一",
     "lastRejectedReason": null
   },
+  "revision": {
+    "active": true,
+    "feedbackType": "plot_feedback",
+    "feedbackSummary": "加强前三章羞辱感和翻盘钩子",
+    "affectedStages": ["drafting", "polishing"],
+    "affectedFiles": [
+      "05_本轮章节规划.md",
+      "manuscript/第1章_你配不上我.md"
+    ],
+    "overrideMode": "add_on",
+    "currentRevisionGate": "awaiting_revision_plan_approval",
+    "awaitingUserApproval": true
+  },
   "blockingIssues": [
     "Waiting for user approval on current polishing round"
   ]

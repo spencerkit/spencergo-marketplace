@@ -41,6 +41,8 @@ Before starting any stage:
 - determine the current stage, blockers, and next valid action from the state file
 - do not infer workflow position only from vague chat memory if structured state exists
 
+When the user asks for project status, current progress, blockers, approval state, current batch state, or next-step guidance, use `scripts/novel_project_status.py` as the default status-summary tool.
+
 ---
 
 ## 5. Write-after-stage rule
@@ -140,9 +142,19 @@ Do not rely on memory-only recovery when a structured state file can be rebuilt.
 
 ---
 
-## 11. Required state quality
+## 12. Required state quality
 
 A usable state file should make it possible to answer:
+- where is the project now
+- what stage was last completed
+- what has already been approved
+- what is blocked
+- what should happen next
+- what batch is currently active
+- whether the current batch is waiting for user approval or next-batch decision
+
+If the state file cannot answer those, it is incomplete.
+uld make it possible to answer:
 - where is the project now
 - what stage was last completed
 - what has already been approved

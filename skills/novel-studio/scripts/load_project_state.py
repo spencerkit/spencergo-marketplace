@@ -70,6 +70,16 @@ def reconstruct(project: Path):
             'lastRevisionFocus': None,
             'lastRejectedReason': None,
         },
+        'revision': {
+            'active': False,
+            'feedbackType': None,
+            'feedbackSummary': None,
+            'affectedStages': [],
+            'affectedFiles': [],
+            'overrideMode': None,
+            'currentRevisionGate': None,
+            'awaitingUserApproval': False,
+        },
         'blockingIssues': [],
         'notes': {},
     }

@@ -94,7 +94,9 @@ Use these reference files as **hard operational guidance**, not optional inspira
 - `references/final-review.md` — scoring, acceptance standard, rollback conditions, and delivery gate requirements
 - `references/file-structure.md` — canonical novel project structure
 - `references/feishu-sync.md` — Feishu Wiki sync rules, node creation rules, and structure mapping
-- `references/state-management.md` — project-state persistence, recovery, and workflow memory rules when available
+- `references/state-management.md` — project-state persistence, recovery, workflow memory rules, and status-summary usage
+- `references/revision-management.md` — revision-mode rules, feedback detection, scope analysis, and update order
+- `references/feedback-confirmation-template.md` — default confirmation pattern when likely formal feedback is detected
 
 ## Delivery mindset
 
@@ -108,6 +110,36 @@ That means the final result should ideally include:
 - characters and manuscript separated cleanly
 - quality review before handoff
 - optional remote sync only after structure is coherent
+
+## Project-status query rule
+
+When the user asks about:
+- current project progress
+- current stage
+- current batch state
+- blockers
+- approval status
+- next-step guidance
+- whether feedback has been recorded or applied
+
+use `scripts/novel_project_status.py` as the default status-summary entry point whenever possible.
+
+Translate the result into human-readable progress language rather than dumping raw state unless the user asks for raw detail.
+
+## Feedback-detection rule
+
+The user may provide revision feedback in normal conversation.
+The agent should proactively detect likely formal feedback, but must not silently apply major revisions without confirmation.
+
+If likely formal feedback is detected:
+- summarize it
+- classify it
+- estimate impact scope
+- identify conflict with prior settings if any
+- ask whether to record it as formal feedback
+- ask whether it should override prior settings or add a new rule
+
+Treat `references/revision-management.md` and `references/feedback-confirmation-template.md` as the operational standard for this.
 
 ## Anti-perfunctory rule
 

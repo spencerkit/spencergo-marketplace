@@ -25,43 +25,29 @@ def load_or_init(state_file: Path, project: Path):
     }
 
 
-def parse_value(raw):
-    low = raw.lower()
-    if low == 'true':
-        return True
-    if low == 'false':
-        return False
-    if low == 'null':
-        return None
-    return raw
-
-
 def main():
-    if len(sys.argv) < 4:
-        print('Usage: update_project_state.py <项目目录> <section.key> <value>')
+    if len(sys.argv) < 5:
+        print('Usage: record_revision_feedback.py <项目目录> <feedbackType> <overrideMode:add_on|override> <feedbackSummary>')
         sys.exit(1)
 
     project = Path(sys.argv[1]).expanduser()
     state_file = project / '.novel-state.json'
-    field = sys.argv[2]
-    value = parse_value(sys.argv[3])
+    feedback_type = sys.argv[2]
+    override_mode = sys.argv[3]
+    summary = ' '.join(sys.argv[4:])
 
     data = load_or_init(state_file, project)
-
-    if '.' not in field:
-        print('Field must be section.key format')
-        sys.exit(2)
-
-    section, key = field.split('.', 1)
-    if section not in data:
-        data[section] = {}
-
-    if isinstance(data[section], dict):
-        data[section][key] = value
-    else:
-        print(f'Section {section} is not a dict')
-        sys.exit(2)
-
+    data.setdefault('revision', {})
+    data['revision'].update({
+        'active': True,
+        'feedbackType': feedback_type,
+        'feedbackSummary': summary,
+        'affectedStages': data['revision'].get('affectedStages', []),
+        'affectedFiles': data['revision'].get('affectedFiles', []),
+        'overrideMode': override_mode,
+        'currentRevisionGate': 'awaiting_revision_scope_confirmation',
+        'awaitingUserApproval': True,
+    })
     data['updatedAt'] = now_iso()
     state_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(data, ensure_ascii=False, indent=2))
