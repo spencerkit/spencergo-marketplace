@@ -1,6 +1,6 @@
 {
   "name": "spencergo",
-  "description": "Spencer's personal marketplace for Claude Code skills - productivity tools for daily life and creative work, including AI-powered naming, writing assistance, and I Ching divination",
+  "description": "Spencer's personal marketplace for Claude Code skills - productivity tools for daily life and creative work, including AI-powered naming, writing assistance, novel production workflow, and I Ching divination",
   "owner": {
     "name": "Spencer",
     "email": ""
@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "spencergo",
-      "description": "Personal skills bundle: yi (I Ching Divination - coin-tossing divination with 64 hexagrams and AI analysis), naming (AI Naming Assistant - 26+ naming scenarios from project names to pet names), and writing (Comprehensive Writing Assistant - 6-stage collaborative workflow for articles, social media, technical docs, stories with polishing and AI-humanization features)",
+      "description": "Personal skills bundle: yi (I Ching Divination - coin-tossing divination with 64 hexagrams and AI analysis), naming (AI Naming Assistant - 26+ naming scenarios from project names to pet names), writing (Comprehensive Writing Assistant - 6-stage collaborative workflow for articles, social media, technical docs, stories with polishing and AI-humanization features), and novel-studio (Chinese web novel production workflow with approval gates, batch writing, and memory system)",
       "version": "1.0.0",
       "source": "./",
       "author": {
