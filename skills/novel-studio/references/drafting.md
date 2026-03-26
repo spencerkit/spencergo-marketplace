@@ -4,6 +4,21 @@
 
 Use a reciprocal batch-writing workflow instead of one-pass full-manuscript generation.
 
+Exploration-style draft experiments are not the default behavior.
+Only switch to exploratory drafting when the user explicitly asks for brainstorming / exploration behavior such as:
+- 进入脑爆模式
+- 进入探索模式
+- 先脑暴
+- 先发散
+- 先不要定稿
+- 先试几个版本
+- 只做创意探索
+
+Without that explicit request:
+- treat drafting as formal production work
+- require confirmed batch scope and approved chapter-plan package
+- do not silently convert drafting into freeform experimentation
+
 Drafting should proceed in controlled loops:
 1. confirm batch scope with the user
 2. produce a chapter-plan package
@@ -18,7 +33,15 @@ Do not default to writing the whole manuscript in one pass.
 
 ---
 
-## 2. Required input
+## 2. Supporting craft references
+
+When drafting, also use these references as needed:
+- read `language-and-rhetoric.md` when adjusting language intensity, scene texture, rhetorical density, and genre-appropriate prose style
+- read `narrative-techniques.md` when a scene or chapter needs stronger payoff shape, suppression/release, reversal, information-gap propulsion, or ending pull
+- read `character-craft.md` when a scene feels technically correct but the characters still feel generic, flat, or interchangeable
+- read `chapter-review-template.md` when reviewing a chapter or batch before handoff and you need a fixed diagnosis structure instead of vague impressions
+
+## 3. Required input
 
 You must have:
 - usable outline
@@ -28,7 +51,7 @@ You must have:
 
 ---
 
-## 3. Forbidden to start if
+## 4. Forbidden to start if
 
 Do not start drafting if:
 - outline stage is incomplete
@@ -38,7 +61,7 @@ Do not start drafting if:
 
 ---
 
-## 4. Reciprocal batch-writing workflow
+## 5. Reciprocal batch-writing workflow
 
 ### Step 4.1 Batch scope confirmation
 Before writing anything, confirm with the user:
@@ -84,7 +107,7 @@ Do not silently continue into the next batch.
 
 ---
 
-## 5. Required output
+## 6. Required output
 
 This stage must produce:
 - a chapter-plan package for the current batch
@@ -99,7 +122,7 @@ Main manuscript artifact:
 
 ---
 
-## 6. Completion standard
+## 7. Completion standard
 
 A drafting batch is complete only if:
 - the user explicitly confirmed the batch chapter count / range
@@ -112,7 +135,7 @@ A drafting batch is complete only if:
 
 ---
 
-## 7. Do not advance if
+## 8. Do not advance if
 
 Do not advance into polishing or the next batch if:
 - the batch scope was never explicitly confirmed
@@ -126,7 +149,7 @@ Do not advance into polishing or the next batch if:
 
 ---
 
-## 8. Hard anti-perfunctory rule
+## 9. Hard anti-perfunctory rule
 
 The following do **not** count as completed drafting:
 - bullet summaries pretending to be chapter text
@@ -135,10 +158,12 @@ The following do **not** count as completed drafting:
 - repetitive filler chapters with no meaningful progression
 - prose that merely restates the outline at slightly greater length
 - chapter-plan notes presented as if they were the actual draft
+- chapters where things happen but nothing meaningfully changes in pressure, relationship, knowledge, or emotional state
+- chapters that only transport the cast from one later event to another without scene-level dramatic value
 
 ---
 
-## 9. Hook and chapter-plan requirements
+## 10. Hook and chapter-plan requirements
 
 For each chapter in the batch, the planning package must state:
 - chapter objective
@@ -155,7 +180,7 @@ These are insufficient on their own.
 
 ---
 
-## 10. Rollback condition
+## 11. Rollback condition
 
 Return to chapter-plan generation or chapter-plan review if:
 - the user says the planned chapter direction is wrong
@@ -168,7 +193,7 @@ Return to planning or character system if:
 
 ---
 
-## 11. End-of-batch recap rule
+## 12. End-of-batch recap rule
 
 After a batch fully completes downstream review, update the project recap document so later batches can restore continuity quickly.
 
@@ -176,7 +201,7 @@ Do not rely only on short-term chat context for ongoing long-form drafting.
 
 ---
 
-## 12. Quality bar
+## 13. Quality bar
 
 A valid drafting batch is:
 - batch-scoped

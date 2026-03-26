@@ -55,7 +55,13 @@ Use this as a quick reference for important `.novel-state.json` fields.
     "currentGate": "waiting_polishing_feedback",
     "lastUserFeedbackSummary": "语气还不够稳，主角魅力不足",
     "lastRevisionFocus": "加强主角吸引点和场景语气统一",
-    "lastRejectedReason": null
+    "lastRejectedReason": null,
+    "finalDecision": "conditional pass",
+    "finalDeliveryReady": false,
+    "finalBlockingIssues": [
+      "第12章收束仍偏弱，需要补强终局情绪"
+    ],
+    "finalReviewSummary": "整体可读性稳定，但仍有阻塞项，暂不建议交付"
   },
   "revision": {
     "active": true,
@@ -67,11 +73,16 @@ Use this as a quick reference for important `.novel-state.json` fields.
       "manuscript/第1章_你配不上我.md"
     ],
     "overrideMode": "add_on",
+    "scopeSummary": "回改本轮章节规划和第1章开篇节奏",
+    "conflictSummary": "不覆盖既定主线，只加强开篇吸引力",
+    "revisionPlanSummary": "先改规划，再改正文，再复核润色结论",
+    "resultSummary": null,
     "currentRevisionGate": "awaiting_revision_plan_approval",
-    "awaitingUserApproval": true
+    "awaitingUserApproval": true,
+    "lastClosedRevision": null
   },
   "blockingIssues": [
-    "Waiting for user approval on current polishing round"
+    "Formal revision active: awaiting_revision_plan_approval"
   ]
 }
 ```

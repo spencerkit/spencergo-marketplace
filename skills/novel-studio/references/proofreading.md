@@ -8,7 +8,20 @@ Proofreading in this workflow is batch-scoped and should help determine whether 
 
 ---
 
-## 2. Required input
+## 2. Supporting diagnostic references
+
+When proofreading, also use these references as needed:
+- read `literary-diagnostics.md` when a batch feels flat, scattered, emotionally weak, rhetorically off, or structurally dull but the exact cause is unclear
+- read `plot-weaving.md` when reviewing whether side plots actually feed back into consequence
+- read `character-craft.md` when checking whether core roles are attractive, differentiated, and scene-effective rather than label-based
+- read `scoring-rubric.md` when the user wants a quality score, pass/fail judgment, readiness judgment, or a more structured evaluation basis
+- read `chapter-review-template.md` when you need to present chapter-level or batch-level review comments in a fixed editorial format
+- read `review-severity.md` when you need to classify which issues are fatal, major, secondary, or cosmetic
+- read `revision-paths.md` when the review must also tell the user what to fix first and what not to waste time fixing yet
+- read `platform-readership-review.md` when the user wants evaluation of opening capture, chase-read pull, payoff density, commercial readability, or platform fit
+- read `book-level-review.md` when the user asks for long-form health, whole-book risk, collapse-point judgment, or serialization sustainability review
+
+## 3. Required input
 
 You must have:
 - a polished current batch
@@ -19,7 +32,7 @@ You must have:
 
 ---
 
-## 3. Forbidden to start if
+## 4. Forbidden to start if
 
 Do not start proofreading if:
 - polishing is incomplete
@@ -29,7 +42,7 @@ Do not start proofreading if:
 
 ---
 
-## 4. Required output
+## 5. Required output
 
 Proofreading must produce:
 - continuity check result
@@ -39,9 +52,14 @@ Proofreading must produce:
 - fix direction when issues exist
 - a proofreading-stage report for user review
 
+Default proofreading output should stay compact unless the user asks for detail:
+- conclusion first
+- top issues second
+- fix order third
+
 ---
 
-## 5. Required check dimensions
+## 6. Required check dimensions
 
 At minimum, check:
 - continuity within the current batch
@@ -51,10 +69,13 @@ At minimum, check:
 - alignment with approved chapter plan
 - alignment with outline
 - alignment with style tone where relevant
+- whether important side plots or relationship lines produce actual consequence rather than decorative presence
+- whether core characters remain attractive, differentiated, and scene-effective rather than collapsing into interchangeable delivery tools
+- whether each chapter has visible dramatic movement rather than only transport or exposition
 
 ---
 
-## 6. Completion standard
+## 7. Completion standard
 
 Proofreading is complete only if:
 - the current batch has been checked across all required dimensions
@@ -65,7 +86,7 @@ Proofreading is complete only if:
 
 ---
 
-## 7. Do not advance if
+## 8. Do not advance if
 
 Do not advance to batch final pass or next-batch decision if:
 - continuity checks were not actually performed
@@ -78,7 +99,7 @@ Do not advance to batch final pass or next-batch decision if:
 
 ---
 
-## 8. Hard anti-perfunctory rule
+## 9. Hard anti-perfunctory rule
 
 The following do **not** count as completed proofreading:
 - “整体没问题” with no actual checks recorded
@@ -86,10 +107,12 @@ The following do **not** count as completed proofreading:
 - vague statements that avoid naming inconsistencies
 - checking only one dimension while ignoring logic, continuity, or OOC risk
 - saying the batch is fine without comparing it against the approved chapter plan
+- agreeing with the user's complaint or self-assessment without independently checking the material
+- using empty praise or empty criticism instead of concrete diagnosis
 
 ---
 
-## 9. Multi-round revision rule
+## 10. Multi-round revision rule
 
 Treat proofreading as another user-reviewed loop.
 
@@ -104,7 +127,7 @@ Do not auto-advance after one proofreading pass.
 
 ---
 
-## 10. Batch final-pass role
+## 11. Batch final-pass role
 
 When proofreading is accepted, this stage serves as the batch-level consistency and quality gate before:
 - updating `05_前情回顾.md`
@@ -116,7 +139,7 @@ The batch is not fully closed until the recap document has been updated.
 
 ---
 
-## 11. Rollback condition
+## 12. Rollback condition
 
 Return to polishing if:
 - prose quality or tone alignment is still the main problem
@@ -131,7 +154,7 @@ Return to planning or character system if:
 
 ---
 
-## 12. Quality bar
+## 13. Quality bar
 
 A valid proofreading result is:
 - specific
@@ -139,9 +162,11 @@ A valid proofreading result is:
 - continuity-aware
 - aligned with approved chapter intent
 - explicit about whether the batch can pass
+- phrased in plain human language rather than generic workshop jargon
 
 Invalid proofreading includes:
 - only checking surface wording
 - ignoring structural contradictions
 - declaring success without actual consistency review
 - moving forward without explicit user approval
+- hiding the real point behind padded professional-sounding language

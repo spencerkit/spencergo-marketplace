@@ -32,7 +32,13 @@ Do not start this stage if:
 
 ---
 
-## 4. Character clarification loop
+## 4. Supporting craft references
+
+When designing characters, also use these references as needed:
+- read `character-craft.md` when shaping attraction, contradiction, scene behavior, speech differentiation, environment-based portrayal, and other-character contrast
+- read `narrative-techniques.md` when character design depends on delayed reveal, re-evaluation, suppression/release, or betrayal/loyalty structure
+
+## 5. Character clarification loop
 
 Before formal character packaging, run a character clarification loop with the user.
 
@@ -52,7 +58,7 @@ If the user’s preference is still unstable, remain in clarification and contin
 
 ---
 
-## 5. Required output
+## 6. Required output
 
 This stage must produce:
 - protagonist definition
@@ -65,7 +71,7 @@ This stage must produce:
 
 ---
 
-## 6. Mandatory character fields
+## 7. Mandatory character fields
 
 For each major character, the package must define at least:
 - 角色名
@@ -84,7 +90,7 @@ If the character is a core role, the package must also explicitly define:
 
 ---
 
-## 7. Completion standard
+## 8. Completion standard
 
 This stage is complete only if:
 - protagonist definition exists and is usable for drafting
@@ -99,7 +105,7 @@ This stage is complete only if:
 
 ---
 
-## 8. Do not advance if
+## 9. Do not advance if
 
 Do not advance to drafting if:
 - protagonist identity is still unstable
@@ -108,12 +114,14 @@ Do not advance to drafting if:
 - motivation and conflict are missing for key characters
 - major character camp / faction is unclear
 - a core character still lacks a clear “attractive point” explanation
+- a core character is still mostly label-based with no contradiction, cost, or scene-level portrayal path
+- speech, behavior, environment, and other-character contrast are all missing as portrayal channels for important roles
 - the user has unresolved objections
 - user approval to advance is missing
 
 ---
 
-## 9. Hard drafting gate
+## 10. Hard drafting gate
 
 Do not enter drafting without:
 - a usable protagonist definition
@@ -123,7 +131,7 @@ Do not enter drafting without:
 
 ---
 
-## 10. Rollback condition
+## 11. Rollback condition
 
 Return to character clarification or character packaging if:
 - drafting reveals severe OOC drift caused by weak role foundations
@@ -133,7 +141,7 @@ Return to character clarification or character packaging if:
 
 ---
 
-## 11. Quality bar
+## 12. Quality bar
 
 A valid character bible is:
 - emotionally usable

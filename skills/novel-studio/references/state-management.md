@@ -30,6 +30,8 @@ The state system must record at least:
 - artifact existence status
 - working title / final title state
 - current batch state when drafting has begun
+- current revision state when formal revision is active
+- latest closed revision snapshot
 - last update time
 
 ---
@@ -96,7 +98,43 @@ At minimum it should record:
 
 ---
 
-## 8. Approval tracking
+## 8. Revision-state tracking
+
+Once formal revision is active, state must record at least:
+- whether revision mode is active
+- feedback type
+- feedback summary
+- affected stages
+- affected files
+- override mode
+- scope summary
+- conflict summary
+- revision plan summary
+- revision result summary
+- current revision gate
+- whether revision mode is awaiting user approval
+- latest closed revision snapshot
+
+These fields must be explicit enough for interruption recovery.
+
+---
+
+## 9. Final-review state tracking
+
+Once final review is written, state must also record at least:
+- latest final-review decision
+- whether the project is judged delivery-ready
+- final-review blockers from the latest report
+- final-review summary for interruption recovery and status output
+
+These fields live under `review.*`.
+
+They do not replace `approvals.finalApproved`.
+`review.finalDecision` records the latest final-review judgment, while `approvals.finalApproved` remains the separate user confirmation for final delivery.
+
+---
+
+## 10. Approval tracking
 
 State should distinguish between:
 - artifact exists
@@ -114,7 +152,7 @@ This makes interruption recovery much safer than relying only on boolean flags.
 
 ---
 
-## 9. Blocking issue tracking
+## 11. Blocking issue tracking
 
 Blocking issues must be recorded explicitly.
 
@@ -126,12 +164,15 @@ Examples:
 - user asked for revision before advancement
 - current batch chapter-plan not yet approved
 - current batch is waiting for user decision whether to continue
+- revision is waiting for scope confirmation
+- revision is waiting for plan approval
+- revision result is waiting for approval
 
 Do not silently ignore blockers.
 
 ---
 
-## 10. Fallback recovery rule
+## 12. Fallback recovery rule
 
 If `.novel-state.json` is missing:
 - recover a provisional state from file structure and existing artifacts
@@ -142,9 +183,9 @@ Do not rely on memory-only recovery when a structured state file can be rebuilt.
 
 ---
 
-## 12. Required state quality
+## 13. Required state quality
 
-A usable state file should make it possible to answer:
+A usable state file should answer:
 - where is the project now
 - what stage was last completed
 - what has already been approved
@@ -152,15 +193,9 @@ A usable state file should make it possible to answer:
 - what should happen next
 - what batch is currently active
 - whether the current batch is waiting for user approval or next-batch decision
-
-If the state file cannot answer those, it is incomplete.
-uld make it possible to answer:
-- where is the project now
-- what stage was last completed
-- what has already been approved
-- what is blocked
-- what should happen next
-- what batch is currently active
-- whether the current batch is waiting for user approval or next-batch decision
+- whether formal revision is active
+- what revision gate is open
+- what the latest closed revision was
+- what the latest final-review result was
 
 If the state file cannot answer those, it is incomplete.

@@ -1,28 +1,9 @@
 #!/usr/bin/env python3
+import json
+import sys
 from pathlib import Path
-import json, sys
-from datetime import datetime, timezone
 
-
-def now_iso():
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
-
-
-def load_or_init(state_file: Path, project: Path):
-    if state_file.exists():
-        return json.loads(state_file.read_text(encoding='utf-8'))
-    return {
-        'project': {'title': project.name, 'rootPath': str(project)},
-        'workflow': {'currentStage': None, 'currentSubstage': None, 'lastCompletedStage': None, 'nextStage': None, 'status': 'in_progress'},
-        'approvals': {},
-        'artifacts': {},
-        'batch': {},
-        'review': {},
-        'revision': {},
-        'blockingIssues': [],
-        'notes': {},
-        'updatedAt': now_iso(),
-    }
+from revision_utils import load_state, reset_active_revision_fields, save_state, set_revision_blocker, write_revision_doc
 
 
 def main():
@@ -31,26 +12,51 @@ def main():
         sys.exit(1)
 
     project = Path(sys.argv[1]).expanduser()
-    state_file = project / '.novel-state.json'
     feedback_type = sys.argv[2]
     override_mode = sys.argv[3]
-    summary = ' '.join(sys.argv[4:])
+    summary = ' '.join(sys.argv[4:]).strip()
 
-    data = load_or_init(state_file, project)
-    data.setdefault('revision', {})
-    data['revision'].update({
+    if override_mode not in {'add_on', 'override'}:
+        print('ERROR: overrideMode must be add_on or override', file=sys.stderr)
+        sys.exit(2)
+    if not summary:
+        print('ERROR: feedbackSummary is required', file=sys.stderr)
+        sys.exit(2)
+
+    try:
+        data = load_state(project)
+    except FileNotFoundError as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        sys.exit(2)
+
+    revision = data['revision']
+    if revision.get('active'):
+        print('ERROR: active revision already exists', file=sys.stderr)
+        sys.exit(2)
+
+    reset_active_revision_fields(revision)
+    revision.update({
         'active': True,
         'feedbackType': feedback_type,
         'feedbackSummary': summary,
-        'affectedStages': data['revision'].get('affectedStages', []),
-        'affectedFiles': data['revision'].get('affectedFiles', []),
+        'affectedStages': [],
+        'affectedFiles': [],
         'overrideMode': override_mode,
+        'scopeSummary': None,
+        'conflictSummary': None,
+        'revisionPlanSummary': None,
+        'resultSummary': None,
         'currentRevisionGate': 'awaiting_revision_scope_confirmation',
         'awaitingUserApproval': True,
     })
-    data['updatedAt'] = now_iso()
-    state_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-    print(json.dumps(data, ensure_ascii=False, indent=2))
+    data['review']['lastUserFeedbackSummary'] = summary
+    data['review']['lastRejectedReason'] = None
+    set_revision_blocker(data, revision['currentRevisionGate'])
+
+    save_state(project, data)
+    saved = load_state(project)
+    write_revision_doc(project, saved)
+    print(json.dumps(saved, ensure_ascii=False, indent=2))
 
 
 if __name__ == '__main__':

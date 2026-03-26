@@ -34,14 +34,59 @@ def gate_text(gate):
     return mapping.get(gate, gate or '无')
 
 
+def review_decision_text(review):
+    return review.get('finalDecision') or '无'
+
+
+def review_delivery_text(review):
+    return yn(review.get('finalDeliveryReady', False))
+
+
+def review_summary_text(review):
+    return review.get('finalReviewSummary') or '无'
+
+
+def review_blockers(review):
+    return list(review.get('finalBlockingIssues') or [])
+
+
+def rollback_stage_text(state):
+    revision = state.get('revision', {})
+    affected_stages = list(revision.get('affectedStages') or [])
+    if affected_stages:
+        return affected_stages[0]
+
+    workflow = state.get('workflow', {})
+    return workflow.get('lastCompletedStage') or workflow.get('currentStage') or '上游阶段'
+
+
 def next_step(state, project: Path):
     workflow = state.get('workflow', {})
     batch = state.get('batch', {})
     review = state.get('review', {})
     revision = state.get('revision', {})
+    approvals = state.get('approvals', {})
 
     if revision.get('active') and revision.get('awaitingUserApproval'):
         return f"先处理修订模式：{gate_text(revision.get('currentRevisionGate'))}"
+
+    final_decision = review.get('finalDecision')
+    final_blockers = review_blockers(review)
+    final_delivery_ready = review.get('finalDeliveryReady', False)
+
+    if final_decision == 'rework required':
+        return f'终审要求返工：请回退到 {rollback_stage_text(state)} 阶段处理后再重新进入终审。'
+    if final_decision == 'conditional pass':
+        if final_blockers:
+            return '先解决终审阻塞项，再请求最终交付确认。'
+        if final_delivery_ready and not approvals.get('finalApproved', False):
+            return '请确认最终交付。'
+        return '请先完成终审收尾项，再请求最终交付确认。'
+    if final_decision == 'pass' and final_delivery_ready and not approvals.get('finalApproved', False):
+        return '请确认最终交付。'
+    if final_decision == 'pass' and not final_delivery_ready:
+        return '终审已通过，但当前版本尚不可交付：请先补齐交付前收尾项。'
+
     if review.get('currentGate'):
         return gate_text(review.get('currentGate'))
     if workflow.get('currentStage') == 'discovery' and not state.get('approvals', {}).get('discoveryApproved', False):
@@ -105,6 +150,9 @@ def main():
         print(f'当前子阶段：{workflow.get("currentSubstage") or "无"}')
         print(f'当前卡点：{gate_text(review.get("currentGate") or revision.get("currentRevisionGate"))}')
         print(f'当前批次范围：{batch.get("chapterRange") or "无"}')
+        print(f'终审结论：{review_decision_text(review)}')
+        print(f'可交付：{review_delivery_text(review)}')
+        print(f'终审摘要：{review_summary_text(review)}')
         print(f'最近正式反馈：{revision.get("feedbackSummary") or review.get("lastUserFeedbackSummary") or "无"}')
         print(f'建议下一步：{next_step(state, project)}')
         return
@@ -145,13 +193,36 @@ def main():
     print(f'final：{yn(approvals.get("finalApproved", False))}')
     print()
 
+    closed_revision = revision.get('lastClosedRevision') or {}
+
     print('[修订状态]')
     print(f'当前 review gate：{gate_text(review.get("currentGate"))}')
     print(f'最近正式反馈：{revision.get("feedbackSummary") or review.get("lastUserFeedbackSummary") or "无"}')
     print(f'反馈类型：{revision.get("feedbackType") or "无"}')
+    print(f'处理模式：{revision.get("overrideMode") or "无"}')
+    print(f'影响阶段：{", ".join(revision.get("affectedStages", [])) or "无"}')
     print(f'影响范围：{", ".join(revision.get("affectedFiles", [])) or "无"}')
+    print(f'范围说明：{revision.get("scopeSummary") or "无"}')
+    print(f'冲突说明：{revision.get("conflictSummary") or "无"}')
+    print(f'修订计划：{revision.get("revisionPlanSummary") or "无"}')
+    print(f'修订结果：{revision.get("resultSummary") or "无"}')
     print(f'当前是否修订模式：{yn(revision.get("active", False))}')
     print(f'当前修订 gate：{gate_text(revision.get("currentRevisionGate"))}')
+    print(f'最近关闭修订：{closed_revision.get("feedbackSummary") or "无"}')
+    print(f'最近关闭结果：{closed_revision.get("resultSummary") or "无"}')
+    print()
+
+    print('[终审状态]')
+    print(f'终审结论：{review_decision_text(review)}')
+    print(f'终审可交付：{review_delivery_text(review)}')
+    print(f'终审摘要：{review_summary_text(review)}')
+    print('终审阻塞项：')
+    final_blockers = review_blockers(review)
+    if final_blockers:
+        for blocker in final_blockers:
+            print(f'- {blocker}')
+    else:
+        print('- 无')
     print()
 
     print('[阻塞项]')

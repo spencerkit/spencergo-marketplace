@@ -51,11 +51,30 @@ Optional if relevant:
 ## 5. Required output
 
 Final review must produce:
-- an explicit decision: pass / conditional pass / rework required
+- `07_终审报告.md`
+- an explicit decision: `pass` / `conditional pass` / `rework required`
 - top strengths
 - major weaknesses
 - whether blocking issues remain
 - delivery readiness judgment
+- a concise summary explaining the final judgment
+
+The report must include these fixed sections:
+- `## 最终结论`
+- `## 是否可交付`
+- `## 主要优点`
+- `## 主要问题`
+- `## 阻塞问题`
+- `## 建议动作`
+
+Inside `## 最终结论`, the decision value must be exactly one of:
+- `pass`
+- `conditional pass`
+- `rework required`
+
+Inside `## 是否可交付`, use an explicit boolean:
+- `true`
+- `false`
 
 ---
 

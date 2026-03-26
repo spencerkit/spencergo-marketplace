@@ -4,6 +4,21 @@
 
 Use this workflow to turn a novel idea into a structured, reviewable, and deliverable fiction project.
 
+Exploration / brainstorming mode is **not** the default workflow.
+Only use explicit exploration behavior when the user clearly asks for it with requests such as:
+- 进入脑爆模式
+- 进入探索模式
+- 先脑暴
+- 先发散
+- 先不要定稿
+- 先试几个版本
+- 只做创意探索
+
+When the user has not explicitly requested exploration mode:
+- remain in the formal staged workflow
+- prefer structured progress over open-ended ideation
+- do not silently switch into freeform brainstorming
+
 Default stage order:
 
 1. Discovery stage
@@ -405,3 +420,10 @@ Always optimize for:
 - editable output
 - explicit completion gates
 - explicit user approval gates
+- concise reporting by default
+
+Default communication style during the workflow:
+- lead with the conclusion
+- keep stage reports compact unless the user asks for detail
+- avoid padded explanation, repeated framing, and lecture-style expansion
+- expand only when the user explicitly asks for more detail

@@ -40,7 +40,13 @@ Do not start outlining if:
 
 ---
 
-## 4. Planning clarification loop
+## 4. Supporting craft references
+
+When outlining, also use these references as needed:
+- read `plot-weaving.md` when designing main plot / side plot / relationship-line interweaving
+- read `narrative-techniques.md` when choosing escalation shape, reversal timing, chapter-ending engines, and arc-level dramatic patterns
+
+## 5. Planning clarification loop
 
 Before formal outline generation, run a planning clarification loop with the user.
 
@@ -61,7 +67,7 @@ If the user’s preference is still unstable, remain in clarification and contin
 
 ---
 
-## 5. Required outline elements
+## 6. Required outline elements
 
 A usable outline must include:
 - main plot line
@@ -75,7 +81,7 @@ A usable outline must include:
 
 ---
 
-## 6. Required output
+## 7. Required output
 
 This stage must produce:
 - `01_想法.md`
@@ -86,7 +92,7 @@ The output must not remain only in chat.
 
 ---
 
-## 7. Completion standard
+## 8. Completion standard
 
 This stage is complete only if:
 - the concept package clearly defines hook, protagonist setup, conflict, and story promise
@@ -94,11 +100,13 @@ This stage is complete only if:
 - the outline contains at least three major turning points
 - escalation path is visible
 - early chapter direction exists
+- important side plots have explicit function and feedback paths into the main line
+- the line structure does not rely on a single flat story rail
 - the user explicitly approves the planning result
 
 ---
 
-## 8. Do not advance if
+## 9. Do not advance if
 
 Do not advance to character bible or drafting if:
 - the outline is still summary-only
@@ -111,7 +119,7 @@ Do not advance to character bible or drafting if:
 
 ---
 
-## 9. Hard drafting gate
+## 10. Hard drafting gate
 
 Do not enter drafting without a usable outline.
 
@@ -125,7 +133,7 @@ It must be structurally actionable.
 
 ---
 
-## 10. Rollback condition
+## 11. Rollback condition
 
 Return to outlining if:
 - drafting reveals structural weakness
@@ -140,7 +148,7 @@ Return to the planning clarification loop if:
 
 ---
 
-## 11. Quality bar
+## 12. Quality bar
 
 A valid outline is:
 - structural

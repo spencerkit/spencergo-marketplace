@@ -93,6 +93,13 @@ When a revision is confirmed as formal, record:
 Recommended artifact:
 - `06_反馈与修订.md`
 
+This file should remain the canonical human-readable revision record for:
+- the current active formal revision
+- the latest closed formal revision
+- current revision gate
+- current scope / conflict / plan summary
+- latest revision result summary
+
 ---
 
 ## 9. State requirement
@@ -101,12 +108,40 @@ The state file should reflect:
 - revision active / inactive
 - latest formal feedback summary
 - affected stages and files
+- override mode
+- scope summary
+- conflict summary
+- revision plan summary
+- revision result summary
 - current revision gate
 - whether revision results are awaiting user approval
+- latest closed revision snapshot
 
 ---
 
-## 10. Hard safety rule
+## 10. Lifecycle gates
+
+For the formal revision workflow, use these gates:
+- `awaiting_revision_scope_confirmation`
+- `awaiting_revision_plan_approval`
+- `awaiting_revision_result_approval`
+
+Do not silently invent extra gate names for this lifecycle unless the workflow itself is expanded.
+
+---
+
+## 11. Revision actions
+
+When using helper scripts or equivalent internal actions:
+- `record_revision_feedback` starts a formal revision and opens the scope-confirmation gate
+- `update_revision_scope` records affected stages/files and opens the plan-approval gate
+- `result_pending` records the revision result and opens the result-approval gate
+- `close` closes the active revision after approval and preserves the latest closed snapshot
+- `reject` keeps the revision active, records the rejection reason, and sends the workflow back to plan approval
+
+---
+
+## 12. Hard safety rule
 
 Do not silently modify previously approved outputs based only on an ambiguous conversational remark.
 

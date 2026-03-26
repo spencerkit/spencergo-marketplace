@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+REVISION_DOC = '06_反馈与修订.md'
+REVISION_BLOCKER_PREFIX = 'Formal revision active:'
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+
+
+def default_review() -> dict:
+    return {
+        'currentGate': None,
+        'lastUserFeedbackSummary': None,
+        'lastRevisionFocus': None,
+        'lastRejectedReason': None,
+        'finalDecision': None,
+        'finalDeliveryReady': False,
+        'finalBlockingIssues': [],
+        'finalReviewSummary': None,
+    }
+
+
+def base_state(project: Path) -> dict:
+    return {
+        'project': {'title': project.name, 'rootPath': str(project)},
+        'workflow': {
+            'currentStage': None,
+            'currentSubstage': None,
+            'lastCompletedStage': None,
+            'nextStage': None,
+            'status': 'in_progress',
+        },
+        'approvals': {},
+        'artifacts': {},
+        'batch': {},
+        'review': default_review(),
+        'revision': {},
+        'blockingIssues': [],
+        'notes': {},
+        'updatedAt': now_iso(),
+    }
+
+
+def default_revision() -> dict:
+    return {
+        'active': False,
+        'feedbackType': None,
+        'feedbackSummary': None,
+        'affectedStages': [],
+        'affectedFiles': [],
+        'overrideMode': None,
+        'scopeSummary': None,
+        'conflictSummary': None,
+        'revisionPlanSummary': None,
+        'resultSummary': None,
+        'currentRevisionGate': None,
+        'awaitingUserApproval': False,
+        'lastClosedRevision': None,
+    }
+
+
+def normalize_state(data: dict, project: Path) -> dict:
+    normalized = base_state(project)
+    normalized.update(data)
+
+    review = default_review()
+    review.update(normalized.get('review', {}))
+    review['finalBlockingIssues'] = list(review.get('finalBlockingIssues', []))
+    normalized['review'] = review
+
+    revision = default_revision()
+    revision.update(normalized.get('revision', {}))
+    normalized['revision'] = revision
+    normalized.setdefault('blockingIssues', [])
+    return normalized
+
+
+def load_state(project: Path) -> dict:
+    if not project.exists() or not project.is_dir():
+        raise FileNotFoundError(f'project not found: {project}')
+
+    state_file = project / '.novel-state.json'
+    if state_file.exists():
+        data = json.loads(state_file.read_text(encoding='utf-8'))
+    else:
+        data = base_state(project)
+    return normalize_state(data, project)
+
+
+def save_state(project: Path, data: dict) -> None:
+    data = normalize_state(data, project)
+    data['updatedAt'] = now_iso()
+    (project / '.novel-state.json').write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+
+
+def parse_csv(value: str) -> list[str]:
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
+def reset_active_revision_fields(revision: dict) -> None:
+    last_closed = revision.get('lastClosedRevision')
+    revision.clear()
+    revision.update(default_revision())
+    revision['lastClosedRevision'] = last_closed
+
+
+def gate_blocker(gate: str | None) -> str | None:
+    if not gate:
+        return None
+    return f'{REVISION_BLOCKER_PREFIX} {gate}'
+
+
+def clear_revision_blockers(data: dict) -> None:
+    blockers = data.setdefault('blockingIssues', [])
+    data['blockingIssues'] = [b for b in blockers if not b.startswith(REVISION_BLOCKER_PREFIX)]
+
+
+def set_revision_blocker(data: dict, gate: str | None) -> None:
+    clear_revision_blockers(data)
+    blocker = gate_blocker(gate)
+    if blocker:
+        data.setdefault('blockingIssues', []).append(blocker)
+
+
+def format_list(items: list[str]) -> str:
+    return ', '.join(items) if items else '无'
+
+
+def render_revision_doc(data: dict) -> str:
+    revision = data['revision']
+    if revision.get('active'):
+        if revision.get('currentRevisionGate') == 'awaiting_revision_scope_confirmation':
+            status = '等待确认范围'
+        elif revision.get('currentRevisionGate') == 'awaiting_revision_plan_approval':
+            status = '等待确认修订计划'
+        elif revision.get('currentRevisionGate') == 'awaiting_revision_result_approval':
+            status = '等待确认修订结果'
+        else:
+            status = '进行中'
+    else:
+        status = '已关闭'
+
+    closed = revision.get('lastClosedRevision') or {}
+    return f"""# 06_反馈与修订
+
+## 当前正式修订
+- 状态：{status}
+- 反馈类型：{revision.get('feedbackType') or '无'}
+- 反馈摘要：{revision.get('feedbackSummary') or '无'}
+- 处理模式：{revision.get('overrideMode') or '无'}
+- 影响阶段：{format_list(revision.get('affectedStages', []))}
+- 影响文件：{format_list(revision.get('affectedFiles', []))}
+- 范围说明：{revision.get('scopeSummary') or '无'}
+- 冲突说明：{revision.get('conflictSummary') or '无'}
+- 修订计划：{revision.get('revisionPlanSummary') or '无'}
+- 修订结果：{revision.get('resultSummary') or '无'}
+- 当前修订 gate：{revision.get('currentRevisionGate') or '无'}
+- 最近更新时间：{data.get('updatedAt', '未知')}
+
+## 最近关闭的修订
+### {closed.get('closedAt') or '无'} {closed.get('feedbackType') or ''}
+- 反馈摘要：{closed.get('feedbackSummary') or '无'}
+- 影响范围：{format_list(closed.get('affectedFiles', []))}
+- 修订结果：{closed.get('resultSummary') or '无'}
+- 关闭方式：{closed.get('closeMode') or '无'}
+"""
+
+
+def write_revision_doc(project: Path, data: dict) -> None:
+    (project / REVISION_DOC).write_text(render_revision_doc(data), encoding='utf-8')

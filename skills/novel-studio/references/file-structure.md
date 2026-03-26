@@ -41,6 +41,8 @@ Use this layout by default:
 ├── 04_章节骨架.md
 ├── 05_前情回顾.md
 ├── 05_本轮章节规划.md
+├── 06_反馈与修订.md
+├── 07_终审报告.md
 ├── characters/
 │   ├── [角色名].md
 │   └── ...
@@ -86,6 +88,19 @@ Purpose:
 - store chapter-level or batch-level structural planning
 - store chapter progression notes
 - store draft guidance
+
+### 4.6 `06_反馈与修订.md`
+Purpose:
+- store the current active formal revision
+- store affected scope and revision plan
+- store the latest closed formal revision result
+
+### 4.7 `07_终审报告.md`
+Purpose:
+- store the latest final-review decision
+- store delivery readiness judgment
+- store final-review strengths, major issues, blockers, and next action
+- provide the canonical final-review artifact for completion checks
 
 ---
 
@@ -190,6 +205,10 @@ A project is minimally structured when it has:
 A project is strongly structured when it also has:
 - `03_人物小传.md`
 - `04_章节骨架.md`
+- `05_本轮章节规划.md`
+- `05_前情回顾.md`
+- `06_反馈与修订.md`
+- `07_终审报告.md`
 - major character files
 - stable chapter files
 
@@ -214,6 +233,9 @@ A project is strongly structured when it also has:
 ### Drafting stage
 - populate `manuscript/*.md`
 
+### Revision stage
+- populate or update `06_反馈与修订.md`
+
 ### Later stages
 - revise existing files rather than fragmenting into many inconsistent duplicates
 
@@ -223,25 +245,7 @@ A project is strongly structured when it also has:
 
 When refining work:
 - prefer updating canonical files
-- avoid creating random suffix copies unless versioning is truly necessary
-
-Avoid uncontrolled file sprawl such as:
-- `大纲_最终版_再改版.md`
-- `大纲_最终版2.md`
-- `大纲_最终版2_真的最终.md`
-
----
-
-## 11. Delivery discipline
-
-At delivery time, the project should be:
-- structurally complete
-- navigable
-- stable in naming
-- ready for archive or Feishu sync
-
-The file tree should tell the project story clearly even without chat history.
-cessary
+- avoid creating random suffix copies unless versioning is truly required
 
 Avoid uncontrolled file sprawl such as:
 - `大纲_最终版_再改版.md`
