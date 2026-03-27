@@ -32,6 +32,13 @@ PROOFREADING_REQUIRED_STAGE_FIELDS = [
 ]
 PROTOCOL_STATUSES = {'completed', 'blocked', 'needs_clarification'}
 PROOFREADING_JUDGMENTS = {'acceptable', 'conditionally acceptable', 'needs revision'}
+PLATFORM_PROFILES = {'起点模式', '番茄模式', '通用模式'}
+LEDGER_FILES = [
+    '05B_世界规则账本.md',
+    '05C_伏笔回收台账.md',
+    '05D_关系状态表.md',
+    '05E_能力与资源变化表.md',
+]
 SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
 
 
@@ -591,6 +598,57 @@ def validate_required_inputs(
         'batchPlan': batch_plan,
         'characterFiles': character_files,
     }
+
+    style_bible = require_text(required_inputs.get('styleBible'), 'requiredInputs.styleBible')
+    ensure_text_matches_baseline_snapshot(
+        baseline,
+        '01A_风格圣经.md',
+        style_bible,
+        'requiredInputs.styleBible',
+    )
+    mainline_spec = require_text(required_inputs.get('mainlineSpec'), 'requiredInputs.mainlineSpec')
+    ensure_text_matches_baseline_snapshot(
+        baseline,
+        '01B_总主线与卷级推进.md',
+        mainline_spec,
+        'requiredInputs.mainlineSpec',
+    )
+    opening_design = require_text(required_inputs.get('openingDesign'), 'requiredInputs.openingDesign')
+    ensure_text_matches_baseline_snapshot(
+        baseline,
+        '04A_开篇设计.md',
+        opening_design,
+        'requiredInputs.openingDesign',
+    )
+    platform_profile = require_text(required_inputs.get('platformProfile'), 'requiredInputs.platformProfile')
+    if platform_profile not in PLATFORM_PROFILES:
+        raise ValueError('requiredInputs.platformProfile must be one of: 起点模式, 番茄模式, 通用模式')
+    track_guide = require_text(required_inputs.get('trackGuide'), 'requiredInputs.trackGuide')
+    ensure_text_matches_baseline_snapshot(
+        baseline,
+        '00C_底盘与切口决策.md',
+        track_guide,
+        'requiredInputs.trackGuide',
+    )
+    ledger_snapshot = validate_relpath_text_map(
+        required_inputs.get('ledgerSnapshot'),
+        'requiredInputs.ledgerSnapshot',
+    )
+    if sorted(ledger_snapshot) != LEDGER_FILES:
+        raise ValueError('requiredInputs.ledgerSnapshot must exactly contain the four canonical ledger files')
+    for relpath, text in ledger_snapshot.items():
+        ensure_text_matches_baseline_snapshot(
+            baseline,
+            relpath,
+            text,
+            f'requiredInputs.ledgerSnapshot.{relpath}',
+        )
+    validated['styleBible'] = style_bible
+    validated['mainlineSpec'] = mainline_spec
+    validated['openingDesign'] = opening_design
+    validated['platformProfile'] = platform_profile
+    validated['trackGuide'] = track_guide
+    validated['ledgerSnapshot'] = ledger_snapshot
 
     recap = required_inputs.get('recap')
     if recap is not None and not isinstance(recap, str):

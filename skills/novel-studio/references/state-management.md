@@ -33,6 +33,10 @@ The state system must record at least:
 - current revision state when formal revision is active
 - latest closed revision snapshot
 - last update time
+- opening-gate approval state
+- style-lock version and platform mode
+- lane / track choice
+- ledger artifact existence
 
 ---
 
@@ -72,6 +76,7 @@ Persist only lightweight execution summaries when drafting, polishing, or proofr
 By the end of Discovery stage, state should reflect whether these artifacts exist:
 - `00A_热点扫描.md`
 - `00B_用户偏好.md`
+- `00C_底盘与切口决策.md`
 - `00_选题报告.md`
 
 It should also record whether:
@@ -99,6 +104,11 @@ At minimum it should record:
 - current batch focus
 - current batch attraction points
 - current batch climax target
+- whether `04A_开篇设计.md` exists
+- whether the opening gate is approved
+- whether the style bible exists
+- whether the mainline spec exists
+- whether the ledger set exists
 
 ---
 
@@ -150,6 +160,7 @@ Examples:
 - `outlineDoc: true` does not mean `outlineApproved: true`
 - `topicReport: true` does not mean `discoveryApproved: true`
 - `chapterPlanExists: true` does not mean `chapterPlanApproved: true`
+- `openingDesign: true` does not mean `openingApproved: true`
 
 State should also record the current review gate and the latest meaningful user feedback summary.
 This makes interruption recovery much safer than relying only on boolean flags.

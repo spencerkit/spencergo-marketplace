@@ -19,15 +19,18 @@ Without that explicit request:
 - require confirmed batch scope and approved chapter-plan package
 - do not silently convert drafting into freeform experimentation
 
+Do not start batch drafting until the opening gate has been explicitly approved.
+
 Drafting should proceed in controlled loops:
-1. confirm batch scope with the user
-2. produce a chapter-plan package
-3. revise that package with the user until explicitly approved
-4. write the draft chapters
-5. hand the batch to polishing and review
-6. complete consistency review and batch final pass
-7. update recap memory
-8. ask whether to continue
+1. if this is the first prose batch, complete and approve the opening gate
+2. confirm batch scope with the user
+3. produce a chapter-plan package
+4. revise that package with the user until explicitly approved
+5. write the draft chapters
+6. hand the batch to polishing and review
+7. complete consistency review and batch final pass
+8. update recap memory
+9. ask whether to continue
 
 Default execution mechanism: drafting uses a drafting subagent. The parent agent remains the orchestrator.
 The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, and accept or reject the returned drafting package before reporting stage progress.
@@ -52,7 +55,11 @@ When drafting, also use these references as needed:
 You must have:
 - usable outline
 - usable character bible
-- style baseline if available
+- approved `01A_风格圣经.md`
+- approved `01B_总主线与卷级推进.md`
+- approved `04A_开篇设计.md` before the first prose batch
+- approved lane / platform decision
+- usable ledger files for world rules, foreshadow, relationships, and resources
 - current recap context if previous batches already exist
 
 ---
@@ -62,6 +69,10 @@ You must have:
 Do not start drafting if:
 - outline stage is incomplete
 - character stage is incomplete
+- the opening gate is not yet approved for the first prose batch
+- the style bible is missing
+- the mainline spec is missing
+- the ledger files are missing
 - chapter intent is structurally ambiguous
 - the current batch scope is not explicitly confirmed by the user
 
@@ -120,6 +131,7 @@ Do not silently continue into the next batch.
 ## 6. Required output
 
 This stage must produce:
+- for the first prose batch, an approved `04A_开篇设计.md`
 - a chapter-plan package for the current batch
 - manuscript files for the approved chapter range
 - a batch report for user review
@@ -138,6 +150,7 @@ Do not modify planning, recap, review, or state artifacts during drafting execut
 ## 7. Completion standard
 
 A drafting batch is complete only if:
+- the first prose batch passed the opening gate before prose writing
 - the user explicitly confirmed the batch chapter count / range
 - the chapter-plan package exists
 - the chapter-plan package was explicitly approved by the user

@@ -6,7 +6,7 @@ Use this as a quick reference for important `.novel-state.json` fields.
 {
   "workflow": {
     "currentStage": "drafting",
-    "currentSubstage": "batch-plan-review",
+    "currentSubstage": "opening-review",
     "lastCompletedStage": "character-system",
     "nextStage": "drafting",
     "status": "awaiting_user_approval"
@@ -15,6 +15,7 @@ Use this as a quick reference for important `.novel-state.json` fields.
     "discoveryApproved": true,
     "planningApproved": true,
     "characterApproved": true,
+    "openingApproved": false,
     "draftingApproved": false,
     "polishingApproved": false,
     "proofreadingApproved": false,
@@ -26,11 +27,19 @@ Use this as a quick reference for important `.novel-state.json` fields.
     "hotSearchScan": true,
     "userPreference": true,
     "topicReport": true,
+    "trackDecision": true,
     "ideaDoc": true,
+    "styleBible": true,
+    "mainlineSpec": true,
     "outlineDoc": true,
     "characterSummary": true,
     "chapterSkeleton": true,
+    "openingDesign": true,
     "recapDoc": true,
+    "worldLedger": true,
+    "foreshadowLedger": true,
+    "relationshipLedger": true,
+    "resourceLedger": true,
     "characterFiles": true,
     "manuscriptFiles": true,
     "feishuSynced": false
@@ -55,6 +64,8 @@ Use this as a quick reference for important `.novel-state.json` fields.
     "currentGate": "waiting_polishing_feedback",
     "lastUserFeedbackSummary": "语气还不够稳，主角魅力不足",
     "lastRevisionFocus": "加强主角吸引点和场景语气统一",
+    "lastDriftRiskSummary": "第3章旁白开始变得过于中性",
+    "lastLedgerRiskSummary": "黑箱权限变化尚未回填到资源账本",
     "lastRejectedReason": null,
     "finalDecision": "conditional pass",
     "finalDeliveryReady": false,
@@ -80,6 +91,12 @@ Use this as a quick reference for important `.novel-state.json` fields.
     "currentRevisionGate": "awaiting_revision_plan_approval",
     "awaitingUserApproval": true,
     "lastClosedRevision": null
+  },
+  "notes": {
+    "platformProfile": "起点模式",
+    "primaryTrack": "规则异变都市",
+    "secondaryFlavor": "悬疑调查",
+    "styleBibleVersion": "v1"
   },
   "blockingIssues": [
     "Formal revision active: awaiting_revision_plan_approval"

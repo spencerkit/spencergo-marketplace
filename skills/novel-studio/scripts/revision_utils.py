@@ -19,6 +19,8 @@ def default_review() -> dict:
         'lastUserFeedbackSummary': None,
         'lastRevisionFocus': None,
         'lastRejectedReason': None,
+        'lastDriftRiskSummary': None,
+        'lastLedgerRiskSummary': None,
         'finalDecision': None,
         'finalDeliveryReady': False,
         'finalBlockingIssues': [],
@@ -52,6 +54,56 @@ def default_batch() -> dict:
     }
 
 
+def default_approvals() -> dict:
+    return {
+        'discoveryApproved': False,
+        'planningApproved': False,
+        'characterApproved': False,
+        'openingApproved': False,
+        'draftingApproved': False,
+        'polishingApproved': False,
+        'proofreadingApproved': False,
+        'finalApproved': False,
+        'titleConfirmed': False,
+        'workingTitleApproved': False,
+    }
+
+
+def default_artifacts() -> dict:
+    return {
+        'hotSearchScan': False,
+        'userPreference': False,
+        'topicReport': False,
+        'trackDecision': False,
+        'ideaDoc': False,
+        'styleBible': False,
+        'mainlineSpec': False,
+        'outlineDoc': False,
+        'characterSummary': False,
+        'chapterSkeleton': False,
+        'openingDesign': False,
+        'recapDoc': False,
+        'worldLedger': False,
+        'foreshadowLedger': False,
+        'relationshipLedger': False,
+        'resourceLedger': False,
+        'characterFiles': False,
+        'manuscriptFiles': False,
+        'feishuSynced': False,
+    }
+
+
+def default_notes() -> dict:
+    return {
+        'workingTitle': None,
+        'finalTitle': None,
+        'platformProfile': None,
+        'primaryTrack': None,
+        'secondaryFlavor': None,
+        'styleBibleVersion': None,
+    }
+
+
 def base_state(project: Path) -> dict:
     return {
         'project': {'title': project.name, 'rootPath': str(project)},
@@ -62,13 +114,13 @@ def base_state(project: Path) -> dict:
             'nextStage': None,
             'status': 'in_progress',
         },
-        'approvals': {},
-        'artifacts': {},
+        'approvals': default_approvals(),
+        'artifacts': default_artifacts(),
         'batch': default_batch(),
         'review': default_review(),
         'revision': {},
         'blockingIssues': [],
-        'notes': {},
+        'notes': default_notes(),
         'updatedAt': now_iso(),
     }
 
@@ -94,6 +146,14 @@ def default_revision() -> dict:
 def normalize_state(data: dict, project: Path) -> dict:
     normalized = base_state(project)
     normalized.update(data)
+    raw_approvals = data.get('approvals') if isinstance(data.get('approvals'), dict) else {}
+
+    approvals = default_approvals()
+    approvals.update(normalized.get('approvals', {}))
+
+    artifacts = default_artifacts()
+    artifacts.update(normalized.get('artifacts', {}))
+    normalized['artifacts'] = artifacts
 
     review = default_review()
     review.update(normalized.get('review', {}))
@@ -109,6 +169,22 @@ def normalize_state(data: dict, project: Path) -> dict:
     batch['lastDelegationBlockers'] = list(batch.get('lastDelegationBlockers', []))
     batch['lastDelegationRisks'] = list(batch.get('lastDelegationRisks', []))
     normalized['batch'] = batch
+
+    notes = default_notes()
+    notes.update(normalized.get('notes', {}))
+    normalized['notes'] = notes
+
+    if (
+        'openingApproved' not in raw_approvals
+        and (
+            batch.get('draftComplete')
+            or artifacts.get('manuscriptFiles')
+            or normalized.get('workflow', {}).get('currentStage') in {'polishing', 'proofreading', 'final-review'}
+        )
+    ):
+        approvals['openingApproved'] = True
+
+    normalized['approvals'] = approvals
     normalized.setdefault('blockingIssues', [])
     return normalized
 

@@ -44,6 +44,8 @@ Execution package shape rules:
 - `required inputs` must be a structured named map, not freeform prose
 - `required inputs.batchRange` must match `batch range`
 - every stage package must include non-empty `outline`, `batchPlan`, and `characterFiles`
+- every stage package must include non-empty `styleBible`, `mainlineSpec`, `platformProfile`, `trackGuide`, and `ledgerSnapshot`
+- every stage package should also carry the approved `openingDesign` once the project enters prose drafting
 - file-backed `required inputs` content must match the parent snapshot captured in `validationContext.baselineFiles`
 - `polishing` packages must include non-empty `polishingFocus`
 - `polishing` `required inputs.manuscriptFiles` must exactly match `target files`

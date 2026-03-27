@@ -13,6 +13,14 @@ WORKFLOW = ROOT / 'skills/novel-studio/references/workflow.md'
 DRAFTING_REF = ROOT / 'skills/novel-studio/references/drafting.md'
 FILE_STRUCTURE = ROOT / 'skills/novel-studio/references/file-structure.md'
 STAGE_MATRIX = ROOT / 'skills/novel-studio/references/stage-reference-matrix.md'
+OPENING_DESIGN = ROOT / 'skills/novel-studio/references/opening-design.md'
+STYLE_BIBLE = ROOT / 'skills/novel-studio/references/style-bible.md'
+PLATFORM_PROFILES = ROOT / 'skills/novel-studio/references/platform-profiles.md'
+ANTI_TEMPLATE = ROOT / 'skills/novel-studio/references/anti-template-checklist.md'
+LEDGERS = ROOT / 'skills/novel-studio/references/continuity-ledgers.md'
+TRACK_RULES_URBAN = ROOT / 'skills/novel-studio/references/track-guides/规则异变都市.md'
+TRACK_FAMILY_XIANXIA = ROOT / 'skills/novel-studio/references/track-guides/家族势力成长修仙.md'
+TRACK_MYSTERY_FANTASY = ROOT / 'skills/novel-studio/references/track-guides/高设定悬疑奇幻.md'
 
 
 class NovelStudioSubagentDocsTest(unittest.TestCase):
@@ -48,6 +56,26 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
             text,
         )
         self.assertIn(
+            '- `references/opening-design.md` — opening-gate rules, first-3/10/20 chapter objectives, and opening approval standard',
+            text,
+        )
+        self.assertIn(
+            '- `references/style-bible.md` — style-lock contract, drift-control rules, and revision path for voice changes',
+            text,
+        )
+        self.assertIn(
+            '- `references/platform-profiles.md` — 起点 / 番茄 / 通用 platform modes and their structural implications',
+            text,
+        )
+        self.assertIn(
+            '- `references/anti-template-checklist.md` — anti-template checks for topic choice, opening quality, and chapter-level drift',
+            text,
+        )
+        self.assertIn(
+            '- `references/continuity-ledgers.md` — world rules, foreshadow, relationship, and resource ledgers for long-form stability',
+            text,
+        )
+        self.assertIn(
             '- validate delegated outputs before advancing workflow state',
             text,
         )
@@ -58,6 +86,7 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         text = self.read_required_doc(README)
         self.assertIn('## Subagent 执行接入', text)
         self.assertIn('`drafting` / `polishing` / `proofreading` 默认走父 agent 编排 + subagent 执行', text)
+        self.assertIn('开篇门是 drafting 之前的强制前置审批门', text)
         self.assertIn('`scripts/prepare_stage_subagent_dispatch.py`', text)
         self.assertIn('`scripts/extract_stage_subagent_result.py`', text)
         self.assertIn('`scripts/finalize_stage_subagent_dispatch.py`', text)
@@ -98,6 +127,10 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         )
         self.assertIn(
             '- `required inputs` must be a structured named map, not freeform prose',
+            text,
+        )
+        self.assertIn(
+            '- every stage package must include non-empty `styleBible`, `mainlineSpec`, `platformProfile`, `trackGuide`, and `ledgerSnapshot`',
             text,
         )
         self.assertIn(
@@ -263,6 +296,7 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         )
         self.assertIn('- current stage is drafting', text)
         self.assertIn('- no open approval gate blocks execution', text)
+        self.assertIn('- opening gate is explicitly approved before batch drafting starts', text)
 
     def test_polishing_reference_defines_required_boundaries(self):
         text = self.read_required_doc(SUBAGENT_POLISHING)
@@ -313,6 +347,10 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
     def test_existing_drafting_reference_preserves_subagent_write_boundary(self):
         text = self.read_required_doc(DRAFTING_REF)
         self.assertIn(
+            'Do not start batch drafting until the opening gate has been explicitly approved.',
+            text,
+        )
+        self.assertIn(
             'The drafting subagent should modify only the target manuscript files for the approved chapter range.',
             text,
         )
@@ -345,6 +383,10 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         )
         self.assertIn(
             'The drafting subagent must not be dispatched until the chapter-plan package for the target batch exists and is explicitly approved.',
+            text,
+        )
+        self.assertIn(
+            'Before the first batch of prose drafting, the project must pass the opening gate with an approved `04A_开篇设计.md`.',
             text,
         )
         self.assertIn(
@@ -393,10 +435,21 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         text = self.read_required_doc(FILE_STRUCTURE)
         self.assertIn('00A_热点扫描.md', text)
         self.assertIn('00B_用户偏好.md', text)
+        self.assertIn('00C_底盘与切口决策.md', text)
+        self.assertIn('01A_风格圣经.md', text)
+        self.assertIn('01B_总主线与卷级推进.md', text)
+        self.assertIn('04A_开篇设计.md', text)
         self.assertIn('05_前情回顾.md', text)
         self.assertIn('05_本轮章节规划.md', text)
+        self.assertIn('05B_世界规则账本.md', text)
+        self.assertIn('05C_伏笔回收台账.md', text)
+        self.assertIn('05D_关系状态表.md', text)
+        self.assertIn('05E_能力与资源变化表.md', text)
         self.assertIn('### 4.1 `00A_热点扫描.md`', text)
         self.assertIn('### 4.2 `00B_用户偏好.md`', text)
+        self.assertIn('### 4.3 `00C_底盘与切口决策.md`', text)
+        self.assertIn('### 4.5 `01A_风格圣经.md`', text)
+        self.assertIn('### 4.6 `01B_总主线与卷级推进.md`', text)
         self.assertIn('### 4.8 `05_前情回顾.md`', text)
         self.assertIn('### 4.9 `05_本轮章节规划.md`', text)
         self.assertIn('- create before drafting prose generation begins for the current batch', text)
@@ -406,3 +459,44 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         text = self.read_required_doc(STAGE_MATRIX)
         self.assertIn('校对结论、修订建议、明确 judgment', text)
         self.assertNotIn('修订后的 `manuscript/*.md`', text)
+
+    def test_new_strategy_and_opening_references_exist(self):
+        opening = self.read_required_doc(OPENING_DESIGN)
+        self.assertIn('Opening Gate', opening)
+        self.assertIn('前三章', opening)
+        self.assertIn('前十章', opening)
+        self.assertIn('前二十章', opening)
+
+        style = self.read_required_doc(STYLE_BIBLE)
+        self.assertIn('风格漂移', style)
+        self.assertIn('V1', style)
+        self.assertIn('风格修订单', style)
+
+        platform = self.read_required_doc(PLATFORM_PROFILES)
+        self.assertIn('起点模式', platform)
+        self.assertIn('番茄模式', platform)
+        self.assertIn('通用模式', platform)
+
+        anti_template = self.read_required_doc(ANTI_TEMPLATE)
+        self.assertIn('只有题材名', anti_template)
+        self.assertIn('替换角色名后仍成立', anti_template)
+
+        ledgers = self.read_required_doc(LEDGERS)
+        self.assertIn('世界规则账本', ledgers)
+        self.assertIn('伏笔回收台账', ledgers)
+        self.assertIn('关系状态表', ledgers)
+        self.assertIn('能力与资源变化表', ledgers)
+
+    def test_track_guide_references_cover_three_priority_lanes(self):
+        urban = self.read_required_doc(TRACK_RULES_URBAN)
+        self.assertIn('规则异变都市', urban)
+        self.assertIn('最稳发动机', urban)
+        self.assertIn('最常见死法', urban)
+
+        family = self.read_required_doc(TRACK_FAMILY_XIANXIA)
+        self.assertIn('家族势力成长修仙', family)
+        self.assertIn('势力经营', family)
+
+        mystery = self.read_required_doc(TRACK_MYSTERY_FANTASY)
+        self.assertIn('高设定悬疑奇幻', mystery)
+        self.assertIn('认知博弈', mystery)

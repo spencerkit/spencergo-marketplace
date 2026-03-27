@@ -1,7 +1,7 @@
 {
   "name": "spencergo",
   "description": "Personal skills: writing (multi-stage content creation), naming (AI naming assistant), novel-studio (Chinese web novel production workflow with approval gates), and yi (I Ching divination)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Spencer"
   }

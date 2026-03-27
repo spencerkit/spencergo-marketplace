@@ -79,10 +79,47 @@ When the user has not explicitly requested exploration mode, remain in the forma
 
 - Do not begin stable planning before discovery stage is complete
 - Do not begin drafting before a usable outline and usable core character package exist
+- Do not begin prose drafting before the opening gate is explicitly approved
 - Do not begin polishing on structurally unstable draft text
 - Do not begin proofreading before polishing is complete for the intended range
 - Do not treat output as final delivery without final review or explicit user override
 - Do not sync unstable or half-structured output to Feishu unless the user explicitly requests intermediate sync
+
+## Opening gate rule
+
+Treat the opening gate as a mandatory pre-drafting approval gate.
+
+Before the first batch of prose drafting:
+- produce `04A_开篇设计.md`
+- verify the opening covers first-3 / first-10 / first-20 chapter responsibilities
+- present the opening package to the user
+- wait for explicit approval
+
+Without explicit opening-gate approval, remain inside drafting preparation and do not dispatch prose drafting.
+
+## Style-lock rule
+
+Treat style as a locked production contract, not a vague preference.
+
+For every project:
+- create `01A_风格圣经.md`
+- record platform mode, lane, narration distance, rhythm density, dialogue ratio, and forbidden cliches
+- treat the approved style bible as hard input for drafting, polishing, and proofreading
+- do not allow style drift silently across batches
+- if style must change, route it through a formal revision decision instead of gradual drift
+
+## Mainline and ledger rule
+
+Treat long-form stability as a file-backed requirement.
+
+Before prose drafting:
+- create `01B_总主线与卷级推进.md`
+- create `05B_世界规则账本.md`
+- create `05C_伏笔回收台账.md`
+- create `05D_关系状态表.md`
+- create `05E_能力与资源变化表.md`
+
+These artifacts are part of the canonical project, not optional side notes.
 
 ## Universal user approval gate
 
@@ -132,6 +169,11 @@ Use these reference files as **hard operational guidance**, not optional inspira
 - `references/hot-search-scan.md` — hot-search / trend-scan logic, search-source priority, and pre-decision market signal scan
 - `references/market-research.md` — topic analysis, market positioning, title generation, title confirmation, discovery-stage hard gates, and final topic-report requirements
 - `references/topic-report-template.md` — default report template for `00_选题报告.md`
+- `references/opening-design.md` — opening-gate rules, first-3/10/20 chapter objectives, and opening approval standard
+- `references/style-bible.md` — style-lock contract, drift-control rules, and revision path for voice changes
+- `references/platform-profiles.md` — 起点 / 番茄 / 通用 platform modes and their structural implications
+- `references/anti-template-checklist.md` — anti-template checks for topic choice, opening quality, and chapter-level drift
+- `references/continuity-ledgers.md` — world rules, foreshadow, relationship, and resource ledgers for long-form stability
 - `references/outlining.md` — idea expansion, world setup, plot structure, outline design, and planning-stage hard gates
 - `references/plot-weaving.md` — how to interweave main plot, side plots, relationship lines, suspense lines, and payoff structure
 - `references/character-bible.md` — character profiles, motivation, arc, relationship structure, and drafting gate requirements

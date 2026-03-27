@@ -39,13 +39,21 @@ Use this layout by default:
 /root/.openclaw/novels/[小说名称]/
 ├── 00A_热点扫描.md
 ├── 00B_用户偏好.md
+├── 00C_底盘与切口决策.md
 ├── 00_选题报告.md
 ├── 01_想法.md
+├── 01A_风格圣经.md
+├── 01B_总主线与卷级推进.md
 ├── 02_大纲.md
 ├── 03_人物小传.md
 ├── 04_章节骨架.md
+├── 04A_开篇设计.md
 ├── 05_前情回顾.md
 ├── 05_本轮章节规划.md
+├── 05B_世界规则账本.md
+├── 05C_伏笔回收台账.md
+├── 05D_关系状态表.md
+├── 05E_能力与资源变化表.md
 ├── 06_反馈与修订.md
 ├── 07_终审报告.md
 ├── characters/
@@ -79,37 +87,43 @@ Update timing:
 - create during discovery after user discussion
 - revise when the user materially changes discovery constraints
 
-### 4.3 `00_选题报告.md`
+### 4.3 `00C_底盘与切口决策.md`
+Purpose:
+- store the approved market-facing lane decision
+- record primary track, optional secondary flavor, platform mode, and anti-template guardrails
+- explain why this lane can sustain conflict and where it most often collapses
+
+### 4.4 `00_选题报告.md`
 Purpose:
 - store topic research
 - store title recommendation logic
 - store final title confirmation
 - store audience and market positioning
 
-### 4.4 `01_想法.md`
+### 4.5 `01A_风格圣经.md`
 Purpose:
-- store story concept expansion
-- store core hook
-- store premise and emotional promise
-- store high-level story identity
+- store the locked style contract for the project
+- record narration distance, rhythm density, dialogue ratio, platform mode, and forbidden drift directions
 
-### 4.5 `02_大纲.md`
+### 4.6 `01B_总主线与卷级推进.md`
 Purpose:
-- store outline structure
-- store major arcs
-- store turning points
-- store suspense and climax design
+- store the total-story engine and volume-level propulsion
+- record the mainline sentence, escalation logic, and cost structure that must survive long serialization
 
-### 4.6 `03_人物小传.md`
-Purpose:
-- store major character package summary
-- may serve as an index or overview before detailed split files exist
+### 4.7 Core planning files
+These files remain required and should stay canonical:
+- `01_想法.md`
+- `02_大纲.md`
+- `03_人物小传.md`
+- `04_章节骨架.md`
+- `04A_开篇设计.md`
 
-### 4.7 `04_章节骨架.md`
-Purpose:
-- store chapter-level or batch-level structural planning
-- store chapter progression notes
-- store draft guidance
+Use them for:
+- story concept expansion
+- outline structure
+- character package summary
+- chapter-level skeleton
+- opening-gate approval before first-batch prose drafting
 
 ### 4.8 `05_前情回顾.md`
 Purpose:
@@ -132,13 +146,25 @@ Update timing:
 - create before drafting prose generation begins for the current batch
 - revise only during chapter-plan review within the drafting stage
 
-### 4.10 `06_反馈与修订.md`
+### 4.10 Ledger set
+These four files are mandatory once the project enters prose drafting:
+- `05B_世界规则账本.md`
+- `05C_伏笔回收台账.md`
+- `05D_关系状态表.md`
+- `05E_能力与资源变化表.md`
+
+Purpose:
+- prevent long-form drift
+- keep world rules, foreshadow, relationships, and resources file-backed
+- give polishing and proofreading a stable baseline beyond chat memory
+
+### 4.11 `06_反馈与修订.md`
 Purpose:
 - store the current active formal revision
 - store affected scope and revision plan
 - store the latest closed formal revision result
 
-### 4.11 `07_终审报告.md`
+### 4.12 `07_终审报告.md`
 Purpose:
 - store the latest final-review decision
 - store delivery readiness judgment
@@ -241,9 +267,13 @@ A project is minimally structured when it has:
 - a root project directory
 - `00A_热点扫描.md`
 - `00B_用户偏好.md`
+- `00C_底盘与切口决策.md`
 - `00_选题报告.md`
 - `01_想法.md`
+- `01A_风格圣经.md`
+- `01B_总主线与卷级推进.md`
 - `02_大纲.md`
+- `04A_开篇设计.md`
 - `characters/`
 - `manuscript/`
 
@@ -252,6 +282,10 @@ A project is strongly structured when it also has:
 - `04_章节骨架.md`
 - `05_本轮章节规划.md`
 - `05_前情回顾.md`
+- `05B_世界规则账本.md`
+- `05C_伏笔回收台账.md`
+- `05D_关系状态表.md`
+- `05E_能力与资源变化表.md`
 - `06_反馈与修订.md`
 - `07_终审报告.md`
 - major character files
@@ -264,10 +298,13 @@ A project is strongly structured when it also has:
 ### Intake / topic stage
 - populate `00A_热点扫描.md`
 - populate `00B_用户偏好.md`
+- populate `00C_底盘与切口决策.md`
 - populate `00_选题报告.md`
 
 ### Idea expansion stage
 - populate `01_想法.md`
+- populate `01A_风格圣经.md`
+- populate `01B_总主线与卷级推进.md`
 
 ### Outline stage
 - populate `02_大纲.md`
@@ -277,9 +314,17 @@ A project is strongly structured when it also has:
 - populate `03_人物小传.md`
 - populate `characters/*.md`
 
+### Opening gate
+- populate `04A_开篇设计.md`
+- do not enter first-batch prose drafting until this file is approved
+
 ### Drafting stage
 - populate `05_本轮章节规划.md`
 - populate `manuscript/*.md`
+- maintain `05B_世界规则账本.md`
+- maintain `05C_伏笔回收台账.md`
+- maintain `05D_关系状态表.md`
+- maintain `05E_能力与资源变化表.md`
 
 ### Revision stage
 - populate or update `06_反馈与修订.md`

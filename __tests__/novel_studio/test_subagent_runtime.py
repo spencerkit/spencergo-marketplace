@@ -48,9 +48,32 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
         (project / '00A_热点扫描.md').write_text('# scan\n', encoding='utf-8')
         (project / '00B_用户偏好.md').write_text('# intake\n', encoding='utf-8')
         (project / '00_选题报告.md').write_text('# topic\n', encoding='utf-8')
+        (project / '00C_底盘与切口决策.md').write_text(
+            '# 底盘与切口\n\n'
+            '## 主赛道\n- 规则异变都市\n\n'
+            '## 辅助风味\n- 悬疑调查\n\n'
+            '## 平台模式\n- 起点模式\n',
+            encoding='utf-8',
+        )
         (project / '01_想法.md').write_text('# idea\n', encoding='utf-8')
+        (project / '01A_风格圣经.md').write_text(
+            '# 风格圣经\n\n'
+            '## 平台模式\n- 起点模式\n\n'
+            '## 叙述基调\n- 冷峻、克制、信息前推\n',
+            encoding='utf-8',
+        )
+        (project / '01B_总主线与卷级推进.md').write_text(
+            '# 总主线\n\n'
+            '主角为了查清失序区事故真相，必须不断深入更高风险区域，而越接近真相越失去正常生活。\n',
+            encoding='utf-8',
+        )
         (project / '02_大纲.md').write_text('# outline\n\n主线推进', encoding='utf-8')
         (project / '03_人物小传.md').write_text('# roles\n\n主角：林川', encoding='utf-8')
+        (project / '04A_开篇设计.md').write_text(
+            '# 开篇设计\n\n'
+            '## 前三章任务\n- 第1章点火\n- 第2章显规\n- 第3章留钩\n',
+            encoding='utf-8',
+        )
         (project / '05_本轮章节规划.md').write_text(
             '## 本轮范围\n- 第1章\n\n'
             '## 本轮写作重点\n- 开篇立钩子\n\n'
@@ -67,6 +90,22 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             '## 最近一轮发生的关键事件\n- 无\n\n'
             '## 当前未回收的伏笔 / 悬念\n- 黑箱来历\n\n'
             '## 下一轮写作必须记住的点\n- 主角表面隐忍\n',
+            encoding='utf-8',
+        )
+        (project / '05B_世界规则账本.md').write_text(
+            '# 世界规则账本\n\n- 失序区只在夜间扩张\n',
+            encoding='utf-8',
+        )
+        (project / '05C_伏笔回收台账.md').write_text(
+            '# 伏笔回收台账\n\n- 黑箱来源：未回收\n',
+            encoding='utf-8',
+        )
+        (project / '05D_关系状态表.md').write_text(
+            '# 关系状态表\n\n- 林川 / 顾遥：互相试探\n',
+            encoding='utf-8',
+        )
+        (project / '05E_能力与资源变化表.md').write_text(
+            '# 能力与资源变化表\n\n- 黑箱权限：一级\n',
             encoding='utf-8',
         )
         characters = project / 'characters'
@@ -93,6 +132,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                 'characterApproved': True,
                 'planningApproved': True,
                 'discoveryApproved': True,
+                'openingApproved': True,
                 'draftingApproved': False,
                 'polishingApproved': False,
                 'proofreadingApproved': False,
@@ -124,7 +164,12 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                 'awaitingUserApproval': False,
             },
             'blockingIssues': [],
-            'notes': {},
+            'notes': {
+                'platformProfile': '起点模式',
+                'primaryTrack': '规则异变都市',
+                'secondaryFlavor': '悬疑调查',
+                'styleBibleVersion': 'v1',
+            },
         }
         if approvals:
             state['approvals'].update(approvals)
@@ -208,8 +253,32 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertIn('outline', package['requiredInputs'])
             self.assertIn('batchPlan', package['requiredInputs'])
             self.assertIn('characterFiles', package['requiredInputs'])
+            self.assertIn('styleBible', package['requiredInputs'])
+            self.assertIn('mainlineSpec', package['requiredInputs'])
+            self.assertIn('platformProfile', package['requiredInputs'])
+            self.assertIn('trackGuide', package['requiredInputs'])
+            self.assertIn('ledgerSnapshot', package['requiredInputs'])
             self.assertIn('baselineFiles', bundle['validationContext'])
             self.assertIn('02_大纲.md', bundle['validationContext']['baselineFiles'])
+
+    def test_build_package_rejects_drafting_without_opening_gate_approval(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_runtime_project(
+                Path(tmp),
+                current_stage='drafting',
+                approvals={'openingApproved': False},
+            )
+            result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'drafting',
+                '--batch-range',
+                '第1章',
+                '--target-file',
+                'manuscript/第1章_开端.md',
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('Opening gate not explicitly approved yet', result.stderr + result.stdout)
 
     def test_build_polishing_package_requires_polishing_focus(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -352,47 +421,20 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             relpath = 'manuscript/第1章_开端.md'
-
-            baseline = self.snapshot_files(project)
-
-            self.write_json(
-                bundle_file,
-                {
-                    'executionPackage': {
-                        'taskType': 'drafting',
-                        'projectRoot': str(project),
-                        'stage': 'drafting',
-                        'batchRange': '第1章',
-                        'targetFiles': [relpath],
-                        'overwriteFlag': False,
-                        'requiredInputs': {'batchRange': '第1章'},
-                        'mustNotModify': [path for path in baseline.keys() if path != relpath],
-                        'outputContract': {
-                            'requiredReturnFields': [
-                                'status',
-                                'changedFiles',
-                                'createdFiles',
-                                'blockedReasons',
-                                'summary',
-                                'notesForNextStage',
-                                'risks',
-                            ],
-                            'mustWriteFiles': [relpath],
-                        },
-                        'acceptanceHints': ['只写批准的 manuscript 文件', '不要修改规划和状态文件'],
-                    },
-                    'validationContext': {
-                        'projectRoot': str(project),
-                        'stage': 'drafting',
-                        'batchRange': '第1章',
-                        'baselineFiles': baseline,
-                        'executionPackageDigest': '',
-                        'baselineFilesDigest': '',
-                        'bundleFingerprint': '',
-                    },
-                },
+            bundle_result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'drafting',
+                '--batch-range',
+                '第1章',
+                '--target-file',
+                relpath,
+                '--overwrite',
+                'true',
             )
-            bundle = json.loads(bundle_file.read_text(encoding='utf-8'))
+            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+            bundle = json.loads(bundle_result.stdout)
+            bundle['executionPackage']['overwriteFlag'] = False
             self.refresh_bundle_digests(bundle)
             self.write_json(bundle_file, bundle)
             (project / relpath).write_text('# 第一章\n\n新正文', encoding='utf-8')
@@ -448,6 +490,17 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                         'batchPlan': (project / '05_本轮章节规划.md').read_text(encoding='utf-8'),
                         'characterFiles': {
                             '03_人物小传.md': (project / '03_人物小传.md').read_text(encoding='utf-8'),
+                        },
+                        'styleBible': (project / '01A_风格圣经.md').read_text(encoding='utf-8'),
+                        'mainlineSpec': (project / '01B_总主线与卷级推进.md').read_text(encoding='utf-8'),
+                        'openingDesign': (project / '04A_开篇设计.md').read_text(encoding='utf-8'),
+                        'platformProfile': '起点模式',
+                        'trackGuide': (project / '00C_底盘与切口决策.md').read_text(encoding='utf-8'),
+                        'ledgerSnapshot': {
+                            '05B_世界规则账本.md': (project / '05B_世界规则账本.md').read_text(encoding='utf-8'),
+                            '05C_伏笔回收台账.md': (project / '05C_伏笔回收台账.md').read_text(encoding='utf-8'),
+                            '05D_关系状态表.md': (project / '05D_关系状态表.md').read_text(encoding='utf-8'),
+                            '05E_能力与资源变化表.md': (project / '05E_能力与资源变化表.md').read_text(encoding='utf-8'),
                         },
                         'recap': None,
                     },
@@ -1042,6 +1095,40 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             )
             self.assertNotEqual(validate.returncode, 0)
             self.assertIn('requiredInputs.outline', validate.stderr + validate.stdout)
+
+    def test_validate_rejects_drafting_bundle_with_missing_style_bible_input(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(root, current_stage='drafting')
+            bundle_result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'drafting',
+                '--batch-range',
+                '第1章',
+                '--target-file',
+                'manuscript/第1章_开端.md',
+            )
+            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+
+            bundle = json.loads(bundle_result.stdout)
+            del bundle['executionPackage']['requiredInputs']['styleBible']
+            self.refresh_bundle_digests(bundle)
+            bundle_file = root / 'bundle.json'
+            result_file = root / 'result.json'
+            self.write_json(bundle_file, bundle)
+            self.write_json(result_file, self.needs_clarification_result())
+
+            validate = run_script(
+                'validate_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertNotEqual(validate.returncode, 0)
+            self.assertIn('requiredInputs.styleBible', validate.stderr + validate.stdout)
 
     def test_validate_rejects_polishing_bundle_without_polishing_focus_input(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2058,6 +2145,17 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(status.returncode, 0, status.stderr)
             self.assertIn('当前卡点：等待你确认本轮初稿结果', status.stdout)
             self.assertIn('最近委派：drafting / completed / 第1章', status.stdout)
+
+    def test_status_shows_opening_gate_when_drafting_not_ready(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_runtime_project(
+                Path(tmp),
+                current_stage='drafting',
+                approvals={'openingApproved': False},
+            )
+            status = run_script('novel_project_status.py', str(project), '--brief')
+            self.assertEqual(status.returncode, 0, status.stderr)
+            self.assertIn('建议下一步：请先完成并确认 Opening Gate，再进入本轮章节规划与正文。', status.stdout)
 
     def test_update_project_state_supports_json_values(self):
         with tempfile.TemporaryDirectory() as tmp:

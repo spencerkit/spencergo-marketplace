@@ -20,6 +20,7 @@
 
 ## Parent Preconditions
 - current stage is drafting
+- opening gate is explicitly approved before batch drafting starts
 - chapter plan exists
 - chapter plan is approved
 - outline usable

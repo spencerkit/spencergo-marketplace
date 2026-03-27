@@ -67,7 +67,36 @@ def require_file(path: Path, label: str) -> str:
     return read_text(path)
 
 
-def build_required_inputs(project: Path, stage: str, batch_range: str, target_files: list[str], polishing_focus: str | None) -> dict[str, object]:
+def resolve_platform_profile(state: dict, project: Path) -> str:
+    notes = state.get('notes', {})
+    profile = (notes.get('platformProfile') or '').strip()
+    if profile:
+        return profile
+
+    for path in (project / '01A_风格圣经.md', project / '00C_底盘与切口决策.md'):
+        text = read_optional(path)
+        if not text:
+            continue
+        for candidate in ('起点模式', '番茄模式', '通用模式'):
+            if candidate in text:
+                return candidate
+
+    return '通用模式'
+
+
+def build_ledger_snapshot(project: Path) -> dict[str, str]:
+    ledgers = {}
+    for relpath, label in [
+        ('05B_世界规则账本.md', 'world ledger'),
+        ('05C_伏笔回收台账.md', 'foreshadow ledger'),
+        ('05D_关系状态表.md', 'relationship ledger'),
+        ('05E_能力与资源变化表.md', 'resource ledger'),
+    ]:
+        ledgers[relpath] = require_file(project / relpath, label)
+    return ledgers
+
+
+def build_required_inputs(project: Path, state: dict, stage: str, batch_range: str, target_files: list[str], polishing_focus: str | None) -> dict[str, object]:
     outline = require_file(project / '02_大纲.md', 'outline')
     batch_plan = require_file(project / '05_本轮章节规划.md', 'chapter plan')
     character_package = load_character_package(project)
@@ -79,6 +108,12 @@ def build_required_inputs(project: Path, stage: str, batch_range: str, target_fi
         'outline': outline,
         'batchPlan': batch_plan,
         'characterFiles': character_package,
+        'styleBible': require_file(project / '01A_风格圣经.md', 'style bible'),
+        'mainlineSpec': require_file(project / '01B_总主线与卷级推进.md', 'mainline spec'),
+        'openingDesign': require_file(project / '04A_开篇设计.md', 'opening design'),
+        'platformProfile': resolve_platform_profile(state, project),
+        'trackGuide': require_file(project / '00C_底盘与切口决策.md', 'track decision'),
+        'ledgerSnapshot': build_ledger_snapshot(project),
         'recap': read_optional(project / '05_前情回顾.md'),
     }
 
@@ -131,6 +166,7 @@ def build_bundle(args: argparse.Namespace) -> dict[str, object]:
 
     required_inputs = build_required_inputs(
         project,
+        state,
         stage,
         batch_range,
         target_files,

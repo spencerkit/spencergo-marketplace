@@ -24,6 +24,7 @@ def yn(v):
 
 def gate_text(gate):
     mapping = {
+        'waiting_opening_gate_approval': '等待你确认 Opening Gate',
         'waiting_draft_feedback': '等待你确认本轮初稿结果',
         'waiting_chapter_plan_approval': '等待你确认本轮章节规划',
         'waiting_polishing_feedback': '等待你确认本轮润色结果',
@@ -97,6 +98,11 @@ def next_step(state, project: Path):
     if final_decision == 'pass' and not final_delivery_ready:
         return '终审已通过，但当前版本尚不可交付：请先补齐交付前收尾项。'
 
+    if workflow.get('currentStage') == 'drafting' and not approvals.get('openingApproved', False):
+        if not exists(project / '04A_开篇设计.md'):
+            return '请先完成 04A_开篇设计.md 并确认 Opening Gate，再进入本轮章节规划与正文。'
+        return '请先完成并确认 Opening Gate，再进入本轮章节规划与正文。'
+
     if review.get('currentGate'):
         return gate_text(review.get('currentGate'))
     if workflow.get('currentStage') == 'discovery' and not state.get('approvals', {}).get('discoveryApproved', False):
@@ -153,12 +159,15 @@ def main():
     review = state.get('review', {})
     revision = state.get('revision', {})
     blockers = state.get('blockingIssues', [])
+    current_gate = review.get('currentGate') or revision.get('currentRevisionGate')
+    if workflow.get('currentStage') == 'drafting' and not approvals.get('openingApproved', False):
+        current_gate = 'waiting_opening_gate_approval'
 
     if mode == '--brief':
         print(f'项目：{project_title}')
         print(f'当前阶段：{workflow.get("currentStage", "未知")}')
         print(f'当前子阶段：{workflow.get("currentSubstage") or "无"}')
-        print(f'当前卡点：{gate_text(review.get("currentGate") or revision.get("currentRevisionGate"))}')
+        print(f'当前卡点：{gate_text(current_gate)}')
         print(f'当前批次范围：{batch.get("chapterRange") or "无"}')
         print(f'终审结论：{review_decision_text(review)}')
         print(f'可交付：{review_delivery_text(review)}')
@@ -200,6 +209,7 @@ def main():
     print(f'discovery：{yn(approvals.get("discoveryApproved", False))}')
     print(f'planning：{yn(approvals.get("planningApproved", False))}')
     print(f'character：{yn(approvals.get("characterApproved", False))}')
+    print(f'opening gate：{yn(approvals.get("openingApproved", False))}')
     print(f'batch scope：{yn(batch.get("scopeConfirmed", False))}')
     print(f'chapter plan：{yn(batch.get("chapterPlanApproved", False))}')
     print(f'draft：{yn(batch.get("draftComplete", False))}')
@@ -211,7 +221,7 @@ def main():
     closed_revision = revision.get('lastClosedRevision') or {}
 
     print('[修订状态]')
-    print(f'当前 review gate：{gate_text(review.get("currentGate"))}')
+    print(f'当前 review gate：{gate_text(current_gate)}')
     print(f'最近正式反馈：{revision.get("feedbackSummary") or review.get("lastUserFeedbackSummary") or "无"}')
     print(f'反馈类型：{revision.get("feedbackType") or "无"}')
     print(f'处理模式：{revision.get("overrideMode") or "无"}')
@@ -250,8 +260,11 @@ def main():
 
     print('[文件状态]')
     checks = [
-        '00A_热点扫描.md', '00B_用户偏好.md', '00_选题报告.md', '01_想法.md', '02_大纲.md',
-        '03_人物小传.md', '04_章节骨架.md', '05_本轮章节规划.md', '05_前情回顾.md'
+        '00A_热点扫描.md', '00B_用户偏好.md', '00_选题报告.md', '00C_底盘与切口决策.md',
+        '01_想法.md', '01A_风格圣经.md', '01B_总主线与卷级推进.md', '02_大纲.md',
+        '03_人物小传.md', '04_章节骨架.md', '04A_开篇设计.md', '05_本轮章节规划.md',
+        '05_前情回顾.md', '05B_世界规则账本.md', '05C_伏笔回收台账.md',
+        '05D_关系状态表.md', '05E_能力与资源变化表.md'
     ]
     for name in checks:
         print(f'{name}：{"已生成" if exists(project / name) else "未生成"}')

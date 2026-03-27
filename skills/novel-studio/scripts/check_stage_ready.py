@@ -48,6 +48,8 @@ def state_gate_errors(state, stage):
         errs.append('Story planning stage not explicitly approved yet')
     if stage == 'drafting' and not approvals.get('characterApproved', False):
         errs.append('Character system stage not explicitly approved yet')
+    if stage == 'drafting' and not approvals.get('openingApproved', False):
+        errs.append('Opening gate not explicitly approved yet')
     if stage == 'polishing' and not batch.get('draftComplete', False):
         errs.append('Current batch draft is not marked complete yet')
     if stage == 'proofreading' and not batch.get('polishingComplete', False):
@@ -65,11 +67,30 @@ def file_gate_errors(project: Path, stage: str):
     errors = []
     stage = stage.lower()
     f00 = project / '00_选题报告.md'
+    f00c = project / '00C_底盘与切口决策.md'
     f01 = project / '01_想法.md'
+    f01a = project / '01A_风格圣经.md'
+    f01b = project / '01B_总主线与卷级推进.md'
     f02 = project / '02_大纲.md'
     f03 = project / '03_人物小传.md'
+    f04a = project / '04A_开篇设计.md'
+    f05b = project / '05B_世界规则账本.md'
+    f05c = project / '05C_伏笔回收台账.md'
+    f05d = project / '05D_关系状态表.md'
+    f05e = project / '05E_能力与资源变化表.md'
     chars = project / 'characters'
     manu = project / 'manuscript'
+
+    strategic_docs = [
+        (f00c, '00C_底盘与切口决策.md'),
+        (f01a, '01A_风格圣经.md'),
+        (f01b, '01B_总主线与卷级推进.md'),
+        (f04a, '04A_开篇设计.md'),
+        (f05b, '05B_世界规则账本.md'),
+        (f05c, '05C_伏笔回收台账.md'),
+        (f05d, '05D_关系状态表.md'),
+        (f05e, '05E_能力与资源变化表.md'),
+    ]
 
     if stage == 'discovery':
         pass
@@ -80,14 +101,23 @@ def file_gate_errors(project: Path, stage: str):
         if not exists_nonempty(f02):
             errors.append('02_大纲.md is missing or empty')
     elif stage == 'drafting':
+        for path, label in strategic_docs:
+            if not exists_nonempty(path):
+                errors.append(f'{label} is missing or empty')
         if not exists_nonempty(f02):
             errors.append('02_大纲.md is missing or empty')
         if count_md(chars) == 0 and not exists_nonempty(f03):
             errors.append('No usable character package found')
     elif stage == 'polishing':
+        for path, label in strategic_docs:
+            if not exists_nonempty(path):
+                errors.append(f'{label} is missing or empty')
         if count_md(manu) == 0:
             errors.append('No manuscript files found in manuscript/')
     elif stage == 'proofreading':
+        for path, label in strategic_docs:
+            if not exists_nonempty(path):
+                errors.append(f'{label} is missing or empty')
         if count_md(manu) == 0:
             errors.append('No manuscript files found in manuscript/')
     elif stage == 'final-review':

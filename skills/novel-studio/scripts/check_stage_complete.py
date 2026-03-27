@@ -127,7 +127,21 @@ def check_character(project: Path, errors):
 
 def check_drafting(project: Path, errors):
     plan = project / '05_本轮章节规划.md'
+    opening = project / '04A_开篇设计.md'
     manu = project / 'manuscript'
+    for required in [
+        project / '00C_底盘与切口决策.md',
+        project / '01A_风格圣经.md',
+        project / '01B_总主线与卷级推进.md',
+        project / '05B_世界规则账本.md',
+        project / '05C_伏笔回收台账.md',
+        project / '05D_关系状态表.md',
+        project / '05E_能力与资源变化表.md',
+    ]:
+        if not exists_nonempty(required):
+            errors.append(f'{required.name} is missing or empty')
+    if not exists_nonempty(opening):
+        errors.append('04A_开篇设计.md is missing or empty')
     if not exists_nonempty(plan):
         errors.append('05_本轮章节规划.md is missing or empty')
     else:

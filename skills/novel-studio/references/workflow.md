@@ -39,6 +39,7 @@ If the user explicitly asks to skip a stage, continue only after stating the ris
 ### 2.1 Stage discipline
 - Do not start stable planning before discovery stage is complete
 - Do not start drafting before planning and character system stages are complete
+- Do not start the first prose batch before the opening gate is approved
 - Do not polish text that is still structurally unstable
 - Do not proofread text that is still under major rewrite
 - Do not treat unreviewed output as final delivery
@@ -229,30 +230,39 @@ The parent agent validates prerequisites, delegates drafting work to the draftin
 Default parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
 The parent still sends only `childPrompt` to the child subagent and keeps dispatch artifacts parent-side.
 The drafting subagent must not be dispatched until the chapter-plan package for the target batch exists and is explicitly approved.
+Before the first batch of prose drafting, the project must pass the opening gate with an approved `04A_开篇设计.md`.
 
 ### Internal sub-steps
-1. define or confirm style baseline if needed
-2. generate or confirm chapter-plan package for the target batch
-3. revise the chapter-plan package until explicitly approved
-4. draft target chapter batch
-5. self-check draft batch
-6. structured stage report / batch report
-7. iterative revision with user
-8. explicit approval gate for next batch or next stage
+1. complete / confirm `01A_风格圣经.md`, `01B_总主线与卷级推进.md`, and the ledger files
+2. if this is the first prose batch, complete the opening gate
+3. generate or confirm chapter-plan package for the target batch
+4. revise the chapter-plan package until explicitly approved
+5. draft target chapter batch
+6. self-check draft batch
+7. structured stage report / batch report
+8. iterative revision with user
+9. explicit approval gate for next batch or next stage
 
 ### Required input
 - usable outline
 - usable character package
+- approved opening gate for the first prose batch
+- approved style bible / platform mode / lane decision
+- usable mainline spec and ledger files
 - drafting scope or target chapter range
 
 ### Forbidden to start if
 - planning stage is incomplete
 - character stage is incomplete
+- the first prose batch has not yet passed the opening gate
+- the style bible or mainline spec is missing
+- the ledger files are missing
 - the target batch cannot yet be turned into a usable chapter-plan package
 - chapter intent is structurally ambiguous
 
 ### Required output
 This stage must produce:
+- for the first prose batch, an approved `04A_开篇设计.md`
 - an approved chapter-plan package for the target batch
 - manuscript files for the target chapter range
 - prose chapters, not only summaries
@@ -260,6 +270,7 @@ This stage must produce:
 
 ### Completion standard
 This stage is complete only if:
+- the first prose batch passed the opening gate before prose drafting began
 - an approved chapter-plan package exists for the intended chapter range
 - manuscript files exist for the intended chapter range
 - chapters materially move story, tension, or character
@@ -267,6 +278,7 @@ This stage is complete only if:
 - the user explicitly approves either the batch continuation or stage completion
 
 ### Do not advance if
+- the opening gate has not been approved for the first prose batch
 - manuscript files are missing
 - intended chapter range is incomplete
 - output is perfunctory or summary-like
