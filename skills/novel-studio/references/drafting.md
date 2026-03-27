@@ -29,6 +29,12 @@ Drafting should proceed in controlled loops:
 7. update recap memory
 8. ask whether to continue
 
+Default execution mechanism: drafting uses a drafting subagent. The parent agent remains the orchestrator.
+The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, and accept or reject the returned drafting package before reporting stage progress.
+Preferred parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
+Use `scripts/subagent_dispatch_runtime.py` when the parent is coordinating drafting in Python.
+Execution mechanism changes do not change drafting-stage semantics.
+
 Do not default to writing the whole manuscript in one pass.
 
 ---
@@ -58,6 +64,8 @@ Do not start drafting if:
 - character stage is incomplete
 - chapter intent is structurally ambiguous
 - the current batch scope is not explicitly confirmed by the user
+
+The parent agent must not delegate drafting until all start conditions are satisfied.
 
 ---
 
@@ -96,6 +104,8 @@ Do not begin draft prose until the chapter-plan package is explicitly approved.
 Only after chapter-plan approval:
 - write the actual draft prose for each chapter in the batch
 - save it into canonical manuscript files
+- overwrite an existing target manuscript file only when the parent has explicitly granted overwrite permission for that dispatch
+- otherwise fail closed instead of rewriting an existing manuscript file or creating ad-hoc duplicate variants
 
 ### Step 4.5 Batch handoff
 After draft writing, the batch must move into polishing and substantive review before it can be considered complete.
@@ -119,6 +129,9 @@ Recommended explicit artifact for planning the batch:
 
 Main manuscript artifact:
 - `manuscript/*.md`
+
+The drafting subagent should modify only the target manuscript files for the approved chapter range.
+Do not modify planning, recap, review, or state artifacts during drafting execution.
 
 ---
 

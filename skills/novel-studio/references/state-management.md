@@ -61,6 +61,10 @@ This includes:
 - final delivery
 - Feishu sync completion if relevant
 
+Do not persist runtime subagent ids in `.novel-state.json`.
+Do not persist session ids, raw execution packages, or raw subagent conversation history in `.novel-state.json`.
+Persist only lightweight execution summaries when drafting, polishing, or proofreading ran through subagent execution.
+
 ---
 
 ## 6. Discovery-state tracking

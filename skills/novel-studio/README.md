@@ -78,6 +78,106 @@
 | Proofreading 校稿     | 无矛盾/逻辑漏洞的章节    | 通过OOC和一致性检查        |
 | Final Review 最终审校 | 评分报告、交付判断       | 达到验收分数               |
 
+## Subagent 执行接入
+
+`drafting` / `polishing` / `proofreading` 默认走父 agent 编排 + subagent 执行。
+
+标准父流程是 `prepare -> spawn -> extract -> finalize`：
+- `scripts/prepare_stage_subagent_dispatch.py`
+- `spawn_agent(..., fork_context=false)`
+- `scripts/extract_stage_subagent_result.py`
+- `scripts/finalize_stage_subagent_dispatch.py`
+
+`prepare_stage_subagent_dispatch.py` 支持 `--dispatch-dir` 生成标准化 dispatch workspace。
+prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `manifestFile` / `rawFile` / `resultFile` / `validatedFile`，父 agent 不必再手写整套临时文件路径。
+标准布局固定为 `bundle.json` / `prompt.txt` / `manifest.json` / `child-response.txt` / `result.json` / `validated.json`。
+如果你显式传了 `bundleFile` / `promptFile` / `manifestFile`，且三者位于同一个父目录，prepare 也会自动把这个目录当成 `dispatchDir`，继续为 `rawFile` / `resultFile` / `validatedFile` 生成标准路径。
+`extract_stage_subagent_result.py` 和 `finalize_stage_subagent_dispatch.py` 也支持直接吃 `--dispatch-dir`。
+显式传入的 `rawFile` / `resultFile` / `bundleFile` / `manifestFile` / `validatedFile` 会覆盖 `dispatchDir` 默认路径。
+如果父 agent 用 Python 编排，可以直接 import `scripts/subagent_dispatch_runtime.py`。
+`prepare_dispatch(...)` 负责生成 `childPrompt`，也就是发给子 agent 的 prompt。
+`record_child_output(...)` 只负责记录子 agent 的原始输出。
+`finalize_dispatch(...)` 会串起 extract + validate + apply。
+
+运行规则：
+- 所有 `bundle` / `prompt` / `manifest` / `child-response` / `result` / `validated` 中间产物都必须放在项目根目录之外
+- 只把 `executionPackage` 发给子 agent
+- `validationContext` 只留在父 agent
+- `drafting` / `polishing` 的 `targetFiles` 必须非空且位于 `manuscript/` 下
+- `outputContract.requiredReturnFields` 必须严格等于协议字段列表，`outputContract.mustWriteFiles` 必须严格等于 `targetFiles`
+- `completed` 结果必须真实触达本次 dispatch 的全部 `outputContract.mustWriteFiles`
+- `proofreading` 必须保持 `targetFiles=[]`、`overwriteFlag=false`，且 `mustNotModify` 覆盖整个项目快照
+- `targetFiles` / `mustNotModify` / `changedFiles` / `createdFiles` 等 path list 不允许重复项
+- `validationContext.executionPackageDigest` / `baselineFilesDigest` / `bundleFingerprint` 必须和当前 bundle 内容一致；一旦手改过 bundle，应直接重建
+- `prepare_stage_subagent_dispatch.py` 默认会写出 sidecar `manifest`
+- sidecar `manifest` 会同时记录 `bundle` 摘要，以及可选 `promptFile` / `promptSha256` 完整性信息
+- `finalize_stage_subagent_dispatch.py` 可以用 `--manifest-file` 先校验 bundle sidecar
+- 子 agent 只允许返回一个 JSON object
+- `blocked` / `needs_clarification` 必须带非空 `blockedReasons`；`completed` 必须保持 `blockedReasons=[]`
+- `proofreading` 的 `completed` 结果必须给出非空的 `continuity` / `logic` / `characterOOC` / `fixDirection`；若 judgment=`needs revision`，`blockers` 也必须非空
+- `proofreading` 若 judgment=`acceptable`，`blockers` 必须为空
+- `proofreading` 若 judgment=`conditionally acceptable`，`blockers` 必须为空且 `risks` 必须非空
+- 父 agent 只有在 extract、validate 都通过后才能 apply 结果
+- 如果子 agent 返回 prose、多个 JSON、空输出或非法 JSON，按协议失败处理，不得静默兜底
+
+Drafting 示例：
+
+```bash
+python3 skills/novel-studio/scripts/prepare_stage_subagent_dispatch.py \
+  "$PROJECT_ROOT" \
+  drafting \
+  --batch-range "第1章" \
+  --target-file "manuscript/第1章_开端.md" \
+  --dispatch-dir "$TMP_DIR"
+```
+
+父 agent 可以直接读取 prepare 返回的 `childPrompt`，或使用 prepare 输出的 `promptFile`。
+
+拿到 child 原始输出后：
+
+```bash
+python3 skills/novel-studio/scripts/extract_stage_subagent_result.py \
+  --dispatch-dir "$TMP_DIR" \
+  --project-root "$PROJECT_ROOT"
+
+python3 skills/novel-studio/scripts/finalize_stage_subagent_dispatch.py \
+  "$PROJECT_ROOT" \
+  --dispatch-dir "$TMP_DIR"
+```
+
+如果你不走标准布局，仍然可以显式传 `--raw-file` / `--result-file` / `--bundle-file` / `--manifest-file` / `--validated-file` 覆盖默认解析。
+
+Python 父 agent 也可以直接写成：
+
+```python
+from pathlib import Path
+
+from subagent_dispatch_runtime import finalize_dispatch, prepare_dispatch, record_child_output
+
+
+payload = prepare_dispatch(
+    project_root,
+    "drafting",
+    batch_range="第1章",
+    target_files=["manuscript/第1章_开端.md"],
+    dispatch_dir=tmp_dir,
+)
+
+child = spawn_agent(
+    agent_type="worker",
+    fork_context=False,
+    message=payload["childPrompt"],
+)
+child_done = wait_agent(ids=[child.id], timeout_ms=180000)
+dispatch_dir = Path(payload["dispatchDir"])
+record_child_output(project_root, child_done["final_message"], dispatch_dir=dispatch_dir)
+applied = finalize_dispatch(project_root, dispatch_dir=dispatch_dir)
+```
+
+如果你只想理解运行时协议，先看：
+- `references/subagent-execution.md`
+- `references/subagent-dispatch-template.md`
+
 ## 使用方式
 
 ```bash

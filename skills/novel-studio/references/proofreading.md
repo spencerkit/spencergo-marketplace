@@ -6,6 +6,12 @@ Run consistency, logic, continuity, and OOC checks on the current approved batch
 
 Proofreading in this workflow is batch-scoped and should help determine whether the current batch is ready to be accepted, revised again, or rolled back.
 
+Default execution mechanism: proofreading uses a read-only proofreading subagent. The parent agent remains the orchestrator.
+The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, and accept or reject the returned proofreading report before reporting stage progress.
+Preferred parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
+The child still receives prompt text only; proofreading dispatch artifacts stay parent-side.
+Execution mechanism changes do not change proofreading-stage semantics.
+
 ---
 
 ## 2. Supporting diagnostic references
@@ -56,6 +62,8 @@ Default proofreading output should stay compact unless the user asks for detail:
 - conclusion first
 - top issues second
 - fix order third
+
+Proofreading is diagnostic. Do not do silent fixing during proofreading.
 
 ---
 
@@ -162,6 +170,8 @@ A valid proofreading result is:
 - continuity-aware
 - aligned with approved chapter intent
 - explicit about whether the batch can pass
+- if the judgment is acceptable, the report uses an explicit no-blocker conclusion instead of a hidden issue list
+- if the judgment is conditionally acceptable, the report records caveats through risks and fix direction rather than blocker entries
 - phrased in plain human language rather than generic workshop jargon
 
 Invalid proofreading includes:

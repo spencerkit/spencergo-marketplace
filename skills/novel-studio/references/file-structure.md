@@ -13,6 +13,9 @@ It should exist as a clean local file tree that supports:
 - final delivery
 - optional Feishu sync
 
+Execution packages used for drafting, polishing, or proofreading are runtime-only inline payloads.
+They are not canonical project artifacts and should not be persisted as part of the project file tree.
+
 ---
 
 ## 2. Root project directory
@@ -34,6 +37,8 @@ Use this layout by default:
 
 ```text
 /root/.openclaw/novels/[小说名称]/
+├── 00A_热点扫描.md
+├── 00B_用户偏好.md
 ├── 00_选题报告.md
 ├── 01_想法.md
 ├── 02_大纲.md
@@ -57,45 +62,83 @@ Optional extra files may exist when needed, but do not break the core structure.
 
 ## 4. Required top-level files
 
-### 4.1 `00_选题报告.md`
+### 4.1 `00A_热点扫描.md`
+Purpose:
+- store discovery-stage hot-search and trend-scan output
+- preserve the external market signal snapshot that informed topic selection
+
+Update timing:
+- create or refresh during discovery before final topic recommendation
+
+### 4.2 `00B_用户偏好.md`
+Purpose:
+- store the user preference capture for genre, platform, tone, constraints, and priorities
+- preserve the explicit intake record that shapes the discovery recommendation
+
+Update timing:
+- create during discovery after user discussion
+- revise when the user materially changes discovery constraints
+
+### 4.3 `00_选题报告.md`
 Purpose:
 - store topic research
 - store title recommendation logic
 - store final title confirmation
 - store audience and market positioning
 
-### 4.2 `01_想法.md`
+### 4.4 `01_想法.md`
 Purpose:
 - store story concept expansion
 - store core hook
 - store premise and emotional promise
 - store high-level story identity
 
-### 4.3 `02_大纲.md`
+### 4.5 `02_大纲.md`
 Purpose:
 - store outline structure
 - store major arcs
 - store turning points
 - store suspense and climax design
 
-### 4.4 `03_人物小传.md`
+### 4.6 `03_人物小传.md`
 Purpose:
 - store major character package summary
 - may serve as an index or overview before detailed split files exist
 
-### 4.5 `04_章节骨架.md`
+### 4.7 `04_章节骨架.md`
 Purpose:
 - store chapter-level or batch-level structural planning
 - store chapter progression notes
 - store draft guidance
 
-### 4.6 `06_反馈与修订.md`
+### 4.8 `05_前情回顾.md`
+Purpose:
+- store continuity-critical recap context after a batch closes
+- support later-batch restoration without relying on chat memory
+
+Update timing:
+- update only after the current batch passes downstream review and closes
+
+### 4.9 `05_本轮章节规划.md`
+Purpose:
+- store the approved chapter-plan package for the current drafting batch
+- define batch scope, chapter objectives, hooks, and local climaxes before prose drafting
+
+Ownership:
+- parent workflow produces and revises this file before drafting delegation
+- drafting subagents do not modify this planning artifact during execution
+
+Update timing:
+- create before drafting prose generation begins for the current batch
+- revise only during chapter-plan review within the drafting stage
+
+### 4.10 `06_反馈与修订.md`
 Purpose:
 - store the current active formal revision
 - store affected scope and revision plan
 - store the latest closed formal revision result
 
-### 4.7 `07_终审报告.md`
+### 4.11 `07_终审报告.md`
 Purpose:
 - store the latest final-review decision
 - store delivery readiness judgment
@@ -196,6 +239,8 @@ Names should be readable by humans and easy to map into Feishu Wiki.
 
 A project is minimally structured when it has:
 - a root project directory
+- `00A_热点扫描.md`
+- `00B_用户偏好.md`
 - `00_选题报告.md`
 - `01_想法.md`
 - `02_大纲.md`
@@ -217,6 +262,8 @@ A project is strongly structured when it also has:
 ## 9. Stage-to-file mapping
 
 ### Intake / topic stage
+- populate `00A_热点扫描.md`
+- populate `00B_用户偏好.md`
 - populate `00_选题报告.md`
 
 ### Idea expansion stage
@@ -231,6 +278,7 @@ A project is strongly structured when it also has:
 - populate `characters/*.md`
 
 ### Drafting stage
+- populate `05_本轮章节规划.md`
 - populate `manuscript/*.md`
 
 ### Revision stage

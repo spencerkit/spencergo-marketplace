@@ -26,6 +26,32 @@ def default_review() -> dict:
     }
 
 
+def default_batch() -> dict:
+    return {
+        'active': False,
+        'chapterRange': None,
+        'chapterCount': None,
+        'scopeConfirmed': False,
+        'chapterPlanExists': False,
+        'chapterPlanApproved': False,
+        'draftComplete': False,
+        'polishingComplete': False,
+        'proofreadingComplete': False,
+        'recapUpdated': False,
+        'awaitingNextBatchDecision': False,
+        'focus': None,
+        'attractionPoints': [],
+        'climaxTarget': None,
+        'lastDelegatedStage': None,
+        'lastDelegatedScope': None,
+        'lastDelegationStatus': None,
+        'lastDelegationSummary': None,
+        'lastDelegationBlockers': [],
+        'lastDelegationRisks': [],
+        'lastDelegatedAt': None,
+    }
+
+
 def base_state(project: Path) -> dict:
     return {
         'project': {'title': project.name, 'rootPath': str(project)},
@@ -38,7 +64,7 @@ def base_state(project: Path) -> dict:
         },
         'approvals': {},
         'artifacts': {},
-        'batch': {},
+        'batch': default_batch(),
         'review': default_review(),
         'revision': {},
         'blockingIssues': [],
@@ -77,6 +103,12 @@ def normalize_state(data: dict, project: Path) -> dict:
     revision = default_revision()
     revision.update(normalized.get('revision', {}))
     normalized['revision'] = revision
+    batch = default_batch()
+    batch.update(normalized.get('batch', {}))
+    batch['attractionPoints'] = list(batch.get('attractionPoints', []))
+    batch['lastDelegationBlockers'] = list(batch.get('lastDelegationBlockers', []))
+    batch['lastDelegationRisks'] = list(batch.get('lastDelegationRisks', []))
+    normalized['batch'] = batch
     normalized.setdefault('blockingIssues', [])
     return normalized
 

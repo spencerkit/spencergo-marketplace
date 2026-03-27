@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import argparse
 import json, sys
 from datetime import datetime, timezone
 
@@ -36,15 +37,21 @@ def parse_value(raw):
     return raw
 
 
-def main():
-    if len(sys.argv) < 4:
-        print('Usage: update_project_state.py <项目目录> <section.key> <value>')
-        sys.exit(1)
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('project')
+    parser.add_argument('field')
+    parser.add_argument('value')
+    parser.add_argument('--json', action='store_true', dest='json_mode')
+    return parser.parse_args()
 
-    project = Path(sys.argv[1]).expanduser()
+
+def main():
+    args = parse_args()
+    project = Path(args.project).expanduser()
     state_file = project / '.novel-state.json'
-    field = sys.argv[2]
-    value = parse_value(sys.argv[3])
+    field = args.field
+    value = json.loads(args.value) if args.json_mode else parse_value(args.value)
 
     data = load_or_init(state_file, project)
 

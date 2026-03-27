@@ -29,6 +29,26 @@ Default order:
 6. Proofreading stage
 7. Final review and delivery stage
 
+## Subagent execution defaults
+
+- `drafting`, `polishing`, and `proofreading` default to subagent execution
+- the parent agent is the orchestrator
+- assemble a curated execution package before delegation
+- delegate with `fork_context = false`
+- prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch` as the parent runtime loop
+- `scripts/subagent_dispatch_runtime.py` exposes `prepare_dispatch`, `record_child_output`, and `finalize_dispatch` for Python parents
+- `prepare_dispatch(...)` generates the child prompt plus parent-side dispatch artifacts
+- child agents still receive prompt text, not local artifact paths
+- `record_child_output(...)` stores raw child output parent-side only
+- `finalize_dispatch(...)` runs extract + validate + apply before state advancement
+- build the execution bundle with `scripts/build_stage_execution_package.py`
+- extract the child JSON result with `scripts/extract_stage_subagent_result.py`
+- validate child results with `scripts/validate_stage_execution_result.py`
+- apply accepted results with `scripts/apply_stage_execution_result.py`
+- validate delegated outputs before advancing workflow state
+- fail closed on protocol or content failure
+- no silent inline fallback for these stages
+
 ## Explicit exploration-mode rule
 
 Do not enter brainstorming / exploration mode unless the user explicitly asks for it.
@@ -117,10 +137,15 @@ Use these reference files as **hard operational guidance**, not optional inspira
 - `references/character-bible.md` — character profiles, motivation, arc, relationship structure, and drafting gate requirements
 - `references/character-craft.md` — attraction design, contradiction, scene-based characterization, environment/other-character contrast, and memorable-role construction
 - `references/drafting.md` — chapter drafting rules, pacing, hooks, anti-perfunctory drafting rules, and polishing gate requirements
+- `references/subagent-drafting.md` — runtime drafting-subagent delegation defaults and parent acceptance requirements
 - `references/language-and-rhetoric.md` — scene-function-based style choice, rhetoric usage, literary device control, and language misuse warnings
 - `references/narrative-techniques.md` — suppression/release, reversal, information-gap propulsion, pressure design, and chapter/arc narrative engines
 - `references/polishing.md` — language refinement, emotional density, readability, de-AI cleanup, and proofreading gate requirements
+- `references/subagent-polishing.md` — runtime polishing-subagent delegation defaults and parent acceptance requirements
 - `references/proofreading.md` — consistency checks, logic review, OOC control, structural QA, and final-review gate requirements
+- `references/subagent-proofreading.md` — runtime proofreading-subagent delegation defaults and parent acceptance requirements
+- `references/subagent-execution.md` — shared subagent execution protocol, inline execution package rules, and fail-closed behavior
+- `references/subagent-dispatch-template.md` — concrete parent-agent dispatch skeleton, child prompt template, helper-based runtime loop, and validate/apply sequence
 - `references/literary-diagnostics.md` — diagnosis of plot flatness, weak characterization, useless subplots, dull chapters, and ineffective language before revision
 - `references/scoring-rubric.md` — structured scoring for outlines, characters, chapters, and review readiness
 - `references/chapter-review-template.md` — fixed editor-style chapter/batch review template with diagnosis and repair priorities

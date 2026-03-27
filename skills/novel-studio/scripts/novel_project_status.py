@@ -24,6 +24,7 @@ def yn(v):
 
 def gate_text(gate):
     mapping = {
+        'waiting_draft_feedback': '等待你确认本轮初稿结果',
         'waiting_chapter_plan_approval': '等待你确认本轮章节规划',
         'waiting_polishing_feedback': '等待你确认本轮润色结果',
         'waiting_proofreading_feedback': '等待你确认本轮校对结果',
@@ -48,6 +49,15 @@ def review_summary_text(review):
 
 def review_blockers(review):
     return list(review.get('finalBlockingIssues') or [])
+
+
+def delegation_text(batch):
+    stage = batch.get('lastDelegatedStage')
+    status = batch.get('lastDelegationStatus')
+    scope = batch.get('lastDelegatedScope')
+    if not stage or not status:
+        return '无'
+    return f'{stage} / {status} / {scope or "无范围"}'
 
 
 def rollback_stage_text(state):
@@ -153,6 +163,7 @@ def main():
         print(f'终审结论：{review_decision_text(review)}')
         print(f'可交付：{review_delivery_text(review)}')
         print(f'终审摘要：{review_summary_text(review)}')
+        print(f'最近委派：{delegation_text(batch)}')
         print(f'最近正式反馈：{revision.get("feedbackSummary") or review.get("lastUserFeedbackSummary") or "无"}')
         print(f'建议下一步：{next_step(state, project)}')
         return
@@ -179,6 +190,10 @@ def main():
     print(f'focus：{batch.get("focus") or "无"}')
     print(f'attraction points：{", ".join(batch.get("attractionPoints", [])) or "无"}')
     print(f'climax target：{batch.get("climaxTarget") or "无"}')
+    print(f'最近委派：{delegation_text(batch)}')
+    print(f'委派摘要：{batch.get("lastDelegationSummary") or "无"}')
+    print(f'委派阻塞：{", ".join(batch.get("lastDelegationBlockers", [])) or "无"}')
+    print(f'委派风险：{", ".join(batch.get("lastDelegationRisks", [])) or "无"}')
     print()
 
     print('[审批状态]')

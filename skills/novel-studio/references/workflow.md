@@ -224,13 +224,21 @@ Return to character system if drafting reveals role collapse or OOC caused by we
 ### Goal
 Produce real draft chapters under explicit user supervision.
 
+Execution mechanism default: parent-orchestrated drafting subagent execution. Stage semantics do not change.
+The parent agent validates prerequisites, delegates drafting work to the drafting subagent, then accepts or rejects the returned batch before reporting to the user.
+Default parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
+The parent still sends only `childPrompt` to the child subagent and keeps dispatch artifacts parent-side.
+The drafting subagent must not be dispatched until the chapter-plan package for the target batch exists and is explicitly approved.
+
 ### Internal sub-steps
 1. define or confirm style baseline if needed
-2. draft target chapter batch
-3. self-check draft batch
-4. structured stage report / batch report
-5. iterative revision with user
-6. explicit approval gate for next batch or next stage
+2. generate or confirm chapter-plan package for the target batch
+3. revise the chapter-plan package until explicitly approved
+4. draft target chapter batch
+5. self-check draft batch
+6. structured stage report / batch report
+7. iterative revision with user
+8. explicit approval gate for next batch or next stage
 
 ### Required input
 - usable outline
@@ -240,16 +248,19 @@ Produce real draft chapters under explicit user supervision.
 ### Forbidden to start if
 - planning stage is incomplete
 - character stage is incomplete
+- the target batch cannot yet be turned into a usable chapter-plan package
 - chapter intent is structurally ambiguous
 
 ### Required output
 This stage must produce:
+- an approved chapter-plan package for the target batch
 - manuscript files for the target chapter range
 - prose chapters, not only summaries
 - stage report or batch report for user review
 
 ### Completion standard
 This stage is complete only if:
+- an approved chapter-plan package exists for the intended chapter range
 - manuscript files exist for the intended chapter range
 - chapters materially move story, tension, or character
 - the text is prose, not outline fragments
@@ -272,6 +283,10 @@ Return to planning or character system if drafting repeatedly breaks due to upst
 ### Goal
 Refine the draft range into a more readable, more human, more emotionally effective version.
 
+Execution mechanism default: parent-orchestrated polishing subagent execution. Stage semantics do not change.
+The parent agent validates prerequisites, delegates polishing work to the polishing subagent, then accepts or rejects the returned batch before reporting to the user.
+Default parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
+
 ### Internal sub-steps
 1. polish target range
 2. reduce AI texture
@@ -281,16 +296,23 @@ Refine the draft range into a more readable, more human, more emotionally effect
 6. explicit approval gate
 
 ### Required input
-- stable draft manuscript for the target range
+- approved draft batch for the target range
+- corresponding chapter-plan package for the target range
+- usable outline
+- usable character package
 - style baseline or tone target
 
 ### Forbidden to start if
+- draft stage approval is missing
+- chapter-plan package is missing
 - manuscript is still under major structural rewrite
 - target range is incomplete
 
 ### Required output
 This stage must produce:
 - polished target range
+- a substantive editorial review
+- explicit optimization suggestions
 - a polishing-stage report for user review
 
 ### Completion standard
@@ -298,11 +320,16 @@ This stage is complete only if:
 - the intended target range is fully polished
 - obvious machine texture is materially reduced
 - readability is materially improved
+- a substantive editorial review exists
+- explicit optimization suggestions exist
 - the user explicitly approves the polished result
 
 ### Do not advance if
 - polishing covers only part of the intended range
+- the review is vague or empty
 - obvious AI texture still dominates
+- scene-tone mismatch remains unresolved
+- obvious outline/style mismatch remains unresolved
 - the user has unresolved objections
 - user approval to advance is missing
 
@@ -316,6 +343,10 @@ Return to drafting if the text is too structurally weak to rescue via polishing.
 ### Goal
 Run consistency, logic, continuity, and OOC checks before final review.
 
+Execution mechanism default: parent-orchestrated proofreading subagent execution. Stage semantics do not change.
+The parent agent validates prerequisites, delegates proofreading work to the proofreading subagent, then accepts or rejects the returned report before reporting to the user.
+Default parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
+
 ### Internal sub-steps
 1. continuity check
 2. logic check
@@ -326,18 +357,24 @@ Run consistency, logic, continuity, and OOC checks before final review.
 7. explicit approval gate
 
 ### Required input
-- polished manuscript
+- polished current batch
+- approved chapter-plan package for the current batch
 - usable outline
 - usable character package
+- recap context when relevant
 
 ### Forbidden to start if
 - no polished manuscript exists for the target range
 - major rewrite is still ongoing
+- chapter-plan package is missing
 
 ### Required output
 This stage must produce:
-- proofreading result
+- continuity check result
+- logic check result
+- OOC / character consistency check result
 - issue list or explicit no-blocker statement
+- fix direction when issues exist
 - a proofreading-stage report for user review
 
 ### Completion standard
@@ -346,12 +383,15 @@ This stage is complete only if:
 - logic has been checked
 - character consistency / OOC has been checked
 - blocking issues are either resolved or explicitly recorded
+- the report clearly states whether the batch is acceptable, conditionally acceptable, or needs revision
 - the user explicitly approves advancement
 
 ### Do not advance if
 - checks were not actually performed
 - blocking contradictions remain unresolved
 - severe OOC remains unresolved
+- the batch no longer matches the approved chapter plan
+- the batch drifts from the outline or intended style in a major way
 - the user has unresolved objections
 - user approval to advance is missing
 

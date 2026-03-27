@@ -12,7 +12,7 @@ Use this table as a quick audit sheet for the current `novel-studio` design.
 | Character system stage | `character-bible.md` | 定义主角、核心配角、反派、关系、动机、冲突、弧线 | `03_人物小传.md`、`characters/*.md` |
 | Drafting stage | `drafting.md` | 生成真实章节初稿、章节推进、批次写作、自检、防敷衍 | `manuscript/*.md` |
 | Polishing stage | `polishing.md` | 润色正文、去AI痕迹、提高清晰度、节奏和情绪表现 | 润色后的 `manuscript/*.md` |
-| Proofreading stage | `proofreading.md` | 做 continuity / logic / OOC / consistency 检查，形成问题清单或无阻塞结论 | 校对结论、修订建议、修订后的 `manuscript/*.md` |
+| Proofreading stage | `proofreading.md` | 做 continuity / logic / OOC / consistency 检查，形成问题清单或无阻塞结论，并给出明确 gate judgment | 校对结论、修订建议、明确 judgment |
 | Final review and delivery stage | `final-review.md` | 做最终交付判断：pass / conditional pass / rework required | 最终评审结论、交付说明 |
 | Final review and delivery stage | `file-structure.md` | 规定项目目录、命名、顶层文件、characters / manuscript 结构 | 完整项目目录结构 |
 | Final review and delivery stage | `feishu-sync.md` | 规定飞书 Wiki 同步逻辑、目录映射、节点创建规则 | 可选 Feishu Wiki 同步结果 |
@@ -43,7 +43,7 @@ Use this table as a quick audit sheet for the current `novel-studio` design.
 
 ### Proofreading stage
 - 目标：拦截逻辑、一致性、人设问题
-- 交付：校对结果 + 修订稿
+- 交付：校对结果 + 修订建议 + 明确 judgment
 
 ### Final review and delivery stage
 - 目标：判断能否交付，并完成交付/同步

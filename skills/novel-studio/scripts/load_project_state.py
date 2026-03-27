@@ -3,7 +3,7 @@ from pathlib import Path
 import json, sys
 import re
 
-from revision_utils import default_review, default_revision, normalize_state, set_revision_blocker
+from revision_utils import default_batch, default_review, default_revision, normalize_state, set_revision_blocker
 
 
 def exists_nonempty(path: Path) -> bool:
@@ -172,20 +172,9 @@ def reconstruct(project: Path):
             'feishuSynced': False,
         },
         'batch': {
-            'active': False,
-            'chapterRange': None,
-            'chapterCount': None,
-            'scopeConfirmed': False,
+            **default_batch(),
             'chapterPlanExists': exists_nonempty(project / '05_本轮章节规划.md'),
-            'chapterPlanApproved': False,
-            'draftComplete': False,
-            'polishingComplete': False,
-            'proofreadingComplete': False,
             'recapUpdated': exists_nonempty(project / '05_前情回顾.md'),
-            'awaitingNextBatchDecision': False,
-            'focus': None,
-            'attractionPoints': [],
-            'climaxTarget': None,
         },
         'review': {
             **default_review(),

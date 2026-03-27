@@ -12,6 +12,12 @@ It must include:
 - concrete optimization advice
 - user review loop
 
+Default execution mechanism: polishing uses a polishing subagent. The parent agent remains the orchestrator.
+The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, require an explicit `polishingFocus`, and accept or reject the returned polishing package before reporting stage progress.
+Preferred parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
+Use `scripts/subagent_dispatch_runtime.py` when the parent is coordinating polishing in Python.
+Execution mechanism changes do not change polishing-stage semantics.
+
 ---
 
 ## 2. Required input
