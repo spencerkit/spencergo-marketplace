@@ -2517,6 +2517,62 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(state['review']['currentGate'], 'waiting_proofreading_feedback')
             self.assertEqual(state['review']['pendingArtifactPaths'], ['05A_本轮校对报告.md'])
 
+    def test_apply_stage_execution_result_updates_chapter_progress_before_batch_summary_fields(self):
+        module = self.load_script_module('apply_stage_execution_result')
+
+        events: list[str] = []
+
+        class TrackingDict(dict):
+            def __setitem__(self, key, value):
+                events.append(f'set:{key}')
+                super().__setitem__(key, value)
+
+        original_apply = module.apply_result_to_chapters
+        try:
+            def fake_apply_result_to_chapters(batch, phase, chapter_labels, target_files, result):
+                events.append('call:apply_result_to_chapters')
+                return batch
+
+            module.apply_result_to_chapters = fake_apply_result_to_chapters
+
+            data = {
+                'batch': TrackingDict(
+                    {
+                        'draftComplete': False,
+                        'polishingComplete': False,
+                        'proofreadingComplete': False,
+                    }
+                ),
+                'workflow': {},
+                'review': {},
+                'artifacts': {},
+            }
+            validated = {
+                'stage': 'drafting',
+                'package': {
+                    'batchRange': '第1章',
+                    'targetFiles': ['manuscript/第1章_开端.md'],
+                    'requiredInputs': {'chapterLabels': ['第1章']},
+                },
+                'result': {
+                    'status': 'completed',
+                    'summary': '已完成第1章初稿',
+                    'risks': [],
+                    'blockedReasons': [],
+                },
+            }
+
+            module.apply_validated_state(data, validated)
+        finally:
+            module.apply_result_to_chapters = original_apply
+
+        self.assertIn('call:apply_result_to_chapters', events)
+        self.assertIn('set:lastDelegatedStage', events)
+        self.assertLess(
+            events.index('call:apply_result_to_chapters'),
+            events.index('set:lastDelegatedStage'),
+        )
+
     def test_status_shows_opening_gate_when_drafting_not_ready(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = self.create_runtime_project(

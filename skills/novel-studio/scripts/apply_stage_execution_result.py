@@ -50,6 +50,13 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     for key, value in base_result_summary_fields().items():
         batch.setdefault(key, value if not isinstance(value, list) else list(value))
 
+    apply_result_to_chapters(
+        batch,
+        stage,
+        package['requiredInputs']['chapterLabels'],
+        package['targetFiles'],
+        result,
+    )
     blockers = delegation_blockers(validated)
     batch['lastDelegatedStage'] = stage
     batch['lastDelegatedScope'] = package.get('batchRange')
@@ -58,13 +65,6 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     batch['lastDelegationBlockers'] = blockers
     batch['lastDelegationRisks'] = list(result.get('risks') or [])
     batch['lastDelegatedAt'] = now_iso()
-    apply_result_to_chapters(
-        batch,
-        stage,
-        package['requiredInputs']['chapterLabels'],
-        package['targetFiles'],
-        result,
-    )
 
     workflow = data.setdefault('workflow', {})
     review = data.setdefault('review', {})
