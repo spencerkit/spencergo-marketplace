@@ -104,6 +104,35 @@ class SupervisorPersistenceTest(unittest.TestCase):
             state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
             self.assertEqual(state['workflow']['status'], 'awaiting_user_approval')
 
+    def test_load_state_pending_artifacts_force_awaiting_user_approval_without_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            (project / '00_选题报告.md').write_text('# 选题报告\n\n## 推荐方向\n- 规则异变都市\n', encoding='utf-8')
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'discovery',
+                        'currentSubstage': None,
+                        'lastCompletedStage': None,
+                        'nextStage': 'story-planning',
+                        'status': 'collecting_inputs',
+                    },
+                    'review': {
+                        'currentGate': None,
+                        'pendingArtifactPaths': ['00_选题报告.md'],
+                    },
+                },
+            )
+
+            result = run_script('load_project_state.py', str(project))
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['workflow']['status'], 'awaiting_user_approval')
+
     def test_check_stage_ready_rejects_advancement_with_open_pending_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'

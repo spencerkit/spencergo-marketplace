@@ -305,7 +305,7 @@ def normalize_supervisor_state(normalized: dict):
     artifacts = normalized.setdefault('artifacts', {})
     artifacts['proofreadingReport'] = bool(artifacts.get('proofreadingReport'))
 
-    if review['pendingArtifactPaths'] and review.get('currentGate'):
+    if review['pendingArtifactPaths']:
         workflow['status'] = 'awaiting_user_approval'
 
     return normalized
