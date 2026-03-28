@@ -2274,20 +2274,23 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             root = Path(tmp)
             relpath = 'manuscript/第1章_开端.md'
             project = self.create_runtime_project(root, current_stage='drafting')
-            bundle_result = run_script(
-                'build_stage_execution_package.py',
+            bundle_file = root / 'bundle.json'
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
                 str(project),
                 'drafting',
                 '--batch-range',
                 '第1章',
                 '--target-file',
                 relpath,
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
             )
-            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
 
-            bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
 
             (project / relpath).write_text('# 第一章\n\n正文', encoding='utf-8')
             self.write_json(
@@ -2315,16 +2318,15 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
             task = state['batch']['chapterTasks'][0]
+            summaries = [item['summary'] for item in state['batch']['pendingProgressItems']]
             self.assertEqual(task['chapterLabel'], '第1章')
             self.assertEqual(task['phase'], 'drafting')
             self.assertEqual(task['phaseStatus'], 'awaiting_user_review')
             self.assertEqual(task['manuscriptPath'], relpath)
             self.assertEqual(task['blockers'], [])
             self.assertEqual(task['lastSummary'], '第1章初稿待审核')
-            self.assertIn(
-                '第1章初稿待审核',
-                [item['summary'] for item in state['batch']['pendingProgressItems']],
-            )
+            self.assertEqual(summaries, ['第1章初稿待审核'])
+            self.assertNotIn('第1章初稿中', summaries)
 
     def test_apply_stage_execution_result_marks_blocked_chapter(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2336,20 +2338,23 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                 batch={'draftComplete': True},
                 manuscript_files={relpath: '# 第一章\n\n正文'},
             )
-            bundle_result = run_script(
-                'build_stage_execution_package.py',
+            bundle_file = root / 'bundle.json'
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
                 str(project),
                 'polishing',
                 '--batch-range',
                 '第1章',
                 '--polishing-focus',
                 '压缩开篇节奏',
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
             )
-            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
 
-            bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
             self.write_json(
                 result_file,
                 {
@@ -2375,16 +2380,83 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
             task = state['batch']['chapterTasks'][0]
+            summaries = [item['summary'] for item in state['batch']['pendingProgressItems']]
             self.assertEqual(task['chapterLabel'], '第1章')
             self.assertEqual(task['phase'], 'polishing')
             self.assertEqual(task['phaseStatus'], 'blocked')
             self.assertEqual(task['manuscriptPath'], relpath)
             self.assertEqual(task['blockers'], ['人物口吻漂移'])
             self.assertEqual(task['lastSummary'], '第1章阻塞：人物口吻漂移')
-            self.assertIn(
-                '第1章阻塞：人物口吻漂移',
-                [item['summary'] for item in state['batch']['pendingProgressItems']],
+            self.assertEqual(summaries, ['第1章阻塞：人物口吻漂移'])
+            self.assertNotIn('第1章润色中', summaries)
+
+    def test_apply_stage_execution_result_preserves_proofreading_revision_blockers_in_chapter_progress(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(
+                root,
+                current_stage='proofreading',
+                manuscript_files={'manuscript/第1章_开端.md': '# 第一章\n\n正文'},
+                batch={'draftComplete': True, 'polishingComplete': True},
             )
+            bundle_file = root / 'proofreading-bundle.json'
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            result_file = root / 'proofreading-result.json'
+            self.write_proofreading_report(
+                project,
+                '# 05A_本轮校对报告\n\n- judgment: needs revision\n- summary: 需要回修\n',
+            )
+            self.write_json(
+                result_file,
+                {
+                    'status': 'completed',
+                    'changedFiles': [],
+                    'createdFiles': ['05A_本轮校对报告.md'],
+                    'blockedReasons': [],
+                    'summary': '本轮校对完成，但需要回修',
+                    'notesForNextStage': '等待审核后回修',
+                    'risks': [],
+                    'judgment': 'needs revision',
+                    'continuity': '存在断点',
+                    'logic': '存在漏洞',
+                    'characterOOC': '轻微',
+                    'blockers': ['结尾信息缺口'],
+                    'fixDirection': '补足关键解释并重写结尾段落',
+                },
+            )
+
+            apply_result = run_script(
+                'apply_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertEqual(apply_result.returncode, 0, apply_result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            task = state['batch']['chapterTasks'][0]
+            summaries = [item['summary'] for item in state['batch']['pendingProgressItems']]
+            self.assertEqual(task['chapterLabel'], '第1章')
+            self.assertEqual(task['phase'], 'proofreading')
+            self.assertEqual(task['phaseStatus'], 'blocked')
+            self.assertEqual(task['blockers'], ['结尾信息缺口'])
+            self.assertEqual(task['lastSummary'], '第1章阻塞：结尾信息缺口')
+            self.assertEqual(summaries, ['第1章阻塞：结尾信息缺口'])
+            self.assertNotIn('第1章校对中', summaries)
 
     def test_finalize_proofreading_dispatch_persists_report_and_pending_artifact(self):
         with tempfile.TemporaryDirectory() as tmp:

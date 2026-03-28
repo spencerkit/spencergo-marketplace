@@ -159,6 +159,16 @@ def append_progress_event(
     return event
 
 
+def drop_pending_progress_for_chapter(batch: dict, chapter_label: str) -> dict:
+    normalize_progress_batch(batch)
+    batch['pendingProgressItems'] = [
+        item
+        for item in batch['pendingProgressItems']
+        if not isinstance(item, dict) or item.get('chapterLabel') != chapter_label
+    ]
+    return batch
+
+
 def has_pending_progress_event(
     batch: dict,
     chapter_label: str,
@@ -246,8 +256,12 @@ def apply_result_to_chapters(
             manuscript_paths_by_label[chapter_label] = relpath
 
     if status == 'completed':
-        phase_status = 'awaiting_user_review'
-        blockers: list[str] = []
+        if phase == 'proofreading' and result.get('judgment') == 'needs revision':
+            phase_status = 'blocked'
+            blockers = list(result.get('blockers') or [])
+        else:
+            phase_status = 'awaiting_user_review'
+            blockers = []
     elif status in {'blocked', 'needs_clarification'}:
         phase_status = 'blocked'
         blockers = list(result.get('blockedReasons') or [])
@@ -264,6 +278,7 @@ def apply_result_to_chapters(
         task['blockers'] = list(blockers)
         task['lastSummary'] = summary
         task['updatedAt'] = timestamp
+        drop_pending_progress_for_chapter(batch, chapter_label)
         if not has_pending_progress_event(batch, chapter_label, phase, phase_status, summary, blockers):
             append_progress_event(batch, chapter_label, phase, phase_status, summary, blockers)
 
