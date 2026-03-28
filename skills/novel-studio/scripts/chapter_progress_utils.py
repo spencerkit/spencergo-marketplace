@@ -158,6 +158,31 @@ def append_progress_event(
     return event
 
 
+def has_pending_progress_event(
+    batch: dict,
+    chapter_label: str,
+    phase: str,
+    phase_status: str,
+    summary: str,
+    blockers: list[str] | None = None,
+) -> bool:
+    normalize_progress_batch(batch)
+    expected_blockers = list(blockers or [])
+    for item in batch['pendingProgressItems']:
+        if not isinstance(item, dict):
+            continue
+        if item.get('chapterLabel') != chapter_label:
+            continue
+        if item.get('phase') != phase or item.get('phaseStatus') != phase_status:
+            continue
+        if item.get('summary') != summary:
+            continue
+        if list(item.get('blockers') or []) != expected_blockers:
+            continue
+        return True
+    return False
+
+
 def mark_dispatch_started(batch: dict, phase: str, chapter_labels: list[str], target_files: list[str]) -> dict:
     normalize_progress_batch(batch)
     timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
@@ -177,13 +202,22 @@ def mark_dispatch_started(batch: dict, phase: str, chapter_labels: list[str], ta
     for chapter_label in chapter_labels:
         task = ensure_chapter_task(batch, chapter_label)
         summary = human_summary(chapter_label, phase, 'in_progress')
-        task['phase'] = phase
-        task['phaseStatus'] = 'in_progress'
-        if chapter_label in manuscript_paths_by_label:
-            task['manuscriptPath'] = manuscript_paths_by_label[chapter_label]
-        task['lastSummary'] = summary
-        task['blockers'] = []
-        task['updatedAt'] = timestamp
-        append_progress_event(batch, chapter_label, phase, 'in_progress', summary)
+        expected_manuscript_path = manuscript_paths_by_label.get(chapter_label, task.get('manuscriptPath'))
+        task_needs_update = (
+            task.get('phase') != phase
+            or task.get('phaseStatus') != 'in_progress'
+            or task.get('manuscriptPath') != expected_manuscript_path
+            or task.get('lastSummary') != summary
+            or list(task.get('blockers') or []) != []
+        )
+        if task_needs_update:
+            task['phase'] = phase
+            task['phaseStatus'] = 'in_progress'
+            task['manuscriptPath'] = expected_manuscript_path
+            task['lastSummary'] = summary
+            task['blockers'] = []
+            task['updatedAt'] = timestamp
+        if not has_pending_progress_event(batch, chapter_label, phase, 'in_progress', summary):
+            append_progress_event(batch, chapter_label, phase, 'in_progress', summary)
 
     return batch

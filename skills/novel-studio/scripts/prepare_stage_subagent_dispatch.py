@@ -11,11 +11,14 @@ from build_stage_execution_package import build_bundle
 from chapter_progress_utils import mark_dispatch_started
 from revision_utils import load_state, save_state
 from stage_execution_utils import (
+    bundle_fingerprint_payload,
     build_bundle_manifest,
     build_child_prompt,
     dispatch_layout,
     ensure_outside_project,
     ensure_project,
+    payload_digest,
+    snapshot_project,
 )
 
 
@@ -89,6 +92,15 @@ def build_prepare_namespace(
     )
 
 
+def refresh_bundle_validation_context(project: Path, bundle: dict[str, object]) -> None:
+    validation = bundle['validationContext']
+    baseline_files = snapshot_project(project)
+    validation['baselineFiles'] = baseline_files
+    validation['baselineFilesDigest'] = payload_digest(baseline_files)
+    validation['executionPackageDigest'] = payload_digest(bundle['executionPackage'])
+    validation['bundleFingerprint'] = payload_digest(bundle_fingerprint_payload(validation))
+
+
 def prepare_dispatch_payload(args: argparse.Namespace) -> dict[str, object]:
     project = ensure_project(Path(args.project))
     bundle = build_bundle(args)
@@ -113,11 +125,6 @@ def prepare_dispatch_payload(args: argparse.Namespace) -> dict[str, object]:
         else layout['manifestFile']
     )
 
-    bundle_file.write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding='utf-8')
-    prompt_file.write_text(prompt, encoding='utf-8')
-    manifest = build_bundle_manifest(bundle_file, bundle, prompt_file=prompt_file, prompt_text=prompt)
-    manifest_file.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
-
     state = load_state(project)
     package = bundle['executionPackage']
     mark_dispatch_started(
@@ -127,6 +134,12 @@ def prepare_dispatch_payload(args: argparse.Namespace) -> dict[str, object]:
         package['targetFiles'],
     )
     save_state(project, state)
+    refresh_bundle_validation_context(project, bundle)
+
+    bundle_file.write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding='utf-8')
+    prompt_file.write_text(prompt, encoding='utf-8')
+    manifest = build_bundle_manifest(bundle_file, bundle, prompt_file=prompt_file, prompt_text=prompt)
+    manifest_file.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
 
     return {
         'dispatchDir': str(dispatch_dir),

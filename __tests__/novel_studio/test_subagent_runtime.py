@@ -565,6 +565,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                         'batchRange': '第1章',
                         'outline': (project / '02_大纲.md').read_text(encoding='utf-8'),
                         'batchPlan': (project / '05_本轮章节规划.md').read_text(encoding='utf-8'),
+                        'chapterLabels': ['第1章'],
                         'characterFiles': {
                             '03_人物小传.md': (project / '03_人物小传.md').read_text(encoding='utf-8'),
                         },
@@ -2426,6 +2427,84 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                 '第1章初稿中',
                 [item['summary'] for item in state['batch']['pendingProgressItems']],
             )
+
+    def test_prepare_dispatch_reuses_in_progress_state_without_duplicate_pending_progress_items(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(root, current_stage='drafting')
+            dispatch_dir = root / 'dispatch'
+
+            for _ in range(2):
+                result = run_script(
+                    'prepare_stage_subagent_dispatch.py',
+                    str(project),
+                    'drafting',
+                    '--batch-range',
+                    '第1章',
+                    '--target-file',
+                    'manuscript/第1章_开端.md',
+                    '--dispatch-dir',
+                    str(dispatch_dir),
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(
+                [item['summary'] for item in state['batch']['pendingProgressItems']],
+                ['第1章初稿中'],
+            )
+
+    def test_prepare_dispatch_keeps_bundle_baseline_compatible_with_finalize_validation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(root, current_stage='drafting')
+            bundle_file = root / 'bundle.json'
+            manifest_file = root / 'manifest.json'
+            result_file = root / 'result.json'
+            validated_file = root / 'validated.json'
+
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'drafting',
+                '--batch-range',
+                '第1章',
+                '--target-file',
+                'manuscript/第1章_开端.md',
+                '--bundle-file',
+                str(bundle_file),
+                '--manifest-file',
+                str(manifest_file),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            (project / 'manuscript' / '第1章_开端.md').write_text('# 第一章\n\n正文', encoding='utf-8')
+            self.write_json(
+                result_file,
+                {
+                    'status': 'completed',
+                    'changedFiles': [],
+                    'createdFiles': ['manuscript/第1章_开端.md'],
+                    'blockedReasons': [],
+                    'summary': '已完成第1章初稿',
+                    'notesForNextStage': '进入润色',
+                    'risks': [],
+                },
+            )
+
+            finalize = run_script(
+                'finalize_stage_subagent_dispatch.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--manifest-file',
+                str(manifest_file),
+                '--result-file',
+                str(result_file),
+                '--validated-file',
+                str(validated_file),
+            )
+            self.assertEqual(finalize.returncode, 0, finalize.stderr)
 
     def test_prepare_dispatch_supports_dispatch_dir_standard_layout(self):
         with tempfile.TemporaryDirectory() as tmp:
