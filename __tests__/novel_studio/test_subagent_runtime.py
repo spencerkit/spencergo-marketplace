@@ -700,13 +700,17 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             self.write_json(
                 result_file,
                 {
                     'status': 'completed',
                     'changedFiles': [],
-                    'createdFiles': [],
+                    'createdFiles': ['05A_本轮校对报告.md'],
                     'blockedReasons': [],
                     'summary': '已完成校对',
                     'notesForNextStage': '',
@@ -882,6 +886,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
 
             bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
             bundle['executionPackage']['outputContract']['requiredStageFields'] = ['judgment']
             self.refresh_bundle_digests(bundle)
             bundle_file = root / 'bundle.json'
@@ -1233,6 +1238,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
 
             bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
             del bundle['executionPackage']['requiredInputs']['manuscriptFiles']
             self.refresh_bundle_digests(bundle)
             bundle_file = root / 'bundle.json'
@@ -1520,6 +1526,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
 
             bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
             bundle['executionPackage']['requiredInputs']['manuscriptFiles'] = {
                 'manuscript/第9章_伪造.md': '# 第九章\n\n伪造内容'
             }
@@ -1879,7 +1886,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
             self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['blockedReasons'] = ['还有阻塞']
@@ -1917,7 +1927,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
             self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['blockers'] = ['仍有连续性问题']
@@ -1955,7 +1968,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
             self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['judgment'] = 'conditionally acceptable'
@@ -1998,7 +2014,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
             self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['judgment'] = 'conditionally acceptable'
@@ -2087,7 +2106,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
             self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['continuity'] = ''
@@ -2124,7 +2146,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
             self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['judgment'] = 'needs revision'
