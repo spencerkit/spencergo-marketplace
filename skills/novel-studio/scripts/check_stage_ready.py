@@ -15,6 +15,13 @@ def count_md(dirpath: Path) -> int:
     return len(list(dirpath.glob('*.md'))) if dirpath.is_dir() else 0
 
 
+def contains_all(path: Path, needles) -> bool:
+    if not path.exists() or not path.is_file():
+        return False
+    text = path.read_text(encoding='utf-8')
+    return all(needle in text for needle in needles)
+
+
 def load_state(project: Path):
     state_file = project / '.novel-state.json'
     if state_file.exists():
@@ -129,6 +136,11 @@ def file_gate_errors(project: Path, stage: str):
         recap = project / '05_前情回顾.md'
         if not exists_nonempty(recap):
             errors.append('05_前情回顾.md is missing or empty')
+        else:
+            needed = ['当前已推进到的位置', '最近一轮发生的关键事件', '当前未回收的伏笔 / 悬念', '下一轮写作必须记住的点']
+            missing = [item for item in needed if not contains_all(recap, [item])]
+            if missing:
+                errors.append('05_前情回顾.md missing required sections: ' + ', '.join(missing))
     else:
         errors.append(f'Unknown stage: {stage}')
     return errors

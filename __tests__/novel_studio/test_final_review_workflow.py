@@ -30,6 +30,7 @@ class FinalReviewWorkflowTest(unittest.TestCase):
             '## 下一轮写作必须记住的点\n'
             '- 保持配角动机连续\n'
         ),
+        proofreading_report: str = '# 05A_本轮校对报告\n\n- judgment: acceptable\n- summary: 通过\n',
         report: str | None = None,
         final_decision=None,
         final_delivery_ready: bool = False,
@@ -49,6 +50,8 @@ class FinalReviewWorkflowTest(unittest.TestCase):
 
         if recap is not None:
             (project / '05_前情回顾.md').write_text(recap, encoding='utf-8')
+        if proofreading_report is not None:
+            (project / '05A_本轮校对报告.md').write_text(proofreading_report, encoding='utf-8')
         if report is not None:
             (project / '07_终审报告.md').write_text(report, encoding='utf-8')
 
