@@ -500,3 +500,32 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         mystery = self.read_required_doc(TRACK_MYSTERY_FANTASY)
         self.assertIn('高设定悬疑奇幻', mystery)
         self.assertIn('认知博弈', mystery)
+
+    def test_docs_define_supervisor_persistence_and_proofreading_report(self):
+        skill = self.read_required_doc(SKILL)
+        self.assertIn(
+            'the parent agent owns workflow control, user communication, approval interpretation, persistence decisions, and subagent dispatch',
+            skill,
+        )
+        self.assertIn('only explicit brainstorming mode may write to `staging/`', skill)
+
+        workflow = self.read_required_doc(WORKFLOW)
+        self.assertIn(
+            'the moment a canonical file is written or refreshed, the workflow enters a stage-specific approval gate',
+            workflow,
+        )
+        self.assertIn('`awaiting_user_approval`', workflow)
+
+        file_structure = self.read_required_doc(FILE_STRUCTURE)
+        self.assertIn('05A_本轮校对报告.md', file_structure)
+        self.assertIn('staging/', file_structure)
+
+        proofreading = self.read_required_doc(ROOT / 'skills/novel-studio/references/proofreading.md')
+        self.assertIn('05A_本轮校对报告.md', proofreading)
+        self.assertIn('Proofreading is diagnostic. Do not do silent fixing during proofreading.', proofreading)
+
+        state_management = self.read_required_doc(ROOT / 'skills/novel-studio/references/state-management.md')
+        self.assertIn('pendingArtifactPaths', state_management)
+        self.assertIn('lastPersistedStage', state_management)
+        self.assertIn('brainstormActive', state_management)
+        self.assertIn('activeBranches', state_management)

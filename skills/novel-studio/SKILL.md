@@ -13,6 +13,12 @@ This skill is designed for **Chinese web fiction / serialized novel production**
 
 Treat novel creation as a staged production pipeline with explicit user approval gates.
 
+Use a supervisor-first model:
+- the parent agent owns workflow control, user communication, approval interpretation, persistence decisions, and subagent dispatch
+- the parent agent must not leave canonical stage artifacts only in chat once they are usable
+- only explicit brainstorming mode may write to `staging/`
+- when brainstorming ends and one branch is selected, copy accepted content back into canonical files and delete stale staging branches immediately
+
 Do not jump forward casually.
 Do not skip key checkpoints unless the user explicitly asks to skip them.
 Do not treat partially completed work as finished.
@@ -70,6 +76,7 @@ Enter exploration mode only when the user clearly says things like:
 In explicit exploration mode:
 - allow multiple candidate directions to coexist
 - allow sample openings, style tests, and concept comparisons
+- only explicit brainstorming mode may write to `staging/`
 - do not treat exploratory outputs as canonical project files unless the user later confirms adoption
 - do not silently convert exploration work into formal stage completion
 
@@ -150,6 +157,8 @@ If approval is ambiguous, ask again.
 ## File-backed completion rule
 
 A stage is not complete if its core output exists only in chat and is not reflected in canonical project files.
+
+When a canonical file reaches the minimum usable threshold, persist it immediately and open the matching approval gate instead of continuing the same work only in conversation.
 
 Follow `references/file-structure.md` for:
 - directory layout

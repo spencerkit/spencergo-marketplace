@@ -24,6 +24,8 @@
 
 **文件优先** — 阶段成果必须持久化到项目文件，不接受仅存在于对话中的临时内容。
 
+**Supervisor-first 落盘** — 父 agent 负责流程掌控、审批解释、落盘决策和 subagent 调度。一旦正式文件被写入或刷新，立即进入对应审批门，不再把它当作“还在讨论”。
+
 **拒绝敷衍** — 不能因为"有东西存在"就判定阶段完成，必须达到可用标准。大纲要具体到情节点，人物要具体到动机和冲突。
 
 **开篇门优先** — 开篇门是 drafting 之前的强制前置审批门。没有 `04A_开篇设计.md` 或没有明确通过 Opening Gate，不进入第一批正文。
@@ -55,6 +57,7 @@
 - **人物档案**：姓名、性格、当前状态、与其他人物的关系
 - **情节进展**：已写章节摘要、伏笔埋设、待回收线索
 - **项目状态**：当前阶段、批次编号、审批状态
+- **正式落盘状态**：待审批文件、最后一次正式落盘阶段、是否处于 brainstorming 分支模式
 
 写作中断后，重新启动时 Agent 会读取记忆文件，自动恢复上下文，无需复述。
 
@@ -83,6 +86,8 @@
 | Polishing 润色        | 精修后的章节             | 无AI味、语言流畅           |
 | Proofreading 校稿     | 无矛盾/逻辑漏洞的章节    | 通过OOC和一致性检查        |
 | Final Review 最终审校 | 评分报告、交付判断       | 达到验收分数               |
+
+正式文件一旦写入，立刻打开当前阶段的审批门；不会继续把已经落盘的成果当作开放讨论。
 
 ## 开篇门与稳定器
 
@@ -137,7 +142,7 @@ prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `man
 - `drafting` / `polishing` 的 `targetFiles` 必须非空且位于 `manuscript/` 下
 - `outputContract.requiredReturnFields` 必须严格等于协议字段列表，`outputContract.mustWriteFiles` 必须严格等于 `targetFiles`
 - `completed` 结果必须真实触达本次 dispatch 的全部 `outputContract.mustWriteFiles`
-- `proofreading` 必须保持 `targetFiles=[]`、`overwriteFlag=false`，且 `mustNotModify` 覆盖整个项目快照
+- `proofreading` 必须只写 `05A_本轮校对报告.md`，且 `overwriteFlag=true`
 - `targetFiles` / `mustNotModify` / `changedFiles` / `createdFiles` 等 path list 不允许重复项
 - `validationContext.executionPackageDigest` / `baselineFilesDigest` / `bundleFingerprint` 必须和当前 bundle 内容一致；一旦手改过 bundle，应直接重建
 - `prepare_stage_subagent_dispatch.py` 默认会写出 sidecar `manifest`
@@ -150,6 +155,8 @@ prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `man
 - `proofreading` 若 judgment=`conditionally acceptable`，`blockers` 必须为空且 `risks` 必须非空
 - 父 agent 只有在 extract、validate 都通过后才能 apply 结果
 - 如果子 agent 返回 prose、多个 JSON、空输出或非法 JSON，按协议失败处理，不得静默兜底
+
+`staging/` 只用于明确要求的脑暴 / 分支探索。only explicit brainstorming mode may write to `staging/`
 
 Drafting 示例：
 

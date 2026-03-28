@@ -49,6 +49,7 @@ Use this layout by default:
 ├── 04_章节骨架.md
 ├── 04A_开篇设计.md
 ├── 05_前情回顾.md
+├── 05A_本轮校对报告.md
 ├── 05_本轮章节规划.md
 ├── 05B_世界规则账本.md
 ├── 05C_伏笔回收台账.md
@@ -59,6 +60,8 @@ Use this layout by default:
 ├── characters/
 │   ├── [角色名].md
 │   └── ...
+├── staging/
+│   └── [stage]/[branch-id]/...
 └── manuscript/
     ├── [章节文件].md
     └── ...
@@ -146,7 +149,16 @@ Update timing:
 - create before drafting prose generation begins for the current batch
 - revise only during chapter-plan review within the drafting stage
 
-### 4.10 Ledger set
+### 4.10 `05A_本轮校对报告.md`
+Purpose:
+- store the current canonical proofreading result for the active batch
+- provide the formal proofreading artifact before final review
+
+Update timing:
+- overwrite on each accepted proofreading pass for the active batch
+- use this file, not chat output, as the formal proofreading artifact
+
+### 4.11 Ledger set
 These four files are mandatory once the project enters prose drafting:
 - `05B_世界规则账本.md`
 - `05C_伏笔回收台账.md`
@@ -158,13 +170,13 @@ Purpose:
 - keep world rules, foreshadow, relationships, and resources file-backed
 - give polishing and proofreading a stable baseline beyond chat memory
 
-### 4.11 `06_反馈与修订.md`
+### 4.12 `06_反馈与修订.md`
 Purpose:
 - store the current active formal revision
 - store affected scope and revision plan
 - store the latest closed formal revision result
 
-### 4.12 `07_终审报告.md`
+### 4.13 `07_终审报告.md`
 Purpose:
 - store the latest final-review decision
 - store delivery readiness judgment
@@ -218,6 +230,17 @@ Each character file should ideally include:
 Directory:
 
 `manuscript/`
+
+---
+
+## 7. Staging directory rules
+
+`staging/` is not a generic scratchpad.
+
+- only explicit brainstorming mode may write to `staging/`
+- keep branches under `staging/<stage>/<branch-id>/`
+- after one branch is promoted, copy selected content back into canonical files
+- after promotion, delete sibling branches and stale branch files immediately
 
 ### 6.1 Purpose
 Store draft or refined chapter text.

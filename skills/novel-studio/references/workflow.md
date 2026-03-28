@@ -51,9 +51,20 @@ Every stage must end with:
 3. explicit user approval before advancement
 
 Without explicit user approval, remain in the current stage.
+Only explicit brainstorming mode may write to `staging/`.
 
 ### 2.3 File discipline
 All major stage outputs must be reflected in canonical project files, not only in chat.
+
+The workflow status model must stay explicit:
+- `collecting_inputs`
+- `producing_artifact`
+- `awaiting_user_approval`
+- `brainstorming`
+- `blocked`
+
+Hard rule: the moment a canonical file is written or refreshed, the workflow enters a stage-specific approval gate.
+Persisted stage output should move the workflow to `awaiting_user_approval`, not stay in freeform discussion.
 
 ### 2.4 Advancement discipline
 Do not advance to the next stage unless:

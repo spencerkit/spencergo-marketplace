@@ -165,6 +165,18 @@ Examples:
 State should also record the current review gate and the latest meaningful user feedback summary.
 This makes interruption recovery much safer than relying only on boolean flags.
 
+Supervisor persistence fields must be explicit under `review.*`:
+- `pendingArtifactPaths`
+- `lastPersistedStage`
+- `lastPersistedAt`
+- `brainstormActive`
+- `activeBranches`
+
+Required invariants:
+- if `pendingArtifactPaths` is non-empty, workflow status must be `awaiting_user_approval`
+- if `brainstormActive` is true, only explicit brainstorming mode may write to `staging/`
+- `activeBranches` should contain only currently valid branch ids
+
 ---
 
 ## 11. Blocking issue tracking

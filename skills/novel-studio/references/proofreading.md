@@ -6,10 +6,11 @@ Run consistency, logic, continuity, and OOC checks on the current approved batch
 
 Proofreading in this workflow is batch-scoped and should help determine whether the current batch is ready to be accepted, revised again, or rolled back.
 
-Default execution mechanism: proofreading uses a read-only proofreading subagent. The parent agent remains the orchestrator.
+Default execution mechanism: proofreading uses a bounded proofreading subagent. The parent agent remains the orchestrator.
 The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, and accept or reject the returned proofreading report before reporting stage progress.
 Preferred parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`.
 The child still receives prompt text only; proofreading dispatch artifacts stay parent-side.
+The only canonical file proofreading may write is `05A_本轮校对报告.md`.
 Execution mechanism changes do not change proofreading-stage semantics.
 
 ---
@@ -56,6 +57,7 @@ Proofreading must produce:
 - OOC / character consistency check result
 - issue list or explicit no-blocker statement
 - fix direction when issues exist
+- `05A_本轮校对报告.md`
 - a proofreading-stage report for user review
 
 Default proofreading output should stay compact unless the user asks for detail:
