@@ -178,8 +178,7 @@ def normalize_state(data: dict, project: Path) -> dict:
         chapter_plan = project / '05_本轮章节规划.md'
         if chapter_plan.exists():
             plan_text = chapter_plan.read_text(encoding='utf-8')
-            if plan_text.strip():
-                initialize_chapter_tasks(batch, plan_text)
+            initialize_chapter_tasks(batch, plan_text)
     normalized['batch'] = batch
 
     notes = default_notes()

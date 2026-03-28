@@ -99,6 +99,40 @@ class ChapterProgressReportingTest(unittest.TestCase):
             )
             self.assertEqual(state['batch']['pendingProgressItems'], [])
 
+    def test_update_project_state_clears_stale_progress_when_approved_plan_file_is_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            (project / '05_本轮章节规划.md').write_text('', encoding='utf-8')
+            (project / '.novel-state.json').write_text(
+                json.dumps(
+                    {
+                        'project': {'title': project.name, 'rootPath': str(project)},
+                        'batch': {
+                            'chapterPlanApproved': False,
+                            'chapterTasks': [],
+                            'pendingProgressItems': ['stale item'],
+                        },
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'update_project_state.py',
+                str(project),
+                'batch.chapterPlanApproved',
+                'true',
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertTrue(state['batch']['chapterPlanApproved'])
+            self.assertEqual(state['batch']['chapterTasks'], [])
+            self.assertEqual(state['batch']['pendingProgressItems'], [])
+
 
 if __name__ == '__main__':
     unittest.main()
