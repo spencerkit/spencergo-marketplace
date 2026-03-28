@@ -177,6 +177,51 @@ class ChapterProgressReportingTest(unittest.TestCase):
             self.assertEqual(state['batch']['chapterTasks'], [])
             self.assertEqual(state['batch']['pendingProgressItems'], [])
 
+    def test_update_project_state_clears_stale_progress_when_approved_plan_file_is_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            (project / '.novel-state.json').write_text(
+                json.dumps(
+                    {
+                        'project': {'title': project.name, 'rootPath': str(project)},
+                        'batch': {
+                            'chapterPlanApproved': False,
+                            'chapterPlanExists': True,
+                            'chapterTasks': [
+                                {
+                                    'chapterLabel': '第1章',
+                                    'manuscriptPath': None,
+                                    'phase': 'drafting',
+                                    'phaseStatus': 'in_progress',
+                                    'lastSummary': 'stale summary',
+                                    'blockers': ['旧阻塞'],
+                                    'updatedAt': '2026-03-28T00:00:00Z',
+                                }
+                            ],
+                            'pendingProgressItems': ['stale item'],
+                        },
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'update_project_state.py',
+                str(project),
+                'batch.chapterPlanApproved',
+                'true',
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertTrue(state['batch']['chapterPlanApproved'])
+            self.assertFalse(state['batch']['chapterPlanExists'])
+            self.assertEqual(state['batch']['chapterTasks'], [])
+            self.assertEqual(state['batch']['pendingProgressItems'], [])
+
 
 if __name__ == '__main__':
     unittest.main()

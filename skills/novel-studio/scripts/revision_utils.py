@@ -179,16 +179,15 @@ def normalize_state(data: dict, project: Path) -> dict:
     batch['lastDelegationBlockers'] = list(batch.get('lastDelegationBlockers', []))
     batch['lastDelegationRisks'] = list(batch.get('lastDelegationRisks', []))
     normalize_progress_batch(batch)
+    chapter_plan = project / '05_本轮章节规划.md'
+    plan_text = chapter_plan.read_text(encoding='utf-8') if chapter_plan.exists() else ''
+    batch['chapterPlanExists'] = bool(plan_text.strip())
     if batch.get('chapterPlanApproved'):
-        chapter_plan = project / '05_本轮章节规划.md'
-        if chapter_plan.exists():
-            plan_text = chapter_plan.read_text(encoding='utf-8')
-            batch['chapterPlanExists'] = bool(plan_text.strip())
-            chapter_labels = extract_chapter_labels_from_plan(plan_text)
-            if not chapter_labels:
-                initialize_chapter_tasks(batch, plan_text)
-            elif not batch.get('chapterTasks'):
-                initialize_chapter_tasks(batch, plan_text)
+        chapter_labels = extract_chapter_labels_from_plan(plan_text)
+        if not chapter_labels:
+            initialize_chapter_tasks(batch, plan_text)
+        elif not batch.get('chapterTasks'):
+            initialize_chapter_tasks(batch, plan_text)
     normalized['batch'] = batch
 
     notes = default_notes()
