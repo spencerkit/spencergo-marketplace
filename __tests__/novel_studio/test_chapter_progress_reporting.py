@@ -143,7 +143,17 @@ class ChapterProgressReportingTest(unittest.TestCase):
                         'project': {'title': project.name, 'rootPath': str(project)},
                         'batch': {
                             'chapterPlanApproved': False,
-                            'chapterTasks': [],
+                            'chapterTasks': [
+                                {
+                                    'chapterLabel': '第1章',
+                                    'manuscriptPath': None,
+                                    'phase': 'drafting',
+                                    'phaseStatus': 'in_progress',
+                                    'lastSummary': 'stale summary',
+                                    'blockers': ['旧阻塞'],
+                                    'updatedAt': '2026-03-28T00:00:00Z',
+                                }
+                            ],
                             'pendingProgressItems': ['stale item'],
                         },
                     },
@@ -163,6 +173,7 @@ class ChapterProgressReportingTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
             self.assertTrue(state['batch']['chapterPlanApproved'])
+            self.assertFalse(state['batch']['chapterPlanExists'])
             self.assertEqual(state['batch']['chapterTasks'], [])
             self.assertEqual(state['batch']['pendingProgressItems'], [])
 
