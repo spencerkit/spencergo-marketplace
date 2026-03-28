@@ -4,6 +4,7 @@ import json, sys
 import re
 
 from revision_utils import default_batch, default_review, default_revision, normalize_state, set_revision_blocker
+from stage_persistence_utils import PROOFREADING_REPORT, WORKFLOW_STATUSES, normalize_path_list
 
 
 def exists_nonempty(path: Path) -> bool:
@@ -193,6 +194,7 @@ def reconstruct(project: Path):
             'chapterSkeleton': exists_nonempty(project / '04_章节骨架.md'),
             'openingDesign': exists_nonempty(opening_design),
             'recapDoc': exists_nonempty(project / '05_前情回顾.md'),
+            'proofreadingReport': exists_nonempty(project / PROOFREADING_REPORT),
             'worldLedger': exists_nonempty(world_ledger),
             'foreshadowLedger': exists_nonempty(foreshadow_ledger),
             'relationshipLedger': exists_nonempty(relationship_ledger),
@@ -288,6 +290,27 @@ def reconstruct(project: Path):
     return state
 
 
+def normalize_supervisor_state(normalized: dict):
+    workflow = normalized.setdefault('workflow', {})
+    if workflow.get('status') not in WORKFLOW_STATUSES:
+        workflow['status'] = 'collecting_inputs'
+
+    review = default_review()
+    review.update(normalized.get('review', {}))
+    review['pendingArtifactPaths'] = normalize_path_list(review.get('pendingArtifactPaths'))
+    review['activeBranches'] = normalize_path_list(review.get('activeBranches'))
+    review['brainstormActive'] = bool(review.get('brainstormActive', False))
+    normalized['review'] = review
+
+    artifacts = normalized.setdefault('artifacts', {})
+    artifacts['proofreadingReport'] = bool(artifacts.get('proofreadingReport'))
+
+    if review['pendingArtifactPaths'] and review.get('currentGate'):
+        workflow['status'] = 'awaiting_user_approval'
+
+    return normalized
+
+
 def main():
     if len(sys.argv) < 2:
         print('Usage: load_project_state.py <项目目录>')
@@ -296,12 +319,12 @@ def main():
     project = Path(sys.argv[1]).expanduser()
     state_file = project / '.novel-state.json'
     if state_file.exists():
-        data = normalize_state(json.loads(state_file.read_text(encoding='utf-8')), project)
+        data = normalize_supervisor_state(normalize_state(json.loads(state_file.read_text(encoding='utf-8')), project))
         state_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
         print(json.dumps(data, ensure_ascii=False, indent=2))
         return
 
-    data = normalize_state(reconstruct(project), project)
+    data = normalize_supervisor_state(normalize_state(reconstruct(project), project))
     state_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(data, ensure_ascii=False, indent=2))
 

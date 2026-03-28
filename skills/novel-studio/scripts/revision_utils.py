@@ -2,20 +2,22 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 from pathlib import Path
+
+from stage_persistence_utils import now_iso
 
 REVISION_DOC = '06_反馈与修订.md'
 REVISION_BLOCKER_PREFIX = 'Formal revision active:'
 
 
-def now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
-
-
 def default_review() -> dict:
     return {
         'currentGate': None,
+        'pendingArtifactPaths': [],
+        'lastPersistedStage': None,
+        'lastPersistedAt': None,
+        'brainstormActive': False,
+        'activeBranches': [],
         'lastUserFeedbackSummary': None,
         'lastRevisionFocus': None,
         'lastRejectedReason': None,
@@ -83,6 +85,7 @@ def default_artifacts() -> dict:
         'chapterSkeleton': False,
         'openingDesign': False,
         'recapDoc': False,
+        'proofreadingReport': False,
         'worldLedger': False,
         'foreshadowLedger': False,
         'relationshipLedger': False,
@@ -112,7 +115,7 @@ def base_state(project: Path) -> dict:
             'currentSubstage': None,
             'lastCompletedStage': None,
             'nextStage': None,
-            'status': 'in_progress',
+            'status': 'collecting_inputs',
         },
         'approvals': default_approvals(),
         'artifacts': default_artifacts(),
