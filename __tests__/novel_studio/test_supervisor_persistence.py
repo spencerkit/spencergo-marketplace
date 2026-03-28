@@ -120,9 +120,9 @@ class SupervisorPersistenceTest(unittest.TestCase):
                         'nextStage': 'story-planning',
                         'status': 'awaiting_user_approval',
                     },
-                    'approvals': {'discoveryApproved': False},
+                    'approvals': {'discoveryApproved': True},
                     'review': {
-                        'currentGate': 'waiting_discovery_feedback',
+                        'currentGate': None,
                         'pendingArtifactPaths': ['00_选题报告.md'],
                     },
                 },
@@ -130,4 +130,4 @@ class SupervisorPersistenceTest(unittest.TestCase):
 
             result = run_script('check_stage_ready.py', str(project), 'story-planning')
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn('Current review gate is still open: waiting_discovery_feedback', result.stderr + result.stdout)
+            self.assertIn('Pending artifacts still await approval: 00_选题报告.md', result.stderr + result.stdout)

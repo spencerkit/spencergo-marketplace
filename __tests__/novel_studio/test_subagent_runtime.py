@@ -204,6 +204,16 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             }
         )
 
+    def set_proofreading_bundle_report_contract(self, bundle: dict) -> None:
+        bundle['executionPackage']['targetFiles'] = ['05A_本轮校对报告.md']
+        bundle['executionPackage']['overwriteFlag'] = True
+        bundle['executionPackage']['outputContract']['mustWriteFiles'] = ['05A_本轮校对报告.md']
+        bundle['executionPackage']['mustNotModify'] = sorted(
+            path
+            for path in bundle['validationContext']['baselineFiles'].keys()
+            if path != '05A_本轮校对报告.md'
+        )
+
     def needs_clarification_result(self, *, summary: str = '需要补充上下文') -> dict:
         return {
             'status': 'needs_clarification',
@@ -215,11 +225,17 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             'risks': [],
         }
 
+    def write_proofreading_report(self, project: Path, content: str | None = None) -> None:
+        (project / '05A_本轮校对报告.md').write_text(
+            content or '# 05A_本轮校对报告\n\n- judgment: acceptable\n- summary: 已完成校对\n',
+            encoding='utf-8',
+        )
+
     def completed_proofreading_result(self, *, summary: str = '已完成校对') -> dict:
         return {
             'status': 'completed',
             'changedFiles': [],
-            'createdFiles': [],
+            'createdFiles': ['05A_本轮校对报告.md'],
             'blockedReasons': [],
             'summary': summary,
             'notesForNextStage': '',
@@ -871,6 +887,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             self.write_json(result_file, self.completed_proofreading_result())
 
             validate = run_script(
@@ -1026,6 +1043,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
 
             bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
             bundle['executionPackage']['targetFiles'] = ['manuscript/第1章_开端.md']
             bundle['executionPackage']['outputContract']['mustWriteFiles'] = ['manuscript/第1章_开端.md']
             bundle['executionPackage']['mustNotModify'] = []
@@ -1033,6 +1051,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             self.write_json(result_file, self.completed_proofreading_result())
 
             validate = run_script(
@@ -1068,11 +1087,13 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
 
             bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
             bundle['executionPackage']['overwriteFlag'] = False
             self.refresh_bundle_digests(bundle)
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             self.write_json(result_file, self.completed_proofreading_result())
 
             validate = run_script(
@@ -1217,6 +1238,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             self.write_json(result_file, self.completed_proofreading_result())
 
             validate = run_script(
@@ -1505,6 +1527,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             self.write_json(result_file, self.completed_proofreading_result())
 
             validate = run_script(
@@ -1857,6 +1880,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['blockedReasons'] = ['还有阻塞']
             self.write_json(result_file, result)
@@ -1894,6 +1918,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['blockers'] = ['仍有连续性问题']
             result['fixDirection'] = '补一轮连续性修正'
@@ -1931,6 +1956,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['judgment'] = 'conditionally acceptable'
             result['risks'] = ['结尾收束略弱，建议下一轮补强']
@@ -1973,6 +1999,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['judgment'] = 'conditionally acceptable'
             result['risks'] = []
@@ -2014,7 +2041,11 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
 
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
-            self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            bundle = json.loads(bundle_result.stdout)
+            self.set_proofreading_bundle_report_contract(bundle)
+            self.refresh_bundle_digests(bundle)
+            self.write_json(bundle_file, bundle)
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result(summary='附条件通过')
             result['judgment'] = 'conditionally acceptable'
             result['risks'] = ['尾段节奏仍可继续收紧']
@@ -2057,6 +2088,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['continuity'] = ''
             self.write_json(result_file, result)
@@ -2093,6 +2125,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
             self.write_json(bundle_file, json.loads(bundle_result.stdout))
+            self.write_proofreading_report(project)
             result = self.completed_proofreading_result()
             result['judgment'] = 'needs revision'
             result['blockers'] = []
