@@ -308,3 +308,255 @@ class SupervisorPersistenceTest(unittest.TestCase):
             state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
             self.assertFalse(state['approvals']['finalApproved'])
             self.assertEqual(state['review']['currentGate'], 'waiting_final_review_feedback')
+
+    def test_persist_stage_artifacts_writes_whitelisted_discovery_files_and_sets_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            artifact_file = Path(tmp) / 'discovery-artifacts.json'
+            artifact_file.write_text(
+                json.dumps(
+                    {
+                        'status': 'completed',
+                        'artifactUpdates': {
+                            '00B_用户偏好.md': '# 用户偏好\n\n- 爽感优先\n',
+                            '00_选题报告.md': '# 选题报告\n\n## 推荐方向\n- 规则异变都市\n',
+                        },
+                        'summary': 'Discovery 已形成正式候选方案',
+                        'blockedReasons': [],
+                        'notesForNextStage': '等待确认后进入 story-planning',
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'persist_stage_artifacts.py',
+                str(project),
+                'discovery',
+                '--artifact-file',
+                str(artifact_file),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((project / '00B_用户偏好.md').exists())
+            self.assertTrue((project / '00_选题报告.md').exists())
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['workflow']['status'], 'awaiting_user_approval')
+            self.assertEqual(state['review']['currentGate'], 'waiting_discovery_feedback')
+            self.assertEqual(
+                state['review']['pendingArtifactPaths'],
+                ['00B_用户偏好.md', '00_选题报告.md'],
+            )
+
+    def test_persist_stage_artifacts_rejects_out_of_scope_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            artifact_file = Path(tmp) / 'bad-artifacts.json'
+            artifact_file.write_text(
+                json.dumps(
+                    {
+                        'status': 'completed',
+                        'artifactUpdates': {
+                            '07_终审报告.md': '# 非法写入\n',
+                        },
+                        'summary': '非法',
+                        'blockedReasons': [],
+                        'notesForNextStage': '',
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'persist_stage_artifacts.py',
+                str(project),
+                'discovery',
+                '--artifact-file',
+                str(artifact_file),
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('out-of-scope artifact for discovery: 07_终审报告.md', result.stderr + result.stdout)
+
+    def test_persist_stage_artifacts_supports_drafting_opening_substage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            artifact_file = Path(tmp) / 'opening-artifacts.json'
+            artifact_file.write_text(
+                json.dumps(
+                    {
+                        'status': 'completed',
+                        'artifactUpdates': {
+                            '04A_开篇设计.md': '# 开篇设计\n\n## 前三章任务\n- 第1章点火\n',
+                        },
+                        'summary': 'Opening Gate 包已成型',
+                        'blockedReasons': [],
+                        'notesForNextStage': '等待确认 opening gate',
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'drafting',
+                        'currentSubstage': 'opening-review',
+                        'lastCompletedStage': 'character-system',
+                        'nextStage': 'drafting',
+                        'status': 'producing_artifact',
+                    },
+                    'review': {'pendingArtifactPaths': [], 'brainstormActive': False, 'activeBranches': []},
+                },
+            )
+
+            result = run_script(
+                'persist_stage_artifacts.py',
+                str(project),
+                'drafting',
+                '--substage',
+                'opening-review',
+                '--artifact-file',
+                str(artifact_file),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((project / '04A_开篇设计.md').exists())
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['review']['currentGate'], 'waiting_opening_feedback')
+            self.assertEqual(state['review']['pendingArtifactPaths'], ['04A_开篇设计.md'])
+
+    def test_persist_stage_artifacts_writes_whitelisted_discovery_files_and_sets_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            artifact_file = Path(tmp) / 'discovery-artifacts.json'
+            artifact_file.write_text(
+                json.dumps(
+                    {
+                        'status': 'completed',
+                        'artifactUpdates': {
+                            '00B_用户偏好.md': '# 用户偏好\n\n- 爽感优先\n',
+                            '00_选题报告.md': '# 选题报告\n\n## 推荐方向\n- 规则异变都市\n',
+                        },
+                        'summary': 'Discovery 已形成正式候选方案',
+                        'blockedReasons': [],
+                        'notesForNextStage': '等待确认后进入 story-planning',
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'persist_stage_artifacts.py',
+                str(project),
+                'discovery',
+                '--artifact-file',
+                str(artifact_file),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((project / '00B_用户偏好.md').exists())
+            self.assertTrue((project / '00_选题报告.md').exists())
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['workflow']['status'], 'awaiting_user_approval')
+            self.assertEqual(state['review']['currentGate'], 'waiting_discovery_feedback')
+            self.assertEqual(
+                state['review']['pendingArtifactPaths'],
+                ['00B_用户偏好.md', '00_选题报告.md'],
+            )
+
+    def test_persist_stage_artifacts_rejects_out_of_scope_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            artifact_file = Path(tmp) / 'bad-artifacts.json'
+            artifact_file.write_text(
+                json.dumps(
+                    {
+                        'status': 'completed',
+                        'artifactUpdates': {
+                            '07_终审报告.md': '# 非法写入\n',
+                        },
+                        'summary': '非法',
+                        'blockedReasons': [],
+                        'notesForNextStage': '',
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'persist_stage_artifacts.py',
+                str(project),
+                'discovery',
+                '--artifact-file',
+                str(artifact_file),
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('out-of-scope artifact for discovery: 07_终审报告.md', result.stderr + result.stdout)
+
+    def test_persist_stage_artifacts_supports_drafting_opening_substage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            artifact_file = Path(tmp) / 'opening-artifacts.json'
+            artifact_file.write_text(
+                json.dumps(
+                    {
+                        'status': 'completed',
+                        'artifactUpdates': {
+                            '04A_开篇设计.md': '# 开篇设计\n\n## 前三章任务\n- 第1章点火\n',
+                        },
+                        'summary': 'Opening Gate 包已成型',
+                        'blockedReasons': [],
+                        'notesForNextStage': '等待确认 opening gate',
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding='utf-8',
+            )
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'drafting',
+                        'currentSubstage': 'opening-review',
+                        'lastCompletedStage': 'character-system',
+                        'nextStage': 'drafting',
+                        'status': 'producing_artifact',
+                    },
+                    'review': {'pendingArtifactPaths': [], 'brainstormActive': False, 'activeBranches': []},
+                },
+            )
+
+            result = run_script(
+                'persist_stage_artifacts.py',
+                str(project),
+                'drafting',
+                '--substage',
+                'opening-review',
+                '--artifact-file',
+                str(artifact_file),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((project / '04A_开篇设计.md').exists())
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['review']['currentGate'], 'waiting_opening_feedback')
+            self.assertEqual(state['review']['pendingArtifactPaths'], ['04A_开篇设计.md'])
