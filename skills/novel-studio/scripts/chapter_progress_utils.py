@@ -118,6 +118,7 @@ def human_summary(chapter_label: str, phase: str, phase_status: str, blockers: l
         ('drafting', 'in_progress'): f'{chapter_label}初稿中',
         ('drafting', 'awaiting_user_review'): f'{chapter_label}初稿待审核',
         ('polishing', 'in_progress'): f'{chapter_label}润色中',
+        ('polishing', 'awaiting_user_review'): f'{chapter_label}润色待审核',
         ('proofreading', 'in_progress'): f'{chapter_label}校对中',
         ('proofreading', 'awaiting_user_review'): f'{chapter_label}审核中',
         ('proofreading', 'completed'): f'{chapter_label}已完成',
@@ -219,5 +220,51 @@ def mark_dispatch_started(batch: dict, phase: str, chapter_labels: list[str], ta
             task['updatedAt'] = timestamp
         if not has_pending_progress_event(batch, chapter_label, phase, 'in_progress', summary):
             append_progress_event(batch, chapter_label, phase, 'in_progress', summary)
+
+    return batch
+
+
+def apply_result_to_chapters(
+    batch: dict,
+    phase: str,
+    chapter_labels: list[str],
+    target_files: list[str],
+    result: dict,
+) -> dict:
+    normalize_progress_batch(batch)
+    timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+    status = result.get('status')
+
+    manuscript_paths_by_label: dict[str, str] = {}
+    if phase in {'drafting', 'polishing'} and len(chapter_labels) == len(target_files):
+        for chapter_label, relpath in zip(chapter_labels, target_files):
+            derived_label = chapter_label_from_manuscript_path(relpath)
+            if derived_label and derived_label != chapter_label:
+                raise ValueError(
+                    f'target file chapter label mismatch for {relpath}: expected {chapter_label}, got {derived_label}'
+                )
+            manuscript_paths_by_label[chapter_label] = relpath
+
+    if status == 'completed':
+        phase_status = 'awaiting_user_review'
+        blockers: list[str] = []
+    elif status in {'blocked', 'needs_clarification'}:
+        phase_status = 'blocked'
+        blockers = list(result.get('blockedReasons') or [])
+    else:
+        raise ValueError(f'unsupported result status for chapter progress update: {status}')
+
+    for chapter_label in chapter_labels:
+        task = ensure_chapter_task(batch, chapter_label)
+        manuscript_path = manuscript_paths_by_label.get(chapter_label, task.get('manuscriptPath'))
+        summary = human_summary(chapter_label, phase, phase_status, blockers)
+        task['phase'] = phase
+        task['phaseStatus'] = phase_status
+        task['manuscriptPath'] = manuscript_path
+        task['blockers'] = list(blockers)
+        task['lastSummary'] = summary
+        task['updatedAt'] = timestamp
+        if not has_pending_progress_event(batch, chapter_label, phase, phase_status, summary, blockers):
+            append_progress_event(batch, chapter_label, phase, phase_status, summary, blockers)
 
     return batch

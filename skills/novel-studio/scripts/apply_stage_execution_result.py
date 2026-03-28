@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from chapter_progress_utils import apply_result_to_chapters
 from revision_utils import load_state, save_state
 from stage_execution_utils import (
     base_result_summary_fields,
@@ -57,6 +58,13 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     batch['lastDelegationBlockers'] = blockers
     batch['lastDelegationRisks'] = list(result.get('risks') or [])
     batch['lastDelegatedAt'] = now_iso()
+    apply_result_to_chapters(
+        batch,
+        stage,
+        package['requiredInputs']['chapterLabels'],
+        package['targetFiles'],
+        result,
+    )
 
     workflow = data.setdefault('workflow', {})
     review = data.setdefault('review', {})
