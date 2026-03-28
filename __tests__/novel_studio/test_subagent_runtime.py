@@ -320,6 +320,26 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertFalse(package['overwriteFlag'])
             self.assertIn('manuscript/第1章_开端.md', package['mustNotModify'])
 
+    def test_proofreading_completed_result_must_write_formal_report_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(
+                root,
+                current_stage='proofreading',
+                manuscript_files={'manuscript/第1章_开端.md': '# 第一章\n\n正文'},
+                batch={'draftComplete': True, 'polishingComplete': True},
+            )
+            bundle_result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+            )
+            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+            bundle = json.loads(bundle_result.stdout)
+            self.assertEqual(bundle['executionPackage']['targetFiles'], ['05A_本轮校对报告.md'])
+
     def test_validate_rejects_blocked_result_with_file_writes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
