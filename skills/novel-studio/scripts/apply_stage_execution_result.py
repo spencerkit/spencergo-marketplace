@@ -14,6 +14,7 @@ from stage_execution_utils import (
     read_json_file,
     validate_bundle_and_result,
 )
+from stage_persistence_utils import PROOFREADING_REPORT
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,6 +60,7 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
 
     workflow = data.setdefault('workflow', {})
     review = data.setdefault('review', {})
+    artifacts = data.setdefault('artifacts', {})
     workflow['status'] = 'awaiting_user_approval' if result['status'] == 'completed' else 'blocked'
 
     if stage == 'drafting' and result['status'] == 'completed':
@@ -70,6 +72,10 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     elif stage == 'proofreading' and result['status'] == 'completed':
         batch['proofreadingComplete'] = result.get('judgment') != 'needs revision'
         review['currentGate'] = stage_gate(stage)
+        review['pendingArtifactPaths'] = [PROOFREADING_REPORT]
+        review['lastPersistedStage'] = 'proofreading'
+        review['lastPersistedAt'] = now_iso()
+        artifacts['proofreadingReport'] = True
 
 
 def main() -> None:

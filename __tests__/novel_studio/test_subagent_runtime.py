@@ -357,6 +357,26 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             bundle = json.loads(bundle_result.stdout)
             self.assertEqual(bundle['executionPackage']['targetFiles'], ['05A_本轮校对报告.md'])
 
+    def test_proofreading_completed_result_must_write_formal_report_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(
+                root,
+                current_stage='proofreading',
+                manuscript_files={'manuscript/第1章_开端.md': '# 第一章\n\n正文'},
+                batch={'draftComplete': True, 'polishingComplete': True},
+            )
+            bundle_result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+            )
+            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+            bundle = json.loads(bundle_result.stdout)
+            self.assertEqual(bundle['executionPackage']['targetFiles'], ['05A_本轮校对报告.md'])
+
     def test_validate_rejects_blocked_result_with_file_writes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -2227,6 +2247,65 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(status.returncode, 0, status.stderr)
             self.assertIn('当前卡点：等待你确认本轮初稿结果', status.stdout)
             self.assertIn('最近委派：drafting / completed / 第1章', status.stdout)
+
+    def test_finalize_proofreading_dispatch_persists_report_and_pending_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(
+                root,
+                current_stage='proofreading',
+                manuscript_files={'manuscript/第1章_开端.md': '# 第一章\n\n正文'},
+                batch={'draftComplete': True, 'polishingComplete': True},
+            )
+            bundle_result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+            )
+            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+
+            bundle_file = root / 'proofreading-bundle.json'
+            result_file = root / 'proofreading-result.json'
+            bundle = json.loads(bundle_result.stdout)
+            self.write_json(bundle_file, bundle)
+
+            (project / '05A_本轮校对报告.md').write_text(
+                '# 05A_本轮校对报告\n\n- judgment: acceptable\n- summary: 通过\n',
+                encoding='utf-8',
+            )
+            self.write_json(
+                result_file,
+                {
+                    'status': 'completed',
+                    'changedFiles': [],
+                    'createdFiles': ['05A_本轮校对报告.md'],
+                    'blockedReasons': [],
+                    'summary': '本轮校对完成，可进入终审',
+                    'notesForNextStage': '进入 final-review',
+                    'risks': [],
+                    'judgment': 'acceptable',
+                    'continuity': '通过',
+                    'logic': '通过',
+                    'characterOOC': '无',
+                    'blockers': [],
+                    'fixDirection': '无需处理',
+                },
+            )
+
+            result = run_script(
+                'apply_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['review']['currentGate'], 'waiting_proofreading_feedback')
+            self.assertEqual(state['review']['pendingArtifactPaths'], ['05A_本轮校对报告.md'])
 
     def test_status_shows_opening_gate_when_drafting_not_ready(self):
         with tempfile.TemporaryDirectory() as tmp:

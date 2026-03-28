@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from stage_persistence_utils import PROOFREADING_REPORT
 from stage_execution_utils import (
     base_output_contract,
     bundle_fingerprint_payload,
@@ -161,8 +162,8 @@ def build_bundle(args: argparse.Namespace) -> dict[str, object]:
         if not target_files:
             raise ValueError('polishing requires manuscript target files')
     else:
-        target_files = []
-        overwrite_flag = False
+        target_files = [PROOFREADING_REPORT]
+        overwrite_flag = True
 
     required_inputs = build_required_inputs(
         project,
@@ -173,10 +174,7 @@ def build_bundle(args: argparse.Namespace) -> dict[str, object]:
         args.polishing_focus,
     )
 
-    if stage == 'proofreading':
-        must_not_modify = project_files(project)
-    else:
-        must_not_modify = build_must_not_modify(project, target_files)
+    must_not_modify = build_must_not_modify(project, target_files)
 
     execution_package = {
         'taskType': stage,

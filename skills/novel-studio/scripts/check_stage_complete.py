@@ -4,6 +4,8 @@ import json
 import re
 import sys
 
+from stage_persistence_utils import PROOFREADING_REPORT
+
 
 VALID_FINAL_DECISIONS = {'pass', 'conditional pass', 'rework required'}
 REQUIRED_FINAL_REVIEW_SECTIONS = [
@@ -160,14 +162,9 @@ def check_polishing(project: Path, errors):
 
 
 def check_proofreading(project: Path, errors):
-    recap = project / '05_前情回顾.md'
-    if not exists_nonempty(recap):
-        errors.append('05_前情回顾.md is missing or empty')
-    else:
-        needed = ['当前已推进到的位置', '最近一轮发生的关键事件', '当前未回收的伏笔 / 悬念', '下一轮写作必须记住的点']
-        missing = [x for x in needed if not contains_all(recap, [x])]
-        if missing:
-            errors.append('05_前情回顾.md missing required sections: ' + ', '.join(missing))
+    report = project / PROOFREADING_REPORT
+    if not exists_nonempty(report):
+        errors.append(f'{PROOFREADING_REPORT} is missing or empty')
 
 
 def check_final_review(project: Path, errors):

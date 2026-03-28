@@ -11,6 +11,7 @@ from pathlib import Path
 from check_stage_ready import file_gate_errors, state_gate_errors
 from load_project_state import reconstruct
 from revision_utils import normalize_state
+from stage_persistence_utils import PROOFREADING_REPORT
 
 STAGES = {'drafting', 'polishing', 'proofreading'}
 PROTOCOL_RETURN_FIELDS = [
@@ -75,6 +76,10 @@ def canonical_acceptance_hints(stage: str) -> list[str]:
         'polishing': ['保留已批准意图和人物口吻', '不要把上游问题静默改成新设定'],
         'proofreading': ['只读校对', '给出明确 judgment 和 blocker'],
     }[stage]
+
+
+def canonical_proofreading_report_path() -> list[str]:
+    return [PROOFREADING_REPORT]
 
 
 def ensure_project(project: Path) -> Path:
@@ -770,16 +775,14 @@ def validate_execution_package_contract(
                 + ', '.join(missing_targets)
             )
     elif stage == 'proofreading':
-        if target_files:
-            raise ValueError('proofreading targetFiles must be empty')
-        if overwrite_flag:
-            raise ValueError('proofreading overwriteFlag must be false')
-        if must_not_modify != sorted(baseline):
-            raise ValueError('proofreading mustNotModify must cover the full project snapshot')
+        if target_files != canonical_proofreading_report_path():
+            raise ValueError('proofreading targetFiles must be exactly [05A_本轮校对报告.md]')
+        if not overwrite_flag:
+            raise ValueError('proofreading overwriteFlag must be true')
     else:
         raise ValueError(f'unsupported stage for execution package validation: {stage}')
 
-    if stage in {'drafting', 'polishing'}:
+    if stage in {'drafting', 'polishing', 'proofreading'}:
         expected_must_not_modify = sorted(relpath for relpath in baseline if relpath not in target_files)
         if must_not_modify != expected_must_not_modify:
             raise ValueError('mustNotModify must exactly match baselineFiles minus targetFiles')
@@ -909,8 +912,10 @@ def validate_bundle_and_result(project: Path, bundle: dict, result: dict) -> dic
     if any(path not in target_files for path in actual_touched):
         raise ValueError('out-of-scope writes detected: ' + ', '.join(actual_touched))
 
-    if stage == 'proofreading' and actual_touched:
-        raise ValueError('proofreading result modified project files')
+    if stage == 'proofreading':
+        forbidden_touches = [path for path in actual_touched if path != PROOFREADING_REPORT]
+        if forbidden_touches:
+            raise ValueError('proofreading may only write the canonical report file')
 
     if validated['status'] == 'completed':
         untouched_required_outputs = [
