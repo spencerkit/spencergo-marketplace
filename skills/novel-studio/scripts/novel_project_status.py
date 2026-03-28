@@ -172,6 +172,7 @@ def main():
         print(f'项目：{project_title}')
         print(f'当前阶段：{workflow.get("currentStage", "未知")}')
         print(f'当前子阶段：{workflow.get("currentSubstage") or "无"}')
+        print(f'当前状态：{workflow.get("status") or "未知"}')
         print(f'当前卡点：{gate_text(current_gate)}')
         pending_artifacts = list(review.get('pendingArtifactPaths') or [])
         if pending_artifacts:

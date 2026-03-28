@@ -231,4 +231,5 @@ class SupervisorPersistenceTest(unittest.TestCase):
 
             result = run_script('novel_project_status.py', str(project), '--brief')
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('当前状态：awaiting_user_approval', result.stdout)
             self.assertIn('待审批文件：01_想法.md, 02_大纲.md', result.stdout)
