@@ -24,11 +24,16 @@ def yn(v):
 
 def gate_text(gate):
     mapping = {
+        'waiting_discovery_feedback': '等待你确认 Discovery 阶段结果',
+        'waiting_planning_feedback': '等待你确认 Planning 阶段结果',
+        'waiting_character_feedback': '等待你确认人物体系结果',
+        'waiting_opening_feedback': '等待你确认 Opening Gate',
         'waiting_opening_gate_approval': '等待你确认 Opening Gate',
         'waiting_draft_feedback': '等待你确认本轮初稿结果',
         'waiting_chapter_plan_approval': '等待你确认本轮章节规划',
         'waiting_polishing_feedback': '等待你确认本轮润色结果',
         'waiting_proofreading_feedback': '等待你确认本轮校对结果',
+        'waiting_final_review_feedback': '等待你确认终审结果',
         'awaiting_revision_scope_confirmation': '等待你确认修订范围',
         'awaiting_revision_plan_approval': '等待你确认修订计划',
         'awaiting_revision_result_approval': '等待你确认修订结果',
@@ -168,6 +173,9 @@ def main():
         print(f'当前阶段：{workflow.get("currentStage", "未知")}')
         print(f'当前子阶段：{workflow.get("currentSubstage") or "无"}')
         print(f'当前卡点：{gate_text(current_gate)}')
+        pending_artifacts = list(review.get('pendingArtifactPaths') or [])
+        if pending_artifacts:
+            print(f'待审批文件：{", ".join(pending_artifacts)}')
         print(f'当前批次范围：{batch.get("chapterRange") or "无"}')
         print(f'终审结论：{review_decision_text(review)}')
         print(f'可交付：{review_delivery_text(review)}')

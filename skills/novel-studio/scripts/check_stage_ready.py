@@ -35,8 +35,11 @@ def state_gate_errors(state, stage):
     revision = state.get('revision', {})
 
     gate = review.get('currentGate')
-    if gate and stage in ['drafting', 'polishing', 'proofreading', 'final-review']:
+    if gate:
         errs.append(f'Current review gate is still open: {gate}')
+    pending_artifacts = list(review.get('pendingArtifactPaths') or [])
+    if pending_artifacts:
+        errs.append(f'Pending artifacts still await approval: {", ".join(pending_artifacts)}')
 
     revision_gate = revision.get('currentRevisionGate') or revision.get('currentGate')
     if revision_gate and stage == 'final-review':
