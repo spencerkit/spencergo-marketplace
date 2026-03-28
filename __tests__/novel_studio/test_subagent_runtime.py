@@ -298,7 +298,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('polishingFocus', result.stderr + result.stdout)
 
-    def test_build_proofreading_package_forces_read_only_contract(self):
+    def test_build_proofreading_package_forces_report_only_contract(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = self.create_runtime_project(
                 Path(tmp),
@@ -316,11 +316,12 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             bundle = json.loads(result.stdout)
             package = bundle['executionPackage']
-            self.assertEqual(package['targetFiles'], [])
-            self.assertFalse(package['overwriteFlag'])
+            self.assertEqual(package['targetFiles'], ['05A_本轮校对报告.md'])
+            self.assertTrue(package['overwriteFlag'])
+            self.assertNotIn('05A_本轮校对报告.md', package['mustNotModify'])
             self.assertIn('manuscript/第1章_开端.md', package['mustNotModify'])
 
-    def test_proofreading_completed_result_must_write_formal_report_only(self):
+    def test_build_proofreading_package_targets_formal_report_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             project = self.create_runtime_project(
@@ -1006,7 +1007,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertNotEqual(validate.returncode, 0)
             self.assertIn('drafting targetFiles must stay under manuscript/', validate.stderr + validate.stdout)
 
-    def test_validate_rejects_proofreading_bundle_with_target_files(self):
+    def test_validate_rejects_proofreading_bundle_with_noncanonical_target_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             project = self.create_runtime_project(
@@ -1043,9 +1044,12 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                 str(result_file),
             )
             self.assertNotEqual(validate.returncode, 0)
-            self.assertIn('proofreading targetFiles must be empty', validate.stderr + validate.stdout)
+            self.assertIn(
+                'proofreading targetFiles must be exactly [05A_本轮校对报告.md]',
+                validate.stderr + validate.stdout,
+            )
 
-    def test_validate_rejects_proofreading_bundle_with_overwrite_true(self):
+    def test_validate_rejects_proofreading_bundle_with_overwrite_false(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             project = self.create_runtime_project(
@@ -1064,7 +1068,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
 
             bundle = json.loads(bundle_result.stdout)
-            bundle['executionPackage']['overwriteFlag'] = True
+            bundle['executionPackage']['overwriteFlag'] = False
             self.refresh_bundle_digests(bundle)
             bundle_file = root / 'bundle.json'
             result_file = root / 'result.json'
@@ -1080,7 +1084,7 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
                 str(result_file),
             )
             self.assertNotEqual(validate.returncode, 0)
-            self.assertIn('proofreading overwriteFlag must be false', validate.stderr + validate.stdout)
+            self.assertIn('proofreading overwriteFlag must be true', validate.stderr + validate.stdout)
 
     def test_validate_rejects_drafting_bundle_with_missing_outline_input(self):
         with tempfile.TemporaryDirectory() as tmp:
