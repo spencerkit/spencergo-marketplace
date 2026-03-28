@@ -435,6 +435,56 @@ class SupervisorPersistenceTest(unittest.TestCase):
             self.assertEqual(state['review']['currentGate'], 'waiting_opening_feedback')
             self.assertEqual(state['review']['pendingArtifactPaths'], ['04A_开篇设计.md'])
 
+    def test_promote_branch_copies_selected_artifact_and_cleans_other_branches(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            staging_a = project / 'staging' / 'story-planning' / '版本A'
+            staging_b = project / 'staging' / 'story-planning' / '版本B'
+            staging_a.mkdir(parents=True)
+            staging_b.mkdir(parents=True)
+            (staging_a / '02_大纲.md').write_text('# 大纲\n\nA 版本\n', encoding='utf-8')
+            (staging_b / '02_大纲.md').write_text('# 大纲\n\nB 版本\n', encoding='utf-8')
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'story-planning',
+                        'currentSubstage': None,
+                        'lastCompletedStage': 'discovery',
+                        'nextStage': 'character-system',
+                        'status': 'brainstorming',
+                    },
+                    'review': {
+                        'brainstormActive': True,
+                        'activeBranches': ['story-planning/版本A', 'story-planning/版本B'],
+                        'pendingArtifactPaths': [],
+                    },
+                },
+            )
+
+            result = run_script(
+                'manage_stage_branches.py',
+                'promote',
+                str(project),
+                'story-planning',
+                '版本B',
+                '--copy-file',
+                '02_大纲.md',
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual((project / '02_大纲.md').read_text(encoding='utf-8'), '# 大纲\n\nB 版本\n')
+            self.assertFalse(staging_a.exists())
+            self.assertFalse(staging_b.exists())
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertFalse(state['review']['brainstormActive'])
+            self.assertEqual(state['review']['activeBranches'], [])
+            self.assertEqual(state['review']['currentGate'], 'waiting_planning_feedback')
+            self.assertEqual(state['review']['pendingArtifactPaths'], ['02_大纲.md'])
+            self.assertEqual(state['workflow']['status'], 'awaiting_user_approval')
+
     def test_persist_stage_artifacts_writes_whitelisted_discovery_files_and_sets_gate(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'

@@ -81,3 +81,7 @@ def validate_artifact_updates(stage: str, artifact_updates: dict[str, str], subs
             raise ValueError(f'artifact content cannot be empty: {relpath}')
         normalized[relpath] = text
     return normalized
+
+
+def branch_state_key(stage: str, branch_id: str) -> str:
+    return f'{stage}/{branch_id}'
