@@ -1,0 +1,102 @@
+{
+  "title": "AI Coding Market Scan",
+  "subtitle": "2026-03-28 · market",
+  "layout_type": "market",
+  "render_mode": "svg",
+  "artifacts": {
+    "svg": "report.svg",
+    "png": "report.png",
+    "markdown": "report.md"
+  },
+  "executive_summary": "AI coding tools are moving from experimentation into repeatable team workflows, but buyers still struggle to compare product depth, evidence quality, and deployment fit.",
+  "research_question": "Which AI coding product direction shows the strongest near-term opportunity for a practical market entry?",
+  "core_conclusion": "A workflow-focused AI coding product aimed at small software teams has the clearest path, especially when it emphasizes trusted outputs, review support, and deployment readiness.",
+  "conclusion_badges": [
+    {"label": "多来源支持", "level": "ok"},
+    {"label": "需求明确", "level": "ok"},
+    {"label": "竞争拥挤", "level": "warn"}
+  ],
+  "key_evidence": [
+    {
+      "title": "Adoption is becoming operational",
+      "body": "Teams increasingly treat AI coding as part of delivery workflow rather than a novelty. Buyers want support for review, traceability, and rollout discipline.",
+      "source": "Public product launches, engineering blogs, and workflow docs",
+      "status": "已有明确来源"
+    },
+    {
+      "title": "Trust is the main purchase filter",
+      "body": "Users will trial impressive generation, but longer-term usage depends on whether the system is explainable, reviewable, and easy to fit into an existing stack.",
+      "source": "Analyst commentary and vendor positioning",
+      "status": "多来源支持"
+    }
+  ],
+  "dimensions": [
+    {
+      "title": "Demand",
+      "body": "Interest is strong across founders, solo builders, and small engineering teams, with the highest pull around speed-up for existing workflows.",
+      "source": "Search trends and product messaging",
+      "status": "多来源支持"
+    },
+    {
+      "title": "Differentiation",
+      "body": "Pure generation is crowded. Workflow control, evidence-backed outputs, and decision support create a more defensible wedge.",
+      "source": "Competitive scan",
+      "status": "已有明确来源"
+    },
+    {
+      "title": "Go-to-market",
+      "body": "A self-serve entry with strong sample outputs and clear team value should reduce friction, but pricing needs to align with visible ROI.",
+      "source": "Pricing pages and SaaS benchmarks",
+      "status": "部分推断"
+    }
+  ],
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Relative signal strength by purchase factor",
+      "data": {
+        "labels": ["Workflow fit", "Trust & review", "Speed gain", "Price clarity"],
+        "values": [92, 88, 81, 64]
+      },
+      "source": "Synthesized from public evidence",
+      "status": "多来源支持",
+      "note": "Higher values indicate stronger recurring decision weight in the market scan."
+    }
+  ],
+  "uncertainty": "Market narratives are moving fast, and some vendor claims are difficult to validate independently. Larger-team procurement behavior may differ from small-team behavior.",
+  "gaps": [
+    "Need stronger bottom-up pricing sensitivity evidence",
+    "Need more direct buyer interviews from engineering managers",
+    "Need validation of long-term retention drivers beyond trial usage"
+  ],
+  "risk_block": "Competition is intense and feature parity can happen quickly if differentiation stays at the UI layer.",
+  "action_block": "Validate one narrow workflow wedge with concrete example reports and team review loops before broadening the product surface.",
+  "recommendations": "Build around a high-trust workflow: structured outputs, evidence tracking, clear artifacts, and handoff quality. Avoid leading with raw generation alone.",
+  "sources": [
+    {
+      "name": "Official product and docs review",
+      "detail": "Vendor documentation and launch material reviewed for workflow claims and deployment framing.",
+      "type": "官方",
+      "status": "已有明确来源"
+    },
+    {
+      "name": "Public market commentary",
+      "detail": "Industry analysis and engineering discussions used to compare positioning and trust concerns.",
+      "type": "二手",
+      "status": "多来源支持"
+    }
+  ],
+  "takeaways": [
+    {"label": "核心判断", "value": "Workflow-first wins"},
+    {"label": "优先方向", "value": "Small team delivery"},
+    {"label": "最大风险", "value": "Feature crowding"}
+  ],
+  "metrics": [
+    {"label": "Signal score", "value": "88/100"},
+    {"label": "Competition", "value": "High"},
+    {"label": "Adoption pull", "value": "Strong"},
+    {"label": "Validation need", "value": "Medium"}
+  ],
+  "decision_panel": "Proceed with a narrow workflow-focused product concept and use evidence-backed reports as the trust layer.",
+  "footer_note": "Research Studio SVG Report"
+}

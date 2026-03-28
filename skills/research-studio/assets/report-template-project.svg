@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="750" height="1000" viewBox="0 0 750 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Research Studio Project SVG Template</title>
+  <desc id="desc">Placeholder SVG template for the project report layout.</desc>
+  <rect width="750" height="1000" fill="#f8fafc" />
+  <rect x="18" y="18" width="714" height="964" rx="20" fill="#ffffff" stroke="#dbe3ee" />
+  <text x="36" y="64" font-size="20" font-family="Arial, sans-serif" fill="#475569">Research Studio · Project Layout</text>
+  <text x="36" y="108" font-size="30" font-family="Arial, sans-serif" font-weight="700" fill="#0f172a">SVG template placeholder</text>
+  <text x="36" y="146" font-size="16" font-family="Arial, sans-serif" fill="#64748b">Mobile-sized SVG-first project template.</text>
+</svg>
