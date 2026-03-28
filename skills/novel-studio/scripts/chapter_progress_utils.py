@@ -38,7 +38,7 @@ def default_progress_fields() -> dict:
 
 def chapter_task(label: str, manuscript_path: str | None = None) -> dict:
     return {
-        'label': label,
+        'chapterLabel': label,
         'manuscriptPath': manuscript_path,
         'phase': 'drafting',
         'phaseStatus': 'queued',
@@ -53,6 +53,17 @@ def normalize_progress_batch(batch: dict) -> dict:
     for key, default_value in fields.items():
         value = batch.get(key)
         batch[key] = list(value) if isinstance(value, list) else list(default_value)
+    normalized_tasks: list[dict] = []
+    for item in batch['chapterTasks']:
+        if not isinstance(item, dict):
+            continue
+        task = dict(item)
+        if 'chapterLabel' not in task and 'label' in task:
+            task['chapterLabel'] = task.pop('label')
+        elif 'label' in task:
+            task.pop('label')
+        normalized_tasks.append(task)
+    batch['chapterTasks'] = normalized_tasks
     return batch
 
 

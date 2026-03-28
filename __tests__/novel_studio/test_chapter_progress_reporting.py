@@ -78,7 +78,7 @@ class ChapterProgressReportingTest(unittest.TestCase):
                 state['batch']['chapterTasks'],
                 [
                     {
-                        'label': '第1章',
+                        'chapterLabel': '第1章',
                         'manuscriptPath': None,
                         'phase': 'drafting',
                         'phaseStatus': 'queued',
@@ -87,7 +87,7 @@ class ChapterProgressReportingTest(unittest.TestCase):
                         'updatedAt': None,
                     },
                     {
-                        'label': '第2章',
+                        'chapterLabel': '第2章',
                         'manuscriptPath': None,
                         'phase': 'drafting',
                         'phaseStatus': 'queued',
