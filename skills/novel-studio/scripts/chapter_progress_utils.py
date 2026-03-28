@@ -113,6 +113,8 @@ def human_summary(chapter_label: str, phase: str, phase_status: str, blockers: l
         if blockers:
             return f'{chapter_label}阻塞：{blockers[0]}'
         return f'{chapter_label}阻塞'
+    if phase == 'proofreading' and phase_status == 'awaiting_user_review' and blockers:
+        return f'{chapter_label}审核中：{blockers[0]}'
 
     summaries = {
         ('drafting', 'in_progress'): f'{chapter_label}初稿中',
@@ -256,11 +258,10 @@ def apply_result_to_chapters(
             manuscript_paths_by_label[chapter_label] = relpath
 
     if status == 'completed':
-        if phase == 'proofreading' and result.get('judgment') == 'needs revision':
-            phase_status = 'blocked'
+        phase_status = 'awaiting_user_review'
+        if phase == 'proofreading':
             blockers = list(result.get('blockers') or [])
         else:
-            phase_status = 'awaiting_user_review'
             blockers = []
     elif status in {'blocked', 'needs_clarification'}:
         phase_status = 'blocked'

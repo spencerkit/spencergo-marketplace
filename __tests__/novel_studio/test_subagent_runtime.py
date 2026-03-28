@@ -2452,10 +2452,10 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             summaries = [item['summary'] for item in state['batch']['pendingProgressItems']]
             self.assertEqual(task['chapterLabel'], '第1章')
             self.assertEqual(task['phase'], 'proofreading')
-            self.assertEqual(task['phaseStatus'], 'blocked')
+            self.assertEqual(task['phaseStatus'], 'awaiting_user_review')
             self.assertEqual(task['blockers'], ['结尾信息缺口'])
-            self.assertEqual(task['lastSummary'], '第1章阻塞：结尾信息缺口')
-            self.assertEqual(summaries, ['第1章阻塞：结尾信息缺口'])
+            self.assertEqual(task['lastSummary'], '第1章审核中：结尾信息缺口')
+            self.assertEqual(summaries, ['第1章审核中：结尾信息缺口'])
             self.assertNotIn('第1章校对中', summaries)
 
     def test_finalize_proofreading_dispatch_persists_report_and_pending_artifact(self):
