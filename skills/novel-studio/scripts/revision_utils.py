@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from chapter_progress_utils import default_progress_fields, initialize_chapter_tasks, normalize_progress_batch
 from stage_persistence_utils import now_iso
 
 REVISION_DOC = '06_反馈与修订.md'
@@ -53,6 +54,7 @@ def default_batch() -> dict:
         'lastDelegationBlockers': [],
         'lastDelegationRisks': [],
         'lastDelegatedAt': None,
+        **default_progress_fields(),
     }
 
 
@@ -171,6 +173,13 @@ def normalize_state(data: dict, project: Path) -> dict:
     batch['attractionPoints'] = list(batch.get('attractionPoints', []))
     batch['lastDelegationBlockers'] = list(batch.get('lastDelegationBlockers', []))
     batch['lastDelegationRisks'] = list(batch.get('lastDelegationRisks', []))
+    normalize_progress_batch(batch)
+    if batch.get('chapterPlanApproved') and not batch.get('chapterTasks'):
+        chapter_plan = project / '05_本轮章节规划.md'
+        if chapter_plan.exists():
+            plan_text = chapter_plan.read_text(encoding='utf-8')
+            if plan_text.strip():
+                initialize_chapter_tasks(batch, plan_text)
     normalized['batch'] = batch
 
     notes = default_notes()

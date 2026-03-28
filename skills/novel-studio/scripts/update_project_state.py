@@ -1,29 +1,10 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import argparse
-import json, sys
-from datetime import datetime, timezone
+import json
+import sys
+from pathlib import Path
 
-
-def now_iso():
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
-
-
-def load_or_init(state_file: Path, project: Path):
-    if state_file.exists():
-        return json.loads(state_file.read_text(encoding='utf-8'))
-    return {
-        'project': {'title': project.name, 'rootPath': str(project)},
-        'workflow': {'currentStage': None, 'currentSubstage': None, 'lastCompletedStage': None, 'nextStage': None, 'status': 'in_progress'},
-        'approvals': {},
-        'artifacts': {},
-        'batch': {},
-        'review': {},
-        'revision': {},
-        'blockingIssues': [],
-        'notes': {},
-        'updatedAt': now_iso(),
-    }
+from revision_utils import base_state, load_state, save_state
 
 
 def parse_value(raw):
@@ -53,7 +34,7 @@ def main():
     field = args.field
     value = json.loads(args.value) if args.json_mode else parse_value(args.value)
 
-    data = load_or_init(state_file, project)
+    data = load_state(project) if state_file.exists() else base_state(project)
 
     if '.' not in field:
         print('Field must be section.key format')
@@ -69,9 +50,8 @@ def main():
         print(f'Section {section} is not a dict')
         sys.exit(2)
 
-    data['updatedAt'] = now_iso()
-    state_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-    print(json.dumps(data, ensure_ascii=False, indent=2))
+    save_state(project, data)
+    print(json.dumps(load_state(project), ensure_ascii=False, indent=2))
 
 
 if __name__ == '__main__':
