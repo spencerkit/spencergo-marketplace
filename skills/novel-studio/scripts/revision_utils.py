@@ -177,6 +177,7 @@ def normalize_state(data: dict, project: Path) -> dict:
     if batch.get('chapterPlanApproved') and not batch.get('chapterTasks'):
         chapter_plan = project / '05_本轮章节规划.md'
         if chapter_plan.exists():
+            batch['chapterPlanExists'] = True
             plan_text = chapter_plan.read_text(encoding='utf-8')
             initialize_chapter_tasks(batch, plan_text)
     normalized['batch'] = batch

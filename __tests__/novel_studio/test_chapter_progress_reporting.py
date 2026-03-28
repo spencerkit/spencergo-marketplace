@@ -74,6 +74,7 @@ class ChapterProgressReportingTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
             self.assertTrue(state['batch']['chapterPlanApproved'])
+            self.assertTrue(state['batch']['chapterPlanExists'])
             self.assertEqual(
                 state['batch']['chapterTasks'],
                 [
@@ -98,6 +99,38 @@ class ChapterProgressReportingTest(unittest.TestCase):
                 ],
             )
             self.assertEqual(state['batch']['pendingProgressItems'], [])
+
+    def test_normalize_state_hydrates_legacy_chapter_tasks(self):
+        revision_utils = self.load_script_module('revision_utils')
+
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+
+            state = revision_utils.normalize_state(
+                {
+                    'project': {'title': project.name, 'rootPath': str(project)},
+                    'batch': {
+                        'chapterTasks': [{'label': '第1章'}],
+                    },
+                },
+                project,
+            )
+
+            self.assertEqual(
+                state['batch']['chapterTasks'],
+                [
+                    {
+                        'chapterLabel': '第1章',
+                        'manuscriptPath': None,
+                        'phase': 'drafting',
+                        'phaseStatus': 'queued',
+                        'lastSummary': None,
+                        'blockers': [],
+                        'updatedAt': None,
+                    }
+                ],
+            )
 
     def test_update_project_state_clears_stale_progress_when_approved_plan_file_is_empty(self):
         with tempfile.TemporaryDirectory() as tmp:

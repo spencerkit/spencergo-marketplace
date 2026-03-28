@@ -58,11 +58,16 @@ def normalize_progress_batch(batch: dict) -> dict:
         if not isinstance(item, dict):
             continue
         task = dict(item)
-        if 'chapterLabel' not in task and 'label' in task:
-            task['chapterLabel'] = task.pop('label')
-        elif 'label' in task:
-            task.pop('label')
-        normalized_tasks.append(task)
+        chapter_label = task.pop('chapterLabel', None)
+        if chapter_label is None and 'label' in task:
+            chapter_label = task.pop('label')
+        else:
+            task.pop('label', None)
+        if not chapter_label:
+            continue
+        hydrated_task = chapter_task(chapter_label, task.get('manuscriptPath'))
+        hydrated_task.update(task)
+        normalized_tasks.append(hydrated_task)
     batch['chapterTasks'] = normalized_tasks
     return batch
 
