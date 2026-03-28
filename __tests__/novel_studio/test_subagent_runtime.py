@@ -277,6 +277,26 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertIn('baselineFiles', bundle['validationContext'])
             self.assertIn('02_大纲.md', bundle['validationContext']['baselineFiles'])
 
+    def test_build_drafting_package_includes_required_chapter_labels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_runtime_project(Path(tmp), current_stage='drafting')
+            result = run_script(
+                'build_stage_execution_package.py',
+                str(project),
+                'drafting',
+                '--batch-range',
+                '第1章',
+                '--target-file',
+                'manuscript/第1章_开端.md',
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            bundle = json.loads(result.stdout)
+            self.assertEqual(
+                bundle['executionPackage']['requiredInputs']['chapterLabels'],
+                ['第1章'],
+            )
+
     def test_build_package_rejects_drafting_without_opening_gate_approval(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = self.create_runtime_project(
@@ -2379,6 +2399,33 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(manifest['bundleFile'], str(bundle_file))
             self.assertEqual(manifest['promptFile'], str(prompt_file))
             self.assertEqual(manifest['executionPackageDigest'], bundle['validationContext']['executionPackageDigest'])
+
+    def test_prepare_dispatch_marks_target_chapter_in_progress(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_runtime_project(root, current_stage='drafting')
+            result = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'drafting',
+                '--batch-range',
+                '第1章',
+                '--target-file',
+                'manuscript/第1章_开端.md',
+                '--dispatch-dir',
+                str(root / 'dispatch'),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            task = state['batch']['chapterTasks'][0]
+            self.assertEqual(task['chapterLabel'], '第1章')
+            self.assertEqual(task['phase'], 'drafting')
+            self.assertEqual(task['phaseStatus'], 'in_progress')
+            self.assertIn(
+                '第1章初稿中',
+                [item['summary'] for item in state['batch']['pendingProgressItems']],
+            )
 
     def test_prepare_dispatch_supports_dispatch_dir_standard_layout(self):
         with tempfile.TemporaryDirectory() as tmp:

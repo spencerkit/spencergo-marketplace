@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from chapter_progress_utils import resolve_dispatch_chapter_labels
 from stage_persistence_utils import PROOFREADING_REPORT
 from stage_execution_utils import (
     base_output_contract,
@@ -108,6 +109,7 @@ def build_required_inputs(project: Path, state: dict, stage: str, batch_range: s
         'batchRange': batch_range,
         'outline': outline,
         'batchPlan': batch_plan,
+        'chapterLabels': resolve_dispatch_chapter_labels(stage, batch_plan, target_files),
         'characterFiles': character_package,
         'styleBible': require_file(project / '01A_风格圣经.md', 'style bible'),
         'mainlineSpec': require_file(project / '01B_总主线与卷级推进.md', 'mainline spec'),

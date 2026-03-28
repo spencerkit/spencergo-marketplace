@@ -8,6 +8,8 @@ import tempfile
 from pathlib import Path
 
 from build_stage_execution_package import build_bundle
+from chapter_progress_utils import mark_dispatch_started
+from revision_utils import load_state, save_state
 from stage_execution_utils import (
     build_bundle_manifest,
     build_child_prompt,
@@ -115,6 +117,16 @@ def prepare_dispatch_payload(args: argparse.Namespace) -> dict[str, object]:
     prompt_file.write_text(prompt, encoding='utf-8')
     manifest = build_bundle_manifest(bundle_file, bundle, prompt_file=prompt_file, prompt_text=prompt)
     manifest_file.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+
+    state = load_state(project)
+    package = bundle['executionPackage']
+    mark_dispatch_started(
+        state['batch'],
+        package['stage'],
+        package['requiredInputs']['chapterLabels'],
+        package['targetFiles'],
+    )
+    save_state(project, state)
 
     return {
         'dispatchDir': str(dispatch_dir),

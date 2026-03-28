@@ -8,6 +8,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+from chapter_progress_utils import resolve_dispatch_chapter_labels
 from check_stage_ready import file_gate_errors, state_gate_errors
 from load_project_state import reconstruct
 from revision_utils import normalize_state
@@ -584,6 +585,13 @@ def validate_required_inputs(
         batch_plan,
         'requiredInputs.batchPlan',
     )
+    chapter_labels = normalize_string_list(
+        required_inputs.get('chapterLabels'),
+        'requiredInputs.chapterLabels',
+    )
+    expected_chapter_labels = resolve_dispatch_chapter_labels(stage, batch_plan, target_files)
+    if chapter_labels != expected_chapter_labels:
+        raise ValueError('requiredInputs.chapterLabels must match the approved plan labels for this dispatch')
 
     character_files = validate_relpath_text_map(
         required_inputs.get('characterFiles'),
@@ -601,6 +609,7 @@ def validate_required_inputs(
         'batchRange': required_inputs['batchRange'],
         'outline': outline,
         'batchPlan': batch_plan,
+        'chapterLabels': chapter_labels,
         'characterFiles': character_files,
     }
 
@@ -687,7 +696,7 @@ def validate_required_inputs(
                 text,
                 f'requiredInputs.manuscriptFiles.{relpath}',
             )
-        if stage == 'polishing' and sorted(manuscript_files) != target_files:
+        if stage == 'polishing' and list(manuscript_files) != target_files:
             raise ValueError('requiredInputs.manuscriptFiles must exactly match targetFiles for polishing')
         if stage == 'proofreading':
             expected_manuscript_files = top_level_manuscript_files_from_snapshot(baseline)
