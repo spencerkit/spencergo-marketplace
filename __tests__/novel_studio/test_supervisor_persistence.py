@@ -233,3 +233,78 @@ class SupervisorPersistenceTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('当前状态：awaiting_user_approval', result.stdout)
             self.assertIn('待审批文件：01_想法.md, 02_大纲.md', result.stdout)
+
+    def test_approve_stage_gate_clears_opening_substage_without_marking_drafting_complete(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            (project / '04A_开篇设计.md').write_text('# 开篇设计\n\n## 前三章任务\n- 第1章点火\n', encoding='utf-8')
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'drafting',
+                        'currentSubstage': 'opening-review',
+                        'lastCompletedStage': 'character-system',
+                        'nextStage': 'drafting',
+                        'status': 'awaiting_user_approval',
+                    },
+                    'approvals': {
+                        'openingApproved': False,
+                    },
+                    'review': {
+                        'currentGate': 'waiting_opening_feedback',
+                        'pendingArtifactPaths': ['04A_开篇设计.md'],
+                        'lastPersistedStage': 'drafting',
+                    },
+                },
+            )
+
+            result = run_script('approve_stage_gate.py', str(project), 'waiting_opening_feedback')
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertTrue(state['approvals']['openingApproved'])
+            self.assertEqual(state['workflow']['lastCompletedStage'], 'character-system')
+            self.assertEqual(state['workflow']['currentStage'], 'drafting')
+            self.assertEqual(state['workflow']['currentSubstage'], None)
+            self.assertEqual(state['workflow']['nextStage'], 'drafting')
+            self.assertEqual(state['workflow']['status'], 'collecting_inputs')
+
+    def test_approve_stage_gate_rejects_final_review_when_not_deliverable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            (project / '07_终审报告.md').write_text('# 终审报告\n\n## 最终结论\n- rework required\n', encoding='utf-8')
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'final-review',
+                        'currentSubstage': None,
+                        'lastCompletedStage': 'proofreading',
+                        'nextStage': None,
+                        'status': 'awaiting_user_approval',
+                    },
+                    'approvals': {
+                        'finalApproved': False,
+                    },
+                    'review': {
+                        'currentGate': 'waiting_final_review_feedback',
+                        'pendingArtifactPaths': ['07_终审报告.md'],
+                        'finalDecision': 'rework required',
+                        'finalDeliveryReady': False,
+                        'finalBlockingIssues': ['需要返工'],
+                    },
+                },
+            )
+
+            result = run_script('approve_stage_gate.py', str(project), 'waiting_final_review_feedback')
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('final review is not ready for approval', result.stderr + result.stdout)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertFalse(state['approvals']['finalApproved'])
+            self.assertEqual(state['review']['currentGate'], 'waiting_final_review_feedback')

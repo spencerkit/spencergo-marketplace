@@ -18,6 +18,15 @@ APPROVAL_TRANSITIONS = {
 }
 
 
+def final_review_ready_for_approval(review: dict) -> bool:
+    decision = review.get('finalDecision')
+    if decision not in {'pass', 'conditional pass'}:
+        return False
+    if not review.get('finalDeliveryReady', False):
+        return False
+    return not list(review.get('finalBlockingIssues') or [])
+
+
 def main() -> int:
     if len(sys.argv) < 3:
         print('Usage: approve_stage_gate.py <项目目录> <gate>')
@@ -45,10 +54,17 @@ def main() -> int:
         return 2
 
     stage, approval_key, next_stage = APPROVAL_TRANSITIONS[gate]
+    if gate == 'waiting_final_review_feedback' and not final_review_ready_for_approval(review):
+        print('ERROR: final review is not ready for approval', file=sys.stderr)
+        return 2
+
     state['approvals'][approval_key] = True
 
     workflow = state['workflow']
-    workflow['lastCompletedStage'] = stage
+    if gate == 'waiting_opening_feedback':
+        workflow['currentSubstage'] = None
+    else:
+        workflow['lastCompletedStage'] = stage
     workflow['currentStage'] = next_stage
     workflow['nextStage'] = next_stage
     workflow['status'] = 'collecting_inputs'
