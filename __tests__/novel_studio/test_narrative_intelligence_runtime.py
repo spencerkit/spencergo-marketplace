@@ -399,6 +399,72 @@ class NarrativeIntelligenceRuntimeTest(unittest.TestCase):
             self.assertIsNone(narrative_intelligence['theoryOfMind']['lastUpdatedBatch'])
             self.assertIsNone(narrative_intelligence['consistency']['lastCheckStage'])
 
+    def test_apply_conditionally_acceptable_proofreading_result_refreshes_metadata_using_cli_project_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_stage_runtime_project(root, current_stage='proofreading')
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            state['project']['rootPath'] = str(root / 'moved-project-copy')
+            self.write_state(project, state)
+
+            bundle_file = root / 'proofreading-bundle.json'
+            result_file = root / 'proofreading-result.json'
+
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            (project / '05A_本轮校对报告.md').write_text(
+                '# 05A_本轮校对报告\n\n- judgment: conditionally acceptable\n- summary: 有条件通过\n',
+                encoding='utf-8',
+            )
+            self.write_json(
+                result_file,
+                {
+                    'status': 'completed',
+                    'changedFiles': [],
+                    'createdFiles': ['05A_本轮校对报告.md'],
+                    'blockedReasons': [],
+                    'summary': '本轮校对完成，有条件通过',
+                    'notesForNextStage': '进入 final-review 前处理提示项',
+                    'risks': ['段落衔接还需微调'],
+                    'judgment': 'conditionally acceptable',
+                    'continuity': '基本通过',
+                    'logic': '基本通过',
+                    'characterOOC': '无',
+                    'blockers': [],
+                    'fixDirection': '处理少量措辞和衔接问题',
+                },
+            )
+
+            apply_result = run_script(
+                'apply_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertEqual(apply_result.returncode, 0, apply_result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            narrative_intelligence = state['narrativeIntelligence']
+
+            self.assertEqual(narrative_intelligence['timeline']['lastUpdatedBatch'], '第1章')
+            self.assertEqual(narrative_intelligence['timeline']['lastTouchedChapters'], ['第1章'])
+            self.assertEqual(narrative_intelligence['cfpg']['lastUpdatedBatch'], '第1章')
+            self.assertEqual(narrative_intelligence['theoryOfMind']['lastUpdatedBatch'], '第1章')
+            self.assertEqual(narrative_intelligence['consistency']['lastCheckStage'], 'proofreading')
+
 
 if __name__ == '__main__':
     unittest.main()

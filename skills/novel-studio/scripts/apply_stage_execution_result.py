@@ -51,7 +51,7 @@ def should_sync_narrative_intelligence(stage: str, result: dict[str, object], ba
     return bool(batch.get('proofreadingComplete'))
 
 
-def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
+def apply_validated_state(data: dict, validated: dict[str, object], project: Path | None = None) -> None:
     stage = validated['stage']
     package = validated['package']
     result = validated['result']
@@ -98,10 +98,13 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
         artifacts['proofreadingReport'] = True
 
     if should_sync_narrative_intelligence(stage, result, batch):
+        sync_project = Path(project) if project is not None else None
         project_root = data.get('project', {}).get('rootPath')
-        if project_root:
+        if sync_project is None and project_root:
+            sync_project = Path(project_root)
+        if sync_project is not None:
             sync_narrative_intelligence(
-                Path(project_root),
+                sync_project,
                 data,
                 stage=stage,
                 chapter_labels=chapter_labels,
@@ -125,7 +128,7 @@ def main() -> None:
         result = read_json_file(Path(args.result_file))
         validated = validate_bundle_and_result(project, bundle, result)
         data = load_state(project)
-        apply_validated_state(data, validated)
+        apply_validated_state(data, validated, project)
         save_state(project, data)
         saved = load_state(project)
     except Exception as exc:
