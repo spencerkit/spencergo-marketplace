@@ -16,6 +16,14 @@ from stage_persistence_utils import (
 )
 
 SUBCOMMANDS = {'create', 'promote', 'prune'}
+CLICHE_EXHAUSTION_FILES = (
+    '00_脑暴任务卡.md',
+    '01_直觉俗套清单.md',
+    '02_反驳与否认.md',
+    '03_变异候选.md',
+    '04_保留候选.md',
+    '05_定稿结论.md',
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -26,6 +34,9 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument('project')
     create.add_argument('stage')
     create.add_argument('branch_id')
+    create.add_argument('--mode', choices=('standard', 'cliche_exhaustion'), default='standard')
+    create.add_argument('--focus')
+    create.add_argument('--round')
 
     promote = subparsers.add_parser('promote')
     promote.add_argument('project')
@@ -44,10 +55,39 @@ def branch_dir(project: Path, stage: str, branch_id: str) -> Path:
     return project / 'staging' / stage / branch_id
 
 
+def scaffold_cliche_exhaustion_branch(branch_path: Path) -> None:
+    for filename in CLICHE_EXHAUSTION_FILES:
+        target = branch_path / filename
+        if not target.exists():
+            target.write_text('', encoding='utf-8')
+
+
+def parse_novelty_axes(branch_path: Path) -> list[str]:
+    conclusion = branch_path / '05_定稿结论.md'
+    if not conclusion.exists():
+        return []
+
+    axes: list[str] = []
+    in_section = False
+    for raw_line in conclusion.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if in_section and line.startswith('## '):
+            break
+        if line == '## Novelty Axes':
+            in_section = True
+            continue
+        if in_section and line.startswith('- '):
+            value = line[2:].strip()
+            if value:
+                axes.append(value)
+    return axes
+
+
 def promote_branch(project: Path, stage: str, branch_id: str, copy_files: list[str]) -> dict:
     data = load_state(project)
     workflow = data.setdefault('workflow', {})
     review = data.setdefault('review', {})
+    style_risk = data.setdefault('narrativeIntelligence', {}).setdefault('styleRisk', {})
     substage = workflow.get('currentSubstage')
     selected_branch = branch_dir(project, stage, branch_id)
     if not selected_branch.exists():
@@ -61,6 +101,7 @@ def promote_branch(project: Path, stage: str, branch_id: str, copy_files: list[s
         artifact_updates[relpath] = source.read_text(encoding='utf-8')
 
     validated = validate_artifact_updates(stage, artifact_updates, substage)
+    novelty_axes = parse_novelty_axes(selected_branch)
     for relpath, text in validated.items():
         target = project / relpath
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -69,22 +110,36 @@ def promote_branch(project: Path, stage: str, branch_id: str, copy_files: list[s
     shutil.rmtree(project / 'staging' / stage, ignore_errors=True)
     review['activeBranches'] = []
     review['brainstormActive'] = False
+    review['selectedBranch'] = branch_state_key(stage, branch_id)
     review['currentGate'] = gate_for_stage(stage, substage)
     review['pendingArtifactPaths'] = sorted(validated)
     review['lastPersistedStage'] = stage
     review['lastPersistedAt'] = now_iso()
+    style_risk['noveltyAxes'] = novelty_axes
     workflow['status'] = 'awaiting_user_approval'
     save_state(project, data)
     return load_state(project)
 
 
-def create_branch(project: Path, stage: str, branch_id: str) -> dict:
+def create_branch(
+    project: Path,
+    stage: str,
+    branch_id: str,
+    mode: str,
+    focus: str | None,
+    round_label: str | None,
+) -> dict:
     data = load_state(project)
     workflow = data.setdefault('workflow', {})
     review = data.setdefault('review', {})
     branch_path = branch_dir(project, stage, branch_id)
     branch_path.mkdir(parents=True, exist_ok=True)
+    if mode == 'cliche_exhaustion':
+        scaffold_cliche_exhaustion_branch(branch_path)
     review['brainstormActive'] = True
+    review['brainstormMode'] = mode
+    review['brainstormFocus'] = focus
+    review['brainstormRound'] = round_label
     workflow['status'] = 'brainstorming'
     key = branch_state_key(stage, branch_id)
     active_branches = list(review.get('activeBranches') or [])
@@ -125,7 +180,14 @@ def main() -> int:
 
     try:
         if args.command == 'create':
-            state = create_branch(project, args.stage, args.branch_id)
+            state = create_branch(
+                project,
+                args.stage,
+                args.branch_id,
+                args.mode,
+                args.focus,
+                args.round,
+            )
         elif args.command == 'promote':
             state = promote_branch(project, args.stage, args.branch_id, args.copy_files)
         elif args.command == 'prune':

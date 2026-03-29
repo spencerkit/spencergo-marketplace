@@ -259,6 +259,73 @@ class SupervisorPersistenceTest(unittest.TestCase):
             self.assertIn('当前状态：awaiting_user_approval', result.stdout)
             self.assertIn('待审批文件：01_想法.md, 02_大纲.md', result.stdout)
 
+    def test_create_cliche_exhaustion_branch_scaffolds_required_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            result = run_script(
+                'manage_stage_branches.py',
+                'create',
+                str(project),
+                'story-planning',
+                '版本A',
+                '--mode',
+                'cliche_exhaustion',
+                '--focus',
+                'story_engine',
+                '--round',
+                'enumeration',
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            branch = project / 'staging' / 'story-planning' / '版本A'
+            self.assertTrue((branch / '00_脑暴任务卡.md').exists())
+            self.assertTrue((branch / '01_直觉俗套清单.md').exists())
+            self.assertTrue((branch / '05_定稿结论.md').exists())
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['review']['brainstormMode'], 'cliche_exhaustion')
+            self.assertEqual(state['review']['brainstormFocus'], 'story_engine')
+            self.assertEqual(state['review']['brainstormRound'], 'enumeration')
+
+    def test_promote_cliche_exhaustion_branch_persists_selected_branch_and_novelty_axes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            branch = project / 'staging' / 'story-planning' / '版本B'
+            branch.mkdir(parents=True)
+            (branch / '01_想法.md').write_text('# 想法\n\n保留版本\n', encoding='utf-8')
+            (branch / '05_定稿结论.md').write_text(
+                '# 定稿结论\n\n'
+                '## 保留方向\n- 版本B\n\n'
+                '## Novelty Axes\n- desire_inversion\n- relationship_consequence\n',
+                encoding='utf-8',
+            )
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {'currentStage': 'story-planning', 'status': 'brainstorming'},
+                    'review': {'brainstormActive': True, 'activeBranches': ['story-planning/版本B']},
+                },
+            )
+
+            result = run_script(
+                'manage_stage_branches.py',
+                'promote',
+                str(project),
+                'story-planning',
+                '版本B',
+                '--copy-file',
+                '01_想法.md',
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['review']['selectedBranch'], 'story-planning/版本B')
+            self.assertEqual(
+                state['narrativeIntelligence']['styleRisk']['noveltyAxes'],
+                ['desire_inversion', 'relationship_consequence'],
+            )
+
     def test_approve_stage_gate_clears_opening_substage_without_marking_drafting_complete(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'
