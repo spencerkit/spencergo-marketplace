@@ -19,6 +19,9 @@ Accepted proofreading has a parent-side post-processing hook:
 - refresh `narrativeIntelligence.timeline` / `cfpg` / `theoryOfMind`
 - refresh `05I_证据链与矛盾对照表.md` plus `narrativeIntelligence.consistency.*`
 - accepted proofreading may trigger a parent-side style-risk refresh
+- this slice only does deterministic duplicate checks for `05_本轮章节规划.md` attraction points and climax targets, storing them in `narrativeIntelligence.styleRisk.clichePatterns`
+- always record `narrativeIntelligence.styleRisk.lastClicheScanStage = "proofreading"` during that parent-side refresh, even when no duplicates are found
+- cliche findings alone do not stop autopilot, add a new approval gate, change the child proofreading contract, or become final-review blockers in this slice
 - if evidence-backed critical issues remain, stop autopilot with an explicit blocker reason
 - do not silently rewrite the child report; checker output is parent-owned derived state
 

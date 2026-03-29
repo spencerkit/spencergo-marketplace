@@ -8,7 +8,7 @@ from pathlib import Path
 
 from autopilot_utils import record_autopilot_progress, stop_autopilot_with_blockers, summarize_chapter_progress
 from chapter_progress_utils import apply_result_to_chapters
-from narrative_checker import refresh_consistency_findings
+from narrative_checker import refresh_cliche_findings, refresh_consistency_findings
 from narrative_intelligence_utils import sync_narrative_intelligence
 from revision_utils import load_state, save_state
 from stage_execution_utils import (
@@ -112,6 +112,7 @@ def apply_validated_state(data: dict, validated: dict[str, object], project: Pat
             )
             if stage == 'proofreading':
                 refresh_consistency_findings(sync_project, data)
+                refresh_cliche_findings(sync_project, data)
 
     if result['status'] == 'completed':
         record_autopilot_progress(data, autopilot_progress_summary)

@@ -1,5 +1,7 @@
 import json
+import importlib.util
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -190,6 +192,101 @@ class NarrativeIntelligenceReviewTest(unittest.TestCase):
             self.assertIn('[叙事智能]', full.stdout)
             self.assertIn('关键问题：1', full.stdout)
             self.assertIn('时间风险：1', full.stdout)
+
+    def test_proofreading_refresh_records_cliche_patterns_for_duplicate_hooks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_review_project(Path(tmp), current_stage='proofreading')
+            (project / '05_本轮章节规划.md').write_text(
+                '## 逐章规划\n'
+                '### 第1章\n- 本章吸引点：隐藏实力\n- 高潮点：结尾反转\n'
+                '### 第2章\n- 本章吸引点：隐藏实力\n- 高潮点：结尾反转\n',
+                encoding='utf-8',
+            )
+
+            result = run_script(
+                'update_narrative_intelligence.py',
+                str(project),
+                '--stage',
+                'proofreading',
+                '--chapter-label',
+                '第1章',
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            style_risk = state['narrativeIntelligence']['styleRisk']
+            self.assertIn('重复吸引点：隐藏实力', style_risk['clichePatterns'])
+            self.assertIn('重复高潮点：结尾反转', style_risk['clichePatterns'])
+            self.assertEqual(style_risk['lastClicheScanStage'], 'proofreading')
+
+    def test_status_brief_shows_cliche_risk_count(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_review_project(
+                Path(tmp),
+                current_stage='proofreading',
+                narrative_intelligence={
+                    'styleRisk': {
+                        'clichePatterns': ['重复吸引点：隐藏实力'],
+                        'noveltyAxes': ['desire_inversion'],
+                        'lastClicheScanStage': 'proofreading',
+                    }
+                },
+            )
+
+            result = run_script('novel_project_status.py', str(project), '--brief')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('套路风险：1 条 / 新意轴：1 条', result.stdout)
+
+    def test_apply_stage_execution_result_refreshes_cliche_patterns_for_accepted_proofreading(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_review_project(root, current_stage='proofreading')
+            (project / '05_本轮章节规划.md').write_text(
+                '## 逐章规划\n'
+                '### 第1章\n- 本章吸引点：隐藏实力\n- 高潮点：结尾反转\n'
+                '### 第2章\n- 本章吸引点：隐藏实力\n- 高潮点：结尾反转\n',
+                encoding='utf-8',
+            )
+
+            spec = importlib.util.spec_from_file_location(
+                'apply_stage_execution_result',
+                SCRIPTS / 'apply_stage_execution_result.py',
+            )
+            self.assertIsNotNone(spec)
+            module = importlib.util.module_from_spec(spec)
+            self.assertIsNotNone(spec.loader)
+            sys.path.insert(0, str(SCRIPTS))
+            try:
+                spec.loader.exec_module(module)
+            finally:
+                sys.path.pop(0)
+            state = module.load_state(project)
+
+            validated = {
+                'stage': 'proofreading',
+                'package': {
+                    'requiredInputs': {
+                        'chapterLabels': ['第1章'],
+                    },
+                    'targetFiles': [],
+                    'batchRange': '第10章',
+                },
+                'result': {
+                'status': 'completed',
+                'summary': '校对完成',
+                'judgment': 'acceptable',
+                'continuity': '通过',
+                'logic': '通过',
+                'characterOOC': '无',
+                'blockers': [],
+                'fixDirection': '无',
+                },
+            }
+            module.apply_validated_state(state, validated, project)
+            style_risk = state['narrativeIntelligence']['styleRisk']
+            self.assertIn('重复吸引点：隐藏实力', style_risk['clichePatterns'])
+            self.assertIn('重复高潮点：结尾反转', style_risk['clichePatterns'])
+            self.assertEqual(style_risk['lastClicheScanStage'], 'proofreading')
 
 
 if __name__ == '__main__':

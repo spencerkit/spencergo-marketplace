@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 
 from autopilot_utils import stop_autopilot_with_blockers
@@ -10,6 +11,8 @@ from narrative_intelligence_utils import (
     ensure_narrative_artifacts,
 )
 from revision_utils import default_narrative_intelligence
+
+CHAPTER_PLAN_ARTIFACT = '05_本轮章节规划.md'
 
 
 def _normalized_text(value: object) -> str | None:
@@ -91,6 +94,37 @@ def _issue_summary(triple: dict[str, str | None]) -> str:
     else:
         detail = '关键伏笔未闭环'
     return f'伏笔 {triple_id} {suffix}：{detail}'
+
+
+def _extract_plan_points(project: Path, prefix: str) -> list[str]:
+    artifact = Path(project) / CHAPTER_PLAN_ARTIFACT
+    if not artifact.exists() or not artifact.is_file():
+        return []
+
+    values: list[str] = []
+    for raw_line in artifact.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if not line.startswith(prefix):
+            continue
+        value = _normalized_text(line.partition('：')[2])
+        if value is not None:
+            values.append(value)
+    return values
+
+
+def build_cliche_findings(project: Path) -> list[str]:
+    findings: list[str] = []
+    duplicate_groups = (
+        ('- 本章吸引点：', '重复吸引点'),
+        ('- 高潮点：', '重复高潮点'),
+    )
+
+    for prefix, label in duplicate_groups:
+        counts = Counter(_extract_plan_points(project, prefix))
+        for value in counts:
+            if counts[value] > 1:
+                findings.append(f'{label}：{value}')
+    return findings
 
 
 def build_consistency_findings(project: Path, state: dict) -> dict[str, list[object]]:
@@ -185,6 +219,14 @@ def refresh_consistency_findings(project: Path, state: dict) -> dict[str, list[o
         )
 
     return findings
+
+
+def refresh_cliche_findings(project: Path, state: dict) -> list[str]:
+    narrative_intelligence = state.setdefault('narrativeIntelligence', default_narrative_intelligence())
+    style_risk = narrative_intelligence.setdefault('styleRisk', default_narrative_intelligence()['styleRisk'])
+    style_risk['clichePatterns'] = build_cliche_findings(project)
+    style_risk['lastClicheScanStage'] = 'proofreading'
+    return list(style_risk['clichePatterns'])
 
 
 def build_revision_actions(state: dict) -> list[dict[str, str]]:
