@@ -89,6 +89,9 @@
 - 只有用户给出显式、带终点章节的授权才会开启 autopilot，例如 `后续你来主控，继续到第10章结束`。单独一句 `继续` 不算。
 - 自动推进不改变职责分工：父 agent 仍负责流程控制、审批解释、状态落盘和进度汇报；`drafting` / `polishing` / `proofreading` 仍由各自 subagent 执行。
 - `advance_autopilot.py` 每次只前进一步：补 `scopeConfirmed`、在 `05_本轮章节规划.md` 可安全解析时批准 `chapterPlanApproved` 并重建 `chapterTasks`、或代批 `waiting_draft_feedback` / `waiting_polishing_feedback` / `waiting_proofreading_feedback`。
+- 每次调用 `advance_autopilot.py` 都会返回 `report`：明确告诉父 agent 现在是继续中、暂停中还是已停止，以及这一步是否应该主动通知用户。
+- 如果 `report.shouldNotify=true`，父 agent 必须立刻把 `report.userFacingMessage` 发给用户；不能只把信息留在状态文件里。
+- 如果这次通知用了 `report.pendingEventIds` 对应的章节进度，发完后要用 `chapter_progress_report.py --ack <event-id>` 回执，避免下次重复播报同一条。
 - 自动推进期间仍持续汇报章节进度；不会因为进入 autopilot 就停止 `chapterTasks` / `pendingProgressItems` 的更新和对外汇报。
 - 以下情况必须停下并给出明确原因：子 agent 返回 `blocked`、用户发来实质性打断、目标章节达到经批准的 proofreading 完成状态、或用户改成新的终点章节。
 - `waiting_final_review_feedback` 永远不自动批准；最终审校和最终交付仍是人工决定。
@@ -194,6 +197,7 @@ prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `man
 章节进度汇报：
 - 父 agent 会把章节级状态变化落到 `.novel-state.json` 的 `chapterTasks` 和 `pendingProgressItems`
 - 默认汇报文案会合并成类似 `第1章初稿待审核；第2章润色中`
+- 自动推进主循环优先读取 `advance_autopilot.py` 返回的 `report.pendingProgressSummary` / `report.userFacingMessage`
 - 读取待汇报摘要：`python3 skills/novel-studio/scripts/chapter_progress_report.py <项目目录>`
 - 汇报成功后确认这些事件已发送：`python3 skills/novel-studio/scripts/chapter_progress_report.py <项目目录> --ack <event-id>`
 

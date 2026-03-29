@@ -1555,6 +1555,23 @@ class NovelStudioAutopilotWorkflowTest(unittest.TestCase):
             self.assertTrue(state['batch']['scopeConfirmed'])
             self.assertFalse(state['batch']['chapterPlanApproved'])
             self.assertTrue(state['autoPilot']['active'])
+            self.assertEqual(
+                payload['report'],
+                {
+                    'status': 'running',
+                    'autopilotActive': True,
+                    'awaitingManualResume': False,
+                    'goalChapter': '第10章',
+                    'lastProgressSummary': None,
+                    'pendingProgressSummary': None,
+                    'pendingEventIds': [],
+                    'stopReason': None,
+                    'actionSummary': '已自动确认本轮范围',
+                    'blockingReason': None,
+                    'shouldNotify': True,
+                    'userFacingMessage': '自动流程进展：已自动确认本轮范围',
+                },
+            )
 
     def test_advance_autopilot_confirms_chapter_plan_when_needed(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1774,6 +1791,23 @@ class NovelStudioAutopilotWorkflowTest(unittest.TestCase):
             state = payload['savedState']
             self.assertFalse(state['batch']['chapterPlanApproved'])
             self.assertEqual(state['batch']['chapterTasks'], [])
+            self.assertEqual(
+                payload['report'],
+                {
+                    'status': 'running',
+                    'autopilotActive': True,
+                    'awaitingManualResume': False,
+                    'goalChapter': '第10章',
+                    'lastProgressSummary': None,
+                    'pendingProgressSummary': None,
+                    'pendingEventIds': [],
+                    'stopReason': None,
+                    'actionSummary': None,
+                    'blockingReason': None,
+                    'shouldNotify': False,
+                    'userFacingMessage': None,
+                },
+            )
 
     def test_advance_autopilot_rebuilds_stale_chapter_tasks_from_current_plan_on_approval(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2014,6 +2048,23 @@ class NovelStudioAutopilotWorkflowTest(unittest.TestCase):
             task = state['batch']['chapterTasks'][0]
             self.assertEqual(task['phase'], 'polishing')
             self.assertEqual(task['phaseStatus'], 'queued')
+            self.assertEqual(
+                payload['report'],
+                {
+                    'status': 'running',
+                    'autopilotActive': True,
+                    'awaitingManualResume': False,
+                    'goalChapter': '第10章',
+                    'lastProgressSummary': '第10章待润色',
+                    'pendingProgressSummary': '第10章待润色',
+                    'pendingEventIds': [payload['report']['pendingEventIds'][0]],
+                    'stopReason': None,
+                    'actionSummary': '已自动通过初稿审批，进入润色阶段',
+                    'blockingReason': None,
+                    'shouldNotify': True,
+                    'userFacingMessage': '自动流程进展：已自动通过初稿审批，进入润色阶段；章节进度：第10章待润色',
+                },
+            )
 
     def test_advance_autopilot_never_approves_final_review_gate(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2071,6 +2122,172 @@ class NovelStudioAutopilotWorkflowTest(unittest.TestCase):
             state = payload['savedState']
             self.assertEqual(state['review']['currentGate'], 'waiting_final_review_feedback')
             self.assertFalse(state['approvals']['finalApproved'])
+            self.assertEqual(
+                payload['report'],
+                {
+                    'status': 'running',
+                    'autopilotActive': True,
+                    'awaitingManualResume': False,
+                    'goalChapter': '第10章',
+                    'lastProgressSummary': '第10章已完成',
+                    'pendingProgressSummary': None,
+                    'pendingEventIds': [],
+                    'stopReason': None,
+                    'actionSummary': None,
+                    'blockingReason': '终审必须人工确认',
+                    'shouldNotify': True,
+                    'userFacingMessage': '自动流程暂停：终审必须人工确认；最近进度：第10章已完成',
+                },
+            )
+
+    def test_advance_autopilot_surfaces_pending_progress_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            self.write_state(
+                project,
+                {
+                    'project': {'title': project.name, 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'drafting',
+                        'currentSubstage': None,
+                        'lastCompletedStage': 'character-system',
+                        'nextStage': 'drafting',
+                        'status': 'collecting_inputs',
+                    },
+                    'review': {
+                        'currentGate': None,
+                        'pendingArtifactPaths': [],
+                    },
+                    'batch': {
+                        'active': True,
+                        'scopeConfirmed': True,
+                        'chapterPlanApproved': True,
+                        'pendingProgressItems': [
+                            {
+                                'eventId': 'progress-1',
+                                'chapterLabel': '第1章',
+                                'phase': 'drafting',
+                                'phaseStatus': 'awaiting_user_review',
+                                'summary': '第1章初稿待审核',
+                                'blockers': [],
+                                'createdAt': '2026-03-29T10:01:00Z',
+                                'reportedAt': None,
+                            },
+                            {
+                                'eventId': 'progress-2',
+                                'chapterLabel': '第2章',
+                                'phase': 'polishing',
+                                'phaseStatus': 'in_progress',
+                                'summary': '第2章润色中',
+                                'blockers': [],
+                                'createdAt': '2026-03-29T10:02:00Z',
+                                'reportedAt': None,
+                            },
+                        ],
+                    },
+                    'autoPilot': {
+                        'active': True,
+                        'goalChapter': '第10章',
+                        'goalCondition': 'proofreading_completed',
+                        'startedAt': '2026-03-29T09:00:00Z',
+                        'startedBy': '继续到第10章结束',
+                        'lastProgressAt': '2026-03-29T10:02:00Z',
+                        'lastProgressSummary': '第2章润色中',
+                        'stopReason': None,
+                        'stoppedAt': None,
+                        'awaitingManualResume': False,
+                    },
+                },
+            )
+
+            result = run_script('advance_autopilot.py', str(project))
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload['action'], 'noop')
+            self.assertEqual(payload['reason'], 'no_safe_autopilot_action')
+            self.assertEqual(
+                payload['report'],
+                {
+                    'status': 'running',
+                    'autopilotActive': True,
+                    'awaitingManualResume': False,
+                    'goalChapter': '第10章',
+                    'lastProgressSummary': '第2章润色中',
+                    'pendingProgressSummary': '第1章初稿待审核；第2章润色中',
+                    'pendingEventIds': ['progress-1', 'progress-2'],
+                    'stopReason': None,
+                    'actionSummary': None,
+                    'blockingReason': None,
+                    'shouldNotify': True,
+                    'userFacingMessage': '章节进度：第1章初稿待审核；第2章润色中',
+                },
+            )
+
+    def test_advance_autopilot_surfaces_stopped_state_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            self.write_state(
+                project,
+                {
+                    'project': {'title': project.name, 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'final-review',
+                        'currentSubstage': None,
+                        'lastCompletedStage': 'proofreading',
+                        'nextStage': None,
+                        'status': 'awaiting_user_approval',
+                    },
+                    'review': {
+                        'currentGate': None,
+                        'pendingArtifactPaths': [],
+                    },
+                    'batch': {
+                        'active': True,
+                        'scopeConfirmed': True,
+                        'chapterPlanApproved': True,
+                        'pendingProgressItems': [],
+                    },
+                    'autoPilot': {
+                        'active': False,
+                        'goalChapter': '第10章',
+                        'goalCondition': 'proofreading_completed',
+                        'startedAt': '2026-03-29T09:00:00Z',
+                        'startedBy': '继续到第10章结束',
+                        'lastProgressAt': '2026-03-29T10:10:00Z',
+                        'lastProgressSummary': '第10章已完成',
+                        'stopReason': 'goal_reached',
+                        'stoppedAt': '2026-03-29T10:11:00Z',
+                        'awaitingManualResume': True,
+                    },
+                },
+            )
+
+            result = run_script('advance_autopilot.py', str(project))
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload['action'], 'noop')
+            self.assertEqual(payload['reason'], 'autopilot_inactive')
+            self.assertEqual(
+                payload['report'],
+                {
+                    'status': 'waiting_manual_resume',
+                    'autopilotActive': False,
+                    'awaitingManualResume': True,
+                    'goalChapter': '第10章',
+                    'lastProgressSummary': '第10章已完成',
+                    'pendingProgressSummary': None,
+                    'pendingEventIds': [],
+                    'stopReason': 'goal_reached',
+                    'actionSummary': None,
+                    'blockingReason': None,
+                    'shouldNotify': True,
+                    'userFacingMessage': '自动流程已停止：已达到目标章节（goal_reached）；最近进度：第10章已完成',
+                },
+            )
 
     def test_advance_autopilot_noops_while_formal_revision_gate_is_active(self):
         with tempfile.TemporaryDirectory() as tmp:

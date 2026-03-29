@@ -81,6 +81,9 @@ Do not advance to the next stage unless:
 - autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still run through their subagents
 - progress updates still continue during automation; keep surfacing merged chapter progress after dispatch start, accepted child results, and approval transitions
 - `scripts/advance_autopilot.py` advances at most one safe step per call
+- each `scripts/advance_autopilot.py` result also includes a `report` object; parent orchestration should use it as the single source for notify / pause / stop decisions instead of inferring from raw state
+- if `report.shouldNotify` is true, send `report.userFacingMessage` immediately and ack any surfaced `report.pendingEventIds` after the message is delivered
+- if `report.blockingReason` is present or `report.awaitingManualResume` is true, surface that halt to the user explicitly instead of silently polling again
 - one-step advancement is limited to confirming `batch.scopeConfirmed`, safely approving `batch.chapterPlanApproved` from a parseable `05_本轮章节规划.md`, or approving an eligible open review gate
 - eligible auto-approvable review gates are only `waiting_draft_feedback`, `waiting_polishing_feedback`, and `waiting_proofreading_feedback`
 - blocked delegated results must halt autopilot with an explicit stop reason such as `blocked: 人物口吻漂移`

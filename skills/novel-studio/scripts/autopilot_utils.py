@@ -5,7 +5,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from chapter_progress_utils import extract_chapter_labels_from_plan, initialize_chapter_tasks
+from chapter_progress_utils import build_progress_report, extract_chapter_labels_from_plan, initialize_chapter_tasks
 from stage_persistence_utils import now_iso
 
 GOAL_CHAPTER_RE = re.compile(r'(第[0-9零一二三四五六七八九十百千万两]+章)(?:\s*结束)?')
@@ -28,6 +28,20 @@ AUTO_APPROVABLE_GATES = {
     'waiting_proofreading_feedback',
 }
 FORMAL_REVISION_BLOCKER_PREFIX = 'Formal revision active:'
+AUTO_ACTION_SUMMARIES = {
+    'confirm_scope': '已自动确认本轮范围',
+    'approve_chapter_plan': '已自动确认本轮章节规划',
+}
+AUTO_GATE_ACTION_SUMMARIES = {
+    'waiting_draft_feedback': '已自动通过初稿审批，进入润色阶段',
+    'waiting_polishing_feedback': '已自动通过润色审批，进入校对阶段',
+    'waiting_proofreading_feedback': '已自动通过校对审批，进入终审阶段',
+}
+AUTO_BLOCKING_REASON_SUMMARIES = {
+    'final_review_manual': '终审必须人工确认',
+    'gate_requires_manual_approval': '当前审批门需要人工确认',
+    'formal_revision_active': '正式修订流程进行中',
+}
 
 
 def normalize_bool(value, *, default: bool = False) -> bool:
@@ -463,3 +477,116 @@ def resolve_next_autopilot_action(state: dict, *, project_path: Path, eligible_g
         return {'action': 'approve_chapter_plan'}
 
     return {'action': 'noop', 'reason': 'no_safe_autopilot_action'}
+
+
+def autopilot_runtime_status(auto_pilot: dict) -> str:
+    if auto_pilot.get('active'):
+        return 'running'
+    if auto_pilot.get('awaitingManualResume'):
+        return 'waiting_manual_resume'
+    return 'inactive'
+
+
+def summarize_autopilot_action(action_payload: dict) -> str | None:
+    action = action_payload.get('action')
+    if action in AUTO_ACTION_SUMMARIES:
+        return AUTO_ACTION_SUMMARIES[action]
+    if action == 'approve_gate':
+        return AUTO_GATE_ACTION_SUMMARIES.get(action_payload.get('gate'))
+    return None
+
+
+def summarize_autopilot_blocking_reason(action_payload: dict) -> str | None:
+    if action_payload.get('action') != 'noop':
+        return None
+    return AUTO_BLOCKING_REASON_SUMMARIES.get(action_payload.get('reason'))
+
+
+def humanize_autopilot_stop_reason(reason: str | None) -> str | None:
+    normalized = (reason or '').strip()
+    if not normalized:
+        return None
+    if normalized == 'goal_reached':
+        return '已达到目标章节（goal_reached）'
+    if normalized == 'user_interruption':
+        return '收到新的用户指令（user_interruption）'
+    if normalized == 'superseded_by_new_user_goal':
+        return '已切换到新的自动目标（superseded_by_new_user_goal）'
+    if normalized.startswith('blocked:'):
+        detail = normalized.split(':', 1)[1].strip()
+        return f'阻塞：{detail}' if detail else '阻塞'
+    return normalized
+
+
+def render_autopilot_user_facing_message(
+    *,
+    pending_progress_summary: str | None,
+    last_progress_summary: str | None,
+    stop_reason: str | None,
+    awaiting_manual_resume: bool,
+    action_summary: str | None,
+    blocking_reason: str | None,
+) -> str | None:
+    parts: list[str] = []
+    if action_summary:
+        parts.append(f'自动流程进展：{action_summary}')
+    if pending_progress_summary:
+        parts.append(f'章节进度：{pending_progress_summary}')
+
+    if stop_reason is not None or awaiting_manual_resume:
+        stop_text = humanize_autopilot_stop_reason(stop_reason) or '等待人工继续'
+        parts.append(f'自动流程已停止：{stop_text}')
+        if last_progress_summary and last_progress_summary != pending_progress_summary:
+            parts.append(f'最近进度：{last_progress_summary}')
+        return '；'.join(parts) if parts else None
+
+    if blocking_reason:
+        parts.append(f'自动流程暂停：{blocking_reason}')
+        if last_progress_summary and last_progress_summary != pending_progress_summary:
+            parts.append(f'最近进度：{last_progress_summary}')
+
+    return '；'.join(parts) if parts else None
+
+
+def build_autopilot_report(state: dict, action_payload: dict) -> dict:
+    auto_pilot = normalize_autopilot(state.get('autoPilot'))
+    batch = state.get('batch') if isinstance(state.get('batch'), dict) else {}
+    progress_report = build_progress_report(batch.get('pendingProgressItems', []))
+    pending_progress_summary = (progress_report.get('summary') or '').strip() or None
+    last_progress_summary = (auto_pilot.get('lastProgressSummary') or '').strip() or None
+    stop_reason = (auto_pilot.get('stopReason') or '').strip() or None
+    action_summary = summarize_autopilot_action(action_payload)
+    blocking_reason = summarize_autopilot_blocking_reason(action_payload)
+    awaiting_manual_resume = normalize_bool(auto_pilot.get('awaitingManualResume'), default=False)
+
+    should_notify = any(
+        [
+            pending_progress_summary,
+            stop_reason,
+            awaiting_manual_resume,
+            action_summary,
+            blocking_reason,
+        ]
+    )
+
+    return {
+        'status': autopilot_runtime_status(auto_pilot),
+        'autopilotActive': normalize_bool(auto_pilot.get('active'), default=False),
+        'awaitingManualResume': awaiting_manual_resume,
+        'goalChapter': auto_pilot.get('goalChapter'),
+        'lastProgressSummary': last_progress_summary,
+        'pendingProgressSummary': pending_progress_summary,
+        'pendingEventIds': list(progress_report.get('eventIds') or []),
+        'stopReason': stop_reason,
+        'actionSummary': action_summary,
+        'blockingReason': blocking_reason,
+        'shouldNotify': should_notify,
+        'userFacingMessage': render_autopilot_user_facing_message(
+            pending_progress_summary=pending_progress_summary,
+            last_progress_summary=last_progress_summary,
+            stop_reason=stop_reason,
+            awaiting_manual_resume=awaiting_manual_resume,
+            action_summary=action_summary,
+            blocking_reason=blocking_reason,
+        ),
+    }

@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from approve_stage_gate import approve_gate, gate_approval_error
-from autopilot_utils import AUTO_APPROVABLE_GATES, resolve_next_autopilot_action
+from autopilot_utils import AUTO_APPROVABLE_GATES, build_autopilot_report, resolve_next_autopilot_action
 from revision_utils import load_state, save_state
 
 
@@ -48,6 +48,7 @@ def main() -> int:
         saved_state = load_state(project)
 
     payload['savedState'] = saved_state
+    payload['report'] = build_autopilot_report(saved_state, payload)
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0
 

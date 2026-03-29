@@ -74,6 +74,10 @@ Default order:
 - vague approval like `继续` or `好` does not activate autopilot
 - autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still belong to their subagents
 - progress updates continue during automation; keep surfacing merged chapter progress after dispatch start, accepted child results, and approval transitions
+- after each `scripts/advance_autopilot.py` call, the parent must inspect the returned `report` object instead of guessing from raw state
+- if `report.shouldNotify` is true, immediately send `report.userFacingMessage` to the user
+- if `report.pendingEventIds` were surfaced, acknowledge them with `scripts/chapter_progress_report.py <项目目录> --ack <event-id>` after the message is sent, so the same update is not repeated forever
+- if `report.blockingReason` is non-empty or `report.awaitingManualResume` is true, explicitly tell the user why automation paused or stopped; never swallow the halt
 - stop automation with an explicit stop reason when a delegated result is blocked, the user sends a substantive interruption, the goal chapter reaches approved proofreading completion, or the user replaces the bounded goal
 - if the user replaces the bounded goal, stop the previous run with `superseded_by_new_user_goal` before starting the new one
 - final review and final delivery remain manual; never auto-approve `waiting_final_review_feedback`
