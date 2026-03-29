@@ -138,6 +138,19 @@ class NarrativeIntelligenceRuntimeTest(unittest.TestCase):
 
             self.assertTrue(state['narrativeIntelligence']['timeline']['enabled'])
 
+    def test_load_project_state_keeps_timeline_disabled_when_one_canonical_artifact_is_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+
+            for artifact_name in NARRATIVE_ARTIFACTS:
+                content = '' if artifact_name == TIMELINE_ARTIFACT else f'# {artifact_name}\n\n已初始化\n'
+                (project / artifact_name).write_text(content, encoding='utf-8')
+
+            state = self.load_reconstructed_state(project)
+
+            self.assertFalse(state['narrativeIntelligence']['timeline']['enabled'])
+
     def test_load_project_state_keeps_timeline_disabled_when_artifact_set_is_partial(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'
