@@ -142,6 +142,17 @@ Before prose drafting:
 
 These artifacts are part of the canonical project, not optional side notes.
 
+## Narrative-intelligence runtime rule
+
+Treat `05F`–`05I` and `narrativeIntelligence.*` as parent-owned derived support artifacts.
+
+Rules:
+- after planning approval, the parent may initialize `05F_时间与事件图谱.md`, `05G_伏笔三元组账本.md`, `05H_角色认知与误判表.md`, and `05I_证据链与矛盾对照表.md`
+- after accepted drafting / polishing / proofreading results, the parent may refresh `narrativeIntelligence.timeline` / `cfpg` / `theoryOfMind`
+- accepted proofreading may also refresh `narrativeIntelligence.consistency.*` and fold open critical issues into final-review blockers
+- if parent-side consistency findings expose critical issues during accepted proofreading, stop autopilot with an explicit reason
+- do not let subagents write `.novel-state.json` or `05F`–`05I` directly
+
 ## Universal user approval gate
 
 Every stage must follow this pattern:

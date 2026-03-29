@@ -82,7 +82,7 @@ def finalize_dispatch_result(
         write_json(resolved_validated_file, validated)
 
     data = load_state(project)
-    apply_validated_state(data, validated)
+    apply_validated_state(data, validated, project)
     save_state(project, data)
     saved = load_state(project)
     return {

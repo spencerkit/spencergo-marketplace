@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from narrative_checker import refresh_consistency_findings
 from narrative_intelligence_utils import sync_narrative_intelligence
 from revision_utils import load_state, save_state
 from stage_execution_utils import ensure_project
@@ -30,6 +31,8 @@ def main() -> None:
             stage=args.stage,
             chapter_labels=args.chapter_labels,
         )
+        if args.stage == 'proofreading':
+            refresh_consistency_findings(project, state)
         save_state(project, state)
         saved = load_state(project)
     except Exception as exc:

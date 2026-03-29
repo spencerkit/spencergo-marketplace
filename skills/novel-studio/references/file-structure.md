@@ -55,6 +55,10 @@ Use this layout by default:
 ├── 05C_伏笔回收台账.md
 ├── 05D_关系状态表.md
 ├── 05E_能力与资源变化表.md
+├── 05F_时间与事件图谱.md
+├── 05G_伏笔三元组账本.md
+├── 05H_角色认知与误判表.md
+├── 05I_证据链与矛盾对照表.md
 ├── 06_反馈与修订.md
 ├── 07_终审报告.md
 ├── characters/
@@ -170,13 +174,30 @@ Purpose:
 - keep world rules, foreshadow, relationships, and resources file-backed
 - give polishing and proofreading a stable baseline beyond chat memory
 
-### 4.12 `06_反馈与修订.md`
+### 4.12 Narrative-intelligence set
+These four files are parent-owned derived support artifacts:
+- `05F_时间与事件图谱.md`
+- `05G_伏笔三元组账本.md`
+- `05H_角色认知与误判表.md`
+- `05I_证据链与矛盾对照表.md`
+
+Purpose:
+- keep timeline / CFPG / ToM / evidence-chain views file-backed
+- give proofreading and final review a canonical consistency surface beyond chat memory
+- preserve parent-owned checker output without changing drafting / polishing / proofreading child contracts
+
+Update timing:
+- initialize after planning approval
+- refresh after accepted drafting / polishing / proofreading results
+- treat these as canonical derived artifacts, but not as new user-approval gates in this slice
+
+### 4.13 `06_反馈与修订.md`
 Purpose:
 - store the current active formal revision
 - store affected scope and revision plan
 - store the latest closed formal revision result
 
-### 4.13 `07_终审报告.md`
+### 4.14 `07_终审报告.md`
 Purpose:
 - store the latest final-review decision
 - store delivery readiness judgment
@@ -309,6 +330,10 @@ A project is strongly structured when it also has:
 - `05C_伏笔回收台账.md`
 - `05D_关系状态表.md`
 - `05E_能力与资源变化表.md`
+- `05F_时间与事件图谱.md`
+- `05G_伏笔三元组账本.md`
+- `05H_角色认知与误判表.md`
+- `05I_证据链与矛盾对照表.md`
 - `06_反馈与修订.md`
 - `07_终审报告.md`
 - major character files
@@ -348,9 +373,16 @@ A project is strongly structured when it also has:
 - maintain `05C_伏笔回收台账.md`
 - maintain `05D_关系状态表.md`
 - maintain `05E_能力与资源变化表.md`
+- parent may refresh `05F_时间与事件图谱.md`
+- parent may refresh `05G_伏笔三元组账本.md`
+- parent may refresh `05H_角色认知与误判表.md`
 
 ### Revision stage
 - populate or update `06_反馈与修订.md`
+
+### Proofreading / final-review handoff
+- accepted proofreading may refresh `05I_证据链与矛盾对照表.md`
+- final review consumes `05I` / `narrativeIntelligence.consistency.openCriticalIssues` as blocker input
 
 ### Later stages
 - revise existing files rather than fragmenting into many inconsistent duplicates

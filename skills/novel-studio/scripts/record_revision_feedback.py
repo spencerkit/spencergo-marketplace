@@ -3,6 +3,7 @@ import json
 import sys
 from pathlib import Path
 
+from narrative_checker import build_revision_actions
 from revision_utils import load_state, reset_active_revision_fields, save_state, set_revision_blocker, write_revision_doc
 
 
@@ -49,6 +50,17 @@ def main():
         'currentRevisionGate': 'awaiting_revision_scope_confirmation',
         'awaitingUserApproval': True,
     })
+    actions = build_revision_actions(data)
+    if actions:
+        data.setdefault('narrativeIntelligence', {})['revisionActions'] = actions
+        revision['scopeSummary'] = '；'.join(action['summary'] for action in actions[:3])
+        revision['revisionPlanSummary'] = '；'.join(action['action'] for action in actions[:3])
+        revision['affectedFiles'] = sorted(
+            {
+                *revision.get('affectedFiles', []),
+                *(action['targetFile'] for action in actions if action.get('targetFile')),
+            }
+        )
     data['review']['lastUserFeedbackSummary'] = summary
     data['review']['lastRejectedReason'] = None
     set_revision_blocker(data, revision['currentRevisionGate'])

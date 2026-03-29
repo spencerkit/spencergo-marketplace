@@ -98,6 +98,37 @@ Use this as a quick reference for important `.novel-state.json` fields.
     ],
     "finalReviewSummary": "整体可读性稳定，但仍有阻塞项，暂不建议交付"
   },
+  "narrativeIntelligence": {
+    "timeline": {
+      "enabled": true,
+      "lastUpdatedBatch": "第10章",
+      "lastTouchedChapters": ["第10章"],
+      "openTemporalRisks": []
+    },
+    "cfpg": {
+      "foreshadowTriples": [],
+      "tripleCounts": {
+        "total": 0,
+        "pending": 0,
+        "fulfilled": 0,
+        "broken": 0,
+        "expired": 0
+      },
+      "lastUpdatedBatch": "第10章"
+    },
+    "theoryOfMind": {
+      "characterBeliefs": [],
+      "beliefConflicts": [],
+      "lastUpdatedBatch": "第10章"
+    },
+    "consistency": {
+      "contradictionCandidates": [],
+      "evidenceChains": [],
+      "lastCheckStage": "proofreading",
+      "openCriticalIssues": []
+    },
+    "revisionActions": []
+  },
   "revision": {
     "active": true,
     "feedbackType": "plot_feedback",
@@ -132,3 +163,8 @@ Autopilot notes:
 - `goalChapter` stores the normalized terminal chapter label, while `goalCondition` records the completion contract.
 - `lastProgressAt` / `lastProgressSummary` capture the latest merged progress surfaced during automation.
 - `stopReason` stays `null` while automation is active; when stopped, record explicit values such as `blocked: 人物口吻漂移`, `user_interruption`, or `goal_reached`.
+
+Narrative-intelligence notes:
+- `narrativeIntelligence.*` is parent-owned derived state. Subagents do not write these fields directly.
+- `timeline` / `cfpg` / `theoryOfMind` refresh on accepted drafting, polishing, and proofreading results.
+- accepted proofreading refresh also updates `consistency.*`; `openCriticalIssues` can stop autopilot and later fold into final-review blockers.

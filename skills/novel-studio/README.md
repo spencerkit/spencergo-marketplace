@@ -36,6 +36,9 @@
 **长篇账本** — 长篇稳定不靠记忆硬扛。必须维护世界规则、伏笔、关系、资源四类账本，避免中后期崩设定。
 
 **叙事智能层** — 在现有状态文件、账本、审校链之上，外挂统一真相源、动态状态追踪、矛盾配对、证据链、角色认知追踪、伏笔三元组追踪等能力；它负责“检查与索引”，不替代主控审批，也不替代 subagent 写审校。
+- `05F_时间与事件图谱.md` / `05G_伏笔三元组账本.md` / `05H_角色认知与误判表.md` / `05I_证据链与矛盾对照表.md` 是父 agent 维护的正式衍生文件。
+- planning 通过后可初始化 `05F` 到 `05I`；accepted 的 drafting / polishing / proofreading 会刷新 `narrativeIntelligence.*`。
+- accepted proofreading 会额外刷新 `05I` 和 `openCriticalIssues`；若存在证据支撑的关键一致性问题，会明确停掉 autopilot，而不是吞掉停止原因。
 
 ## 三大核心机制
 

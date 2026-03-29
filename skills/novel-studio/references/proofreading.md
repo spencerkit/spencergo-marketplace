@@ -13,6 +13,12 @@ The child still receives prompt text only; proofreading dispatch artifacts stay 
 The only canonical file proofreading may write is `05A_本轮校对报告.md`.
 Execution mechanism changes do not change proofreading-stage semantics.
 
+Accepted proofreading has a parent-side post-processing hook:
+- refresh `narrativeIntelligence.timeline` / `cfpg` / `theoryOfMind`
+- refresh `05I_证据链与矛盾对照表.md` plus `narrativeIntelligence.consistency.*`
+- if evidence-backed critical issues remain, stop autopilot with an explicit blocker reason
+- do not silently rewrite the child report; checker output is parent-owned derived state
+
 ---
 
 ## 2. Supporting diagnostic references
@@ -59,6 +65,8 @@ Proofreading must produce:
 - fix direction when issues exist
 - `05A_本轮校对报告.md`
 - a proofreading-stage report for user review
+
+The parent may additionally refresh `05I_证据链与矛盾对照表.md` after accepted proofreading. That checker artifact does not replace `05A_本轮校对报告.md`; it supplements it.
 
 Default proofreading output should stay compact unless the user asks for detail:
 - conclusion first

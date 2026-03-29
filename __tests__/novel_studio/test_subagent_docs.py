@@ -279,6 +279,18 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         self.assertIn('record_child_output(project_root, child_done["final_message"], dispatch_dir=dispatch_dir)', text)
         self.assertIn('- if `wait_agent` times out or returns no usable final message, treat it as infrastructure failure and retry at most once', text)
 
+    def test_state_fields_template_mentions_narrative_intelligence(self):
+        state_fields = self.read_required_doc(ROOT / 'skills/novel-studio/references/state-fields-template.md')
+        self.assertIn('"narrativeIntelligence": {', state_fields)
+        self.assertIn('"openCriticalIssues": []', state_fields)
+
+    def test_file_structure_mentions_05f_to_05i(self):
+        file_structure = self.read_required_doc(FILE_STRUCTURE)
+        self.assertIn('05F_时间与事件图谱.md', file_structure)
+        self.assertIn('05G_伏笔三元组账本.md', file_structure)
+        self.assertIn('05H_角色认知与误判表.md', file_structure)
+        self.assertIn('05I_证据链与矛盾对照表.md', file_structure)
+
     def test_drafting_reference_defines_required_boundaries(self):
         text = self.read_required_doc(SUBAGENT_DRAFTING)
         self.assertIn('## Default Mode', text)

@@ -3403,6 +3403,86 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             self.assertEqual(payload['savedState']['batch']['lastDelegationSummary'], '已完成第1章初稿')
             self.assertTrue((dispatch_dir / 'validated.json').exists())
 
+    def test_finalize_dispatch_uses_cli_project_path_for_conditionally_acceptable_proofreading_sync(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stale_project = root / 'moved-project-copy'
+            stale_project.mkdir()
+            project = self.create_runtime_project(
+                root,
+                current_stage='proofreading',
+                manuscript_files={'manuscript/第1章_开端.md': '# 第一章\n\n正文'},
+                batch={'draftComplete': True, 'polishingComplete': True},
+            )
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            state['project']['rootPath'] = str(stale_project)
+            (project / '.novel-state.json').write_text(
+                json.dumps(state, ensure_ascii=False, indent=2),
+                encoding='utf-8',
+            )
+
+            dispatch_dir = root / 'dispatch'
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+                '--dispatch-dir',
+                str(dispatch_dir),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            self.write_proofreading_report(
+                project,
+                '# 05A_本轮校对报告\n\n- judgment: conditionally acceptable\n- summary: 有条件通过\n',
+            )
+            self.write_json(
+                dispatch_dir / 'result.json',
+                {
+                    'status': 'completed',
+                    'changedFiles': [],
+                    'createdFiles': ['05A_本轮校对报告.md'],
+                    'blockedReasons': [],
+                    'summary': '本轮校对完成，有条件通过',
+                    'notesForNextStage': '进入 final-review 前处理提示项',
+                    'risks': ['段落衔接还需微调'],
+                    'judgment': 'conditionally acceptable',
+                    'continuity': '基本通过',
+                    'logic': '基本通过',
+                    'characterOOC': '无',
+                    'blockers': [],
+                    'fixDirection': '处理少量措辞和衔接问题',
+                },
+            )
+
+            finalize = run_script(
+                'finalize_stage_subagent_dispatch.py',
+                str(project),
+                '--dispatch-dir',
+                str(dispatch_dir),
+            )
+            self.assertEqual(finalize.returncode, 0, finalize.stderr)
+
+            payload = json.loads(finalize.stdout)
+            narrative_intelligence = payload['savedState']['narrativeIntelligence']
+            self.assertEqual(payload['validated']['stage'], 'proofreading')
+            self.assertEqual(payload['savedState']['batch']['proofreadingComplete'], True)
+            self.assertEqual(narrative_intelligence['timeline']['lastUpdatedBatch'], '第1章')
+            self.assertEqual(narrative_intelligence['timeline']['lastTouchedChapters'], ['第1章'])
+            self.assertEqual(narrative_intelligence['cfpg']['lastUpdatedBatch'], '第1章')
+            self.assertEqual(narrative_intelligence['theoryOfMind']['lastUpdatedBatch'], '第1章')
+            self.assertEqual(narrative_intelligence['consistency']['lastCheckStage'], 'proofreading')
+            self.assertTrue((dispatch_dir / 'validated.json').exists())
+            self.assertTrue((project / '05F_时间与事件图谱.md').exists())
+            self.assertTrue((project / '05G_伏笔三元组账本.md').exists())
+            self.assertTrue((project / '05H_角色认知与误判表.md').exists())
+            self.assertTrue((project / '05I_证据链与矛盾对照表.md').exists())
+            self.assertFalse((stale_project / '05F_时间与事件图谱.md').exists())
+            self.assertFalse((stale_project / '05G_伏笔三元组账本.md').exists())
+            self.assertFalse((stale_project / '05H_角色认知与误判表.md').exists())
+            self.assertFalse((stale_project / '05I_证据链与矛盾对照表.md').exists())
+
     def test_finalize_dispatch_rejects_stale_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

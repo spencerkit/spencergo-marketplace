@@ -16,6 +16,7 @@ You must have:
 - final project files
 - review notes or explicit no-blocker judgment
 - user quality priorities if they were specified
+- parent-side narrative-consistency findings when present
 
 ---
 
@@ -26,6 +27,7 @@ Do not start final review if:
 - major blocking issues are still unresolved
 - the manuscript is still under major rewrite
 - the project file structure is incomplete for the intended delivery scope
+- `narrativeIntelligence.consistency.openCriticalIssues` still contains unresolved critical issues and the user has not accepted them as blockers
 
 ---
 
@@ -59,6 +61,8 @@ Final review must produce:
 - delivery readiness judgment
 - a concise summary explaining the final judgment
 
+When parent-side narrative critical issues exist, merge them into the blocker set rather than ignoring them.
+
 The report must include these fixed sections:
 - `## 最终结论`
 - `## 是否可交付`
@@ -85,6 +89,7 @@ Final review is complete only if:
 - blocking issues are either resolved or clearly named
 - the judgment explains why the work passes or fails
 - the project is assessed against the user’s actual standard, not vague perfectionism
+- narrative critical issues are either resolved, merged into blockers, or explicitly accepted by user override
 
 ---
 

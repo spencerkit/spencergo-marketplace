@@ -185,6 +185,8 @@ This stage is complete only if:
 - escalation path is visible
 - the user explicitly approves the planning result
 
+After planning approval, the parent may initialize derived narrative-intelligence artifacts `05F`–`05I`.
+
 ### Do not advance if
 - the outline is still summary-only
 - major conflict progression is missing
@@ -415,6 +417,11 @@ This stage must produce:
 - fix direction when issues exist
 - a proofreading-stage report for user review
 
+Accepted proofreading also refreshes parent-owned narrative-consistency output before final review:
+- refresh `05I_证据链与矛盾对照表.md`
+- update `narrativeIntelligence.consistency.*`
+- if evidence-backed critical issues remain, stop autopilot with an explicit blocker reason
+
 ### Completion standard
 This stage is complete only if:
 - continuity has been checked
@@ -458,16 +465,19 @@ Autopilot must not approve this gate. Final review and final delivery remain man
 - proofread manuscript
 - final project files
 - review notes or explicit no-blocker judgment
+- parent-side narrative-consistency findings when present
 
 ### Forbidden to start if
 - proofreading is incomplete
 - major blocking issues remain unresolved
+- `narrativeIntelligence.consistency.openCriticalIssues` still contains unresolved critical issues unless the user explicitly accepts them as blockers
 
 ### Required output
 This stage must produce:
 - explicit final review decision
 - delivery summary
 - optional Feishu sync result if requested
+- blocker folding from parent-side narrative critical issues when present
 
 ### Completion standard
 This stage is complete only if:

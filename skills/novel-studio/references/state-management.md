@@ -37,6 +37,7 @@ The state system must record at least:
 - style-lock version and platform mode
 - lane / track choice
 - ledger artifact existence
+- parent-owned `narrativeIntelligence.*` summary, including timeline risk, open critical issues, and revision actions
 - autopilot goal / latest progress / stop reason state when bounded automation is active
 
 ---
@@ -66,6 +67,8 @@ This includes:
 - final delivery
 - Feishu sync completion if relevant
 - autopilot activation, supersede, progress update, and explicit stop events
+- planning approval initialization for derived narrative-intelligence artifacts `05F`–`05I`
+- accepted drafting / polishing / proofreading refreshes for `narrativeIntelligence.*`
 
 Do not persist runtime subagent ids in `.novel-state.json`.
 Do not persist session ids, raw execution packages, or raw subagent conversation history in `.novel-state.json`.
@@ -139,6 +142,8 @@ Once formal revision is active, state must record at least:
 
 These fields must be explicit enough for interruption recovery.
 
+The revision entry point may also prefill scope / plan from `narrativeIntelligence.revisionActions` when open critical findings already exist.
+
 ---
 
 ## 9. Autopilot-state tracking
@@ -175,12 +180,35 @@ Once final review is written, state must also record at least:
 
 These fields live under `review.*`.
 
+Open critical issues from `narrativeIntelligence.consistency.openCriticalIssues` must be foldable into `review.finalBlockingIssues`.
+
 They do not replace `approvals.finalApproved`.
 `review.finalDecision` records the latest final-review judgment, while `approvals.finalApproved` remains the separate user confirmation for final delivery.
 
 ---
 
-## 11. Approval tracking
+## 11. Narrative-intelligence tracking
+
+`narrativeIntelligence.*` is parent-owned derived state.
+
+State must record at least:
+- whether the timeline layer is enabled
+- the latest batch and chapter labels touched by parent-side refresh
+- open temporal risks
+- CFPG triple counts
+- the latest consistency-check stage
+- evidence-backed open critical issues
+- revision actions derived from open critical issues when applicable
+
+Rules:
+- initialize `05F`–`05I` after planning approval
+- refresh timeline / CFPG / ToM metadata after accepted drafting, polishing, and proofreading
+- accepted proofreading may refresh `consistency.*` and stop autopilot with an explicit blocker reason
+- do not let subagents write `.novel-state.json` or `05F`–`05I` directly
+
+---
+
+## 12. Approval tracking
 
 State should distinguish between:
 - artifact exists
@@ -211,7 +239,7 @@ Required invariants:
 
 ---
 
-## 12. Blocking issue tracking
+## 13. Blocking issue tracking
 
 Blocking issues must be recorded explicitly.
 
@@ -231,7 +259,7 @@ Do not silently ignore blockers.
 
 ---
 
-## 13. Fallback recovery rule
+## 14. Fallback recovery rule
 
 If `.novel-state.json` is missing:
 - recover a provisional state from file structure and existing artifacts
@@ -242,7 +270,7 @@ Do not rely on memory-only recovery when a structured state file can be rebuilt.
 
 ---
 
-## 14. Required state quality
+## 15. Required state quality
 
 A usable state file should answer:
 - where is the project now
@@ -257,5 +285,6 @@ A usable state file should answer:
 - what revision gate is open
 - what the latest closed revision was
 - what the latest final-review result was
+- what the latest narrative-intelligence summary says
 
 If the state file cannot answer those, it is incomplete.

@@ -60,6 +60,13 @@ def review_blockers(review):
     return list(review.get('finalBlockingIssues') or [])
 
 
+def narrative_summary_text(state: dict) -> str:
+    intelligence = state.get('narrativeIntelligence', {})
+    critical = len(intelligence.get('consistency', {}).get('openCriticalIssues', []))
+    temporal = len(intelligence.get('timeline', {}).get('openTemporalRisks', []))
+    return f'{critical} 条关键问题 / {temporal} 条时间风险'
+
+
 def delegation_text(batch):
     stage = batch.get('lastDelegatedStage')
     status = batch.get('lastDelegationStatus')
@@ -204,6 +211,7 @@ def main():
         print(f'自动目标：{autopilot_goal_text(auto_pilot)}')
         print(f'自动流程最近进度：{auto_pilot.get("lastProgressSummary") or "无"}')
         print(f'自动流程停止原因：{auto_pilot.get("stopReason") or "无"}')
+        print(f'叙事智能：{narrative_summary_text(state)}')
         pending_report = build_progress_report(batch.get('pendingProgressItems', []))
         if pending_report['summary']:
             print(f'待汇报变更：{pending_report["summary"]}')
@@ -296,6 +304,12 @@ def main():
             print(f'- {blocker}')
     else:
         print('- 无')
+    print()
+
+    intelligence = state.get('narrativeIntelligence', {})
+    print('[叙事智能]')
+    print(f'关键问题：{len(intelligence.get("consistency", {}).get("openCriticalIssues", []))}')
+    print(f'时间风险：{len(intelligence.get("timeline", {}).get("openTemporalRisks", []))}')
     print()
 
     print('[阻塞项]')

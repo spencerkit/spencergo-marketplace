@@ -41,7 +41,7 @@ def render_list(items: list[str]) -> str:
     return ''.join(f'- {item}\n' for item in items)
 
 
-def render_report(args: argparse.Namespace) -> str:
+def render_report(args: argparse.Namespace, blockers: list[str]) -> str:
     return (
         '# 07_终审报告\n\n'
         '## 最终结论\n'
@@ -54,7 +54,7 @@ def render_report(args: argparse.Namespace) -> str:
         '## 主要问题\n'
         f'{render_list(args.issues)}\n'
         '## 阻塞问题\n'
-        f'{render_list(args.blockers)}\n'
+        f'{render_list(blockers)}\n'
         '## 建议动作\n'
         f'{render_list(args.actions)}'
     )
@@ -75,10 +75,21 @@ def main() -> None:
     args = parse_args()
     project = Path(args.project).expanduser()
 
-    if args.decision == 'pass' and args.blockers:
+    try:
+        data = load_state(project)
+    except FileNotFoundError as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        sys.exit(2)
+
+    open_critical_issues = list(
+        data.get('narrativeIntelligence', {}).get('consistency', {}).get('openCriticalIssues', [])
+    )
+    merged_blockers = list(dict.fromkeys([*args.blockers, *open_critical_issues]))
+
+    if args.decision == 'pass' and merged_blockers:
         print('ERROR: pass cannot be combined with blockers', file=sys.stderr)
         sys.exit(2)
-    if args.delivery_ready and args.blockers:
+    if args.delivery_ready and merged_blockers:
         print('ERROR: delivery-ready=true cannot be used with blockers', file=sys.stderr)
         sys.exit(2)
     if args.decision == 'rework required' and args.delivery_ready:
@@ -91,19 +102,13 @@ def main() -> None:
         print('ERROR: summary is required', file=sys.stderr)
         sys.exit(2)
 
-    try:
-        data = load_state(project)
-    except FileNotFoundError as exc:
-        print(f'ERROR: {exc}', file=sys.stderr)
-        sys.exit(2)
-
-    report = render_report(args)
+    report = render_report(args, merged_blockers)
     (project / FINAL_REVIEW_DOC).write_text(report, encoding='utf-8')
 
     review = data['review']
     review['finalDecision'] = args.decision
     review['finalDeliveryReady'] = args.delivery_ready
-    review['finalBlockingIssues'] = list(args.blockers)
+    review['finalBlockingIssues'] = merged_blockers
     review['finalReviewSummary'] = args.summary.strip()
     add_final_review_blockers(data, review['finalBlockingIssues'])
 
