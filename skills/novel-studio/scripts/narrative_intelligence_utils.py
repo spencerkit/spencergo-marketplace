@@ -54,7 +54,7 @@ def ensure_narrative_artifacts(project: Path) -> list[str]:
 
     for filename, template in NARRATIVE_ARTIFACT_TEMPLATES.items():
         artifact = project / filename
-        if artifact.exists():
+        if artifact.exists() and artifact.is_file() and artifact.read_text(encoding='utf-8').strip():
             continue
         artifact.write_text(template, encoding='utf-8')
         created.append(filename)
