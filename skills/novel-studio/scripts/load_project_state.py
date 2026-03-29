@@ -4,7 +4,14 @@ import json, sys
 import re
 
 from autopilot_utils import default_autopilot
-from revision_utils import default_batch, default_review, default_revision, normalize_state, set_revision_blocker
+from revision_utils import (
+    default_batch,
+    default_narrative_intelligence,
+    default_review,
+    default_revision,
+    normalize_state,
+    set_revision_blocker,
+)
 from stage_persistence_utils import PROOFREADING_REPORT, WORKFLOW_STATUSES, normalize_path_list
 
 
@@ -217,6 +224,9 @@ def reconstruct(project: Path):
         },
         'autoPilot': {
             **default_autopilot(),
+        },
+        'narrativeIntelligence': {
+            **default_narrative_intelligence(),
         },
         'blockingIssues': [],
         'notes': {

@@ -115,6 +115,44 @@ def default_notes() -> dict:
     }
 
 
+def default_narrative_intelligence() -> dict:
+    return {
+        'timeline': {
+            'enabled': False,
+            'lastUpdatedBatch': None,
+            'lastTouchedChapters': [],
+            'openTemporalRisks': [],
+        },
+        'cfpg': {
+            'foreshadowTriples': [],
+            'tripleCounts': {
+                'total': 0,
+                'pending': 0,
+                'fulfilled': 0,
+                'broken': 0,
+                'expired': 0,
+            },
+            'lastUpdatedBatch': None,
+        },
+        'theoryOfMind': {
+            'characterBeliefs': [],
+            'beliefConflicts': [],
+            'lastUpdatedBatch': None,
+        },
+        'consistency': {
+            'contradictionCandidates': [],
+            'evidenceChains': [],
+            'lastCheckStage': None,
+            'openCriticalIssues': [],
+        },
+        'revisionActions': [],
+        'styleRisk': {
+            'clichePatterns': [],
+            'lastCokeScore': None,
+        },
+    }
+
+
 def base_state(project: Path) -> dict:
     return {
         'project': {'title': project.name, 'rootPath': str(project)},
@@ -131,6 +169,7 @@ def base_state(project: Path) -> dict:
         'review': default_review(),
         'revision': {},
         'autoPilot': default_autopilot(),
+        'narrativeIntelligence': default_narrative_intelligence(),
         'blockingIssues': [],
         'notes': default_notes(),
         'updatedAt': now_iso(),
@@ -196,6 +235,45 @@ def normalize_state(data: dict, project: Path) -> dict:
     notes = default_notes()
     notes.update(normalized.get('notes', {}))
     normalized['notes'] = notes
+
+    narrative_intelligence = default_narrative_intelligence()
+    narrative_intelligence.update(normalized.get('narrativeIntelligence', {}))
+
+    timeline = default_narrative_intelligence()['timeline']
+    timeline.update(narrative_intelligence.get('timeline', {}))
+    timeline['lastTouchedChapters'] = list(timeline.get('lastTouchedChapters', []))
+    timeline['openTemporalRisks'] = list(timeline.get('openTemporalRisks', []))
+    narrative_intelligence['timeline'] = timeline
+
+    cfpg = default_narrative_intelligence()['cfpg']
+    cfpg.update(narrative_intelligence.get('cfpg', {}))
+    cfpg['foreshadowTriples'] = list(cfpg.get('foreshadowTriples', []))
+    triple_counts = default_narrative_intelligence()['cfpg']['tripleCounts']
+    triple_counts.update(cfpg.get('tripleCounts', {}))
+    cfpg['tripleCounts'] = triple_counts
+    narrative_intelligence['cfpg'] = cfpg
+
+    theory_of_mind = default_narrative_intelligence()['theoryOfMind']
+    theory_of_mind.update(narrative_intelligence.get('theoryOfMind', {}))
+    theory_of_mind['characterBeliefs'] = list(theory_of_mind.get('characterBeliefs', []))
+    theory_of_mind['beliefConflicts'] = list(theory_of_mind.get('beliefConflicts', []))
+    narrative_intelligence['theoryOfMind'] = theory_of_mind
+
+    consistency = default_narrative_intelligence()['consistency']
+    consistency.update(narrative_intelligence.get('consistency', {}))
+    consistency['contradictionCandidates'] = list(consistency.get('contradictionCandidates', []))
+    consistency['evidenceChains'] = list(consistency.get('evidenceChains', []))
+    consistency['openCriticalIssues'] = list(consistency.get('openCriticalIssues', []))
+    narrative_intelligence['consistency'] = consistency
+
+    narrative_intelligence['revisionActions'] = list(narrative_intelligence.get('revisionActions', []))
+
+    style_risk = default_narrative_intelligence()['styleRisk']
+    style_risk.update(narrative_intelligence.get('styleRisk', {}))
+    style_risk['clichePatterns'] = list(style_risk.get('clichePatterns', []))
+    narrative_intelligence['styleRisk'] = style_risk
+
+    normalized['narrativeIntelligence'] = narrative_intelligence
 
     if (
         'openingApproved' not in raw_approvals
