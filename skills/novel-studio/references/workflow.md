@@ -74,6 +74,21 @@ Do not advance to the next stage unless:
 - no listed blocker remains unresolved
 - the user explicitly approves advancement
 
+### 2.5 Autopilot overlay
+- manual approval remains the default; without explicit autopilot authorization, every gate stays manual
+- autopilot activates only after explicit bounded user authorization with a terminal chapter goal such as `继续到第10章结束`
+- vague approval like `继续` or `好` does not activate autopilot
+- autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still run through their subagents
+- progress updates still continue during automation; keep surfacing merged chapter progress after dispatch start, accepted child results, and approval transitions
+- `scripts/advance_autopilot.py` advances at most one safe step per call
+- one-step advancement is limited to confirming `batch.scopeConfirmed`, safely approving `batch.chapterPlanApproved` from a parseable `05_本轮章节规划.md`, or approving an eligible open review gate
+- eligible auto-approvable review gates are only `waiting_draft_feedback`, `waiting_polishing_feedback`, and `waiting_proofreading_feedback`
+- blocked delegated results must halt autopilot with an explicit stop reason such as `blocked: 人物口吻漂移`
+- substantive user interruptions must halt autopilot with stop reason `user_interruption`
+- when the goal chapter reaches approved proofreading completion, halt autopilot with stop reason `goal_reached`
+- if the user replaces the bounded goal, stop the old run with `superseded_by_new_user_goal` before starting the new one
+- never auto-approve `waiting_final_review_feedback`; `advance_autopilot.py` returns `final_review_manual` and final review stays manual
+
 ---
 
 ## 3. Stage 1: Discovery stage
@@ -427,6 +442,8 @@ Return to the earliest upstream stage that can really fix the issue.
 
 ### Goal
 Decide whether the project is ready for delivery, then deliver or sync if approved.
+
+Autopilot must not approve this gate. Final review and final delivery remain manual.
 
 ### Internal sub-steps
 1. final review judgment

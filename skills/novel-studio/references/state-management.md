@@ -12,7 +12,7 @@ Novel work is long-running. The workflow must not depend only on short-term chat
 
 Use a project-local state file:
 
-`/root/.openclaw/novels/[小说名称]/.novel-state.json`
+`[project root]/.novel-state.json`
 
 This file is the primary structured workflow memory for the current project.
 
@@ -37,6 +37,7 @@ The state system must record at least:
 - style-lock version and platform mode
 - lane / track choice
 - ledger artifact existence
+- autopilot goal / latest progress / stop reason state when bounded automation is active
 
 ---
 
@@ -64,10 +65,11 @@ This includes:
 - rollback to an earlier stage
 - final delivery
 - Feishu sync completion if relevant
+- autopilot activation, supersede, progress update, and explicit stop events
 
 Do not persist runtime subagent ids in `.novel-state.json`.
 Do not persist session ids, raw execution packages, or raw subagent conversation history in `.novel-state.json`.
-Persist only lightweight execution summaries when drafting, polishing, or proofreading ran through subagent execution.
+Persist only lightweight execution summaries and autopilot progress/stop fields when drafting, polishing, or proofreading ran through subagent execution.
 
 ---
 
@@ -93,6 +95,8 @@ Once drafting begins, state must also track the current batch.
 At minimum it should record:
 - current batch chapter range
 - current batch chapter count
+- chapterTasks for the approved current batch
+- pendingProgressItems for unsent chapter-progress changes
 - whether batch scope is confirmed
 - whether chapter-plan package exists
 - whether chapter-plan package is approved
@@ -109,6 +113,10 @@ At minimum it should record:
 - whether the style bible exists
 - whether the mainline spec exists
 - whether the ledger set exists
+
+Chapter progress is explicit state, not chat-only memory.
+`chapterTasks` tracks the latest per-chapter phase/status summary.
+`pendingProgressItems` tracks lightweight progress events that still need to be reported or acknowledged.
 
 ---
 
@@ -133,7 +141,31 @@ These fields must be explicit enough for interruption recovery.
 
 ---
 
-## 9. Final-review state tracking
+## 9. Autopilot-state tracking
+
+Bounded automation lives under `autoPilot.*`.
+
+State must record at least:
+- whether autopilot is currently active
+- the normalized terminal goal chapter under `goalChapter`
+- the goal completion contract under `goalCondition`
+- when automation started and which user message authorized it
+- the latest merged progress timestamp and summary under `lastProgressAt` / `lastProgressSummary`
+- the explicit stop reason under `stopReason`
+- when automation stopped under `stoppedAt`
+- whether manual resume is required under `awaitingManualResume`
+
+Rules:
+- default remains manual approval, so `autoPilot.active: false` is the normal baseline
+- store the target goal explicitly as `goalChapter` + `goalCondition`; for current automation the goal condition remains `proofreading_completed`
+- store the latest surfaced automation progress explicitly as `lastProgressSummary`, not only in chat
+- stop reasons must stay explicit, for example `blocked: 人物口吻漂移`, `user_interruption`, or `goal_reached`
+- if the user replaces the bounded goal, record `superseded_by_new_user_goal` for the old run before starting the new one
+- final review remains manual; `review.finalDecision` and `approvals.finalApproved` are separate from `autoPilot.*`
+
+---
+
+## 10. Final-review state tracking
 
 Once final review is written, state must also record at least:
 - latest final-review decision
@@ -148,7 +180,7 @@ They do not replace `approvals.finalApproved`.
 
 ---
 
-## 10. Approval tracking
+## 11. Approval tracking
 
 State should distinguish between:
 - artifact exists
@@ -179,7 +211,7 @@ Required invariants:
 
 ---
 
-## 11. Blocking issue tracking
+## 12. Blocking issue tracking
 
 Blocking issues must be recorded explicitly.
 
@@ -199,7 +231,7 @@ Do not silently ignore blockers.
 
 ---
 
-## 12. Fallback recovery rule
+## 13. Fallback recovery rule
 
 If `.novel-state.json` is missing:
 - recover a provisional state from file structure and existing artifacts
@@ -210,7 +242,7 @@ Do not rely on memory-only recovery when a structured state file can be rebuilt.
 
 ---
 
-## 13. Required state quality
+## 14. Required state quality
 
 A usable state file should answer:
 - where is the project now
@@ -220,6 +252,7 @@ A usable state file should answer:
 - what should happen next
 - what batch is currently active
 - whether the current batch is waiting for user approval or next-batch decision
+- what the latest bounded autopilot goal, progress, and stop reason are
 - whether formal revision is active
 - what revision gate is open
 - what the latest closed revision was

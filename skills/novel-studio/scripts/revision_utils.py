@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from autopilot_utils import default_autopilot, normalize_autopilot
 from chapter_progress_utils import (
     default_progress_fields,
     extract_chapter_labels_from_plan,
@@ -129,6 +130,7 @@ def base_state(project: Path) -> dict:
         'batch': default_batch(),
         'review': default_review(),
         'revision': {},
+        'autoPilot': default_autopilot(),
         'blockingIssues': [],
         'notes': default_notes(),
         'updatedAt': now_iso(),
@@ -173,6 +175,9 @@ def normalize_state(data: dict, project: Path) -> dict:
     revision = default_revision()
     revision.update(normalized.get('revision', {}))
     normalized['revision'] = revision
+
+    normalized['autoPilot'] = normalize_autopilot(normalized.get('autoPilot'))
+
     batch = default_batch()
     batch.update(normalized.get('batch', {}))
     batch['attractionPoints'] = list(batch.get('attractionPoints', []))
@@ -184,9 +189,7 @@ def normalize_state(data: dict, project: Path) -> dict:
     batch['chapterPlanExists'] = bool(plan_text.strip())
     if batch.get('chapterPlanApproved'):
         chapter_labels = extract_chapter_labels_from_plan(plan_text)
-        if not chapter_labels:
-            initialize_chapter_tasks(batch, plan_text)
-        elif not batch.get('chapterTasks'):
+        if chapter_labels and not batch.get('chapterTasks'):
             initialize_chapter_tasks(batch, plan_text)
     normalized['batch'] = batch
 

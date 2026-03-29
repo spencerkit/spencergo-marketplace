@@ -435,6 +435,118 @@ class SupervisorPersistenceTest(unittest.TestCase):
             self.assertEqual(state['review']['currentGate'], 'waiting_opening_feedback')
             self.assertEqual(state['review']['pendingArtifactPaths'], ['04A_开篇设计.md'])
 
+    def test_approve_stage_gate_advances_chapter_to_polishing_queue(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            (project / '05_本轮章节规划.md').write_text(
+                '## 逐章规划\n### 第1章\n- 本章目标：点火\n',
+                encoding='utf-8',
+            )
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'drafting',
+                        'currentSubstage': None,
+                        'lastCompletedStage': 'character-system',
+                        'nextStage': 'polishing',
+                        'status': 'awaiting_user_approval',
+                    },
+                    'approvals': {
+                        'draftingApproved': False,
+                        'polishingApproved': False,
+                        'proofreadingApproved': False,
+                    },
+                    'review': {'currentGate': 'waiting_draft_feedback', 'pendingArtifactPaths': []},
+                    'batch': {
+                        'active': True,
+                        'chapterPlanApproved': True,
+                        'chapterTasks': [
+                            {
+                                'chapterLabel': '第1章',
+                                'manuscriptPath': 'manuscript/第1章_开端.md',
+                                'phase': 'drafting',
+                                'phaseStatus': 'awaiting_user_review',
+                                'lastSummary': '第1章初稿待审核',
+                                'blockers': [],
+                                'updatedAt': '2026-03-28T10:00:00Z',
+                            }
+                        ],
+                        'pendingProgressItems': [],
+                    },
+                },
+            )
+
+            result = run_script('approve_stage_gate.py', str(project), 'waiting_draft_feedback')
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            task = state['batch']['chapterTasks'][0]
+            self.assertEqual(task['phase'], 'polishing')
+            self.assertEqual(task['phaseStatus'], 'queued')
+            self.assertEqual(task['lastSummary'], '第1章待润色')
+
+    def test_status_brief_shows_chapter_progress_and_pending_progress(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {
+                        'currentStage': 'polishing',
+                        'currentSubstage': None,
+                        'lastCompletedStage': 'drafting',
+                        'nextStage': 'proofreading',
+                        'status': 'in_progress',
+                    },
+                    'batch': {
+                        'chapterTasks': [
+                            {
+                                'chapterLabel': '第1章',
+                                'manuscriptPath': 'manuscript/第1章_开端.md',
+                                'phase': 'polishing',
+                                'phaseStatus': 'in_progress',
+                                'lastSummary': '第1章润色中',
+                                'blockers': [],
+                                'updatedAt': '2026-03-28T10:00:00Z',
+                            },
+                            {
+                                'chapterLabel': '第2章',
+                                'manuscriptPath': 'manuscript/第2章_显规.md',
+                                'phase': 'proofreading',
+                                'phaseStatus': 'completed',
+                                'lastSummary': '第2章已完成',
+                                'blockers': [],
+                                'updatedAt': '2026-03-28T10:01:00Z',
+                            },
+                        ],
+                        'pendingProgressItems': [
+                            {
+                                'eventId': 'e1',
+                                'chapterLabel': '第1章',
+                                'phase': 'polishing',
+                                'phaseStatus': 'in_progress',
+                                'summary': '第1章润色中',
+                                'blockers': [],
+                                'createdAt': '2026-03-28T10:00:00Z',
+                                'reportedAt': None,
+                            }
+                        ],
+                    },
+                    'review': {'currentGate': None, 'pendingArtifactPaths': []},
+                },
+            )
+
+            result = run_script('novel_project_status.py', str(project), '--brief')
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('章节进度：第1章润色中；第2章已完成', result.stdout)
+            self.assertIn('待汇报变更：第1章润色中', result.stdout)
+
     def test_promote_branch_copies_selected_artifact_and_cleans_other_branches(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'

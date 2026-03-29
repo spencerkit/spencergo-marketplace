@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from autopilot_utils import record_autopilot_progress, stop_autopilot_with_blockers, summarize_chapter_progress
 from chapter_progress_utils import apply_result_to_chapters
 from revision_utils import load_state, save_state
 from stage_execution_utils import (
@@ -45,6 +46,7 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     stage = validated['stage']
     package = validated['package']
     result = validated['result']
+    chapter_labels = list(package['requiredInputs']['chapterLabels'])
 
     batch = data.setdefault('batch', {})
     for key, value in base_result_summary_fields().items():
@@ -53,10 +55,11 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     apply_result_to_chapters(
         batch,
         stage,
-        package['requiredInputs']['chapterLabels'],
+        chapter_labels,
         package['targetFiles'],
         result,
     )
+    autopilot_progress_summary = summarize_chapter_progress(batch, chapter_labels)
     blockers = delegation_blockers(validated)
     batch['lastDelegatedStage'] = stage
     batch['lastDelegatedScope'] = package.get('batchRange')
@@ -84,6 +87,15 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
         review['lastPersistedStage'] = 'proofreading'
         review['lastPersistedAt'] = now_iso()
         artifacts['proofreadingReport'] = True
+
+    if result['status'] == 'completed':
+        record_autopilot_progress(data, autopilot_progress_summary)
+    elif result['status'] in {'blocked', 'needs_clarification'}:
+        stop_autopilot_with_blockers(
+            data,
+            blocked_reasons=blockers,
+            summary=result.get('summary'),
+        )
 
 
 def main() -> None:

@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 from pathlib import PurePosixPath
+from uuid import uuid4
 
 CHAPTER_LABEL_RE = re.compile(r'(第[0-9零一二三四五六七八九十百千万两]+章)')
 PLAN_HEADING_RE = re.compile(r'^\s*###\s+(第[0-9零一二三四五六七八九十百千万两]+章)(?:\s|$|[:：])')
@@ -77,6 +78,22 @@ def chapter_task(label: str, manuscript_path: str | None = None) -> dict:
     }
 
 
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+
+
+def progress_event_id(event: dict, index: int) -> str:
+    event_id = event.get('eventId')
+    if isinstance(event_id, str) and event_id.strip():
+        return event_id
+
+    chapter_label = event.get('chapterLabel') or 'unknown'
+    phase = event.get('phase') or 'unknown'
+    phase_status = event.get('phaseStatus') or 'unknown'
+    created_at = event.get('createdAt') or f'index-{index}'
+    return f'legacy-{chapter_label}-{phase}-{phase_status}-{created_at}-{index}'
+
+
 def normalize_progress_batch(batch: dict) -> dict:
     fields = default_progress_fields()
     for key, default_value in fields.items():
@@ -117,10 +134,13 @@ def human_summary(chapter_label: str, phase: str, phase_status: str, blockers: l
         return f'{chapter_label}审核中：{blockers[0]}'
 
     summaries = {
+        ('drafting', 'queued'): f'{chapter_label}待写',
         ('drafting', 'in_progress'): f'{chapter_label}初稿中',
         ('drafting', 'awaiting_user_review'): f'{chapter_label}初稿待审核',
+        ('polishing', 'queued'): f'{chapter_label}待润色',
         ('polishing', 'in_progress'): f'{chapter_label}润色中',
         ('polishing', 'awaiting_user_review'): f'{chapter_label}润色待审核',
+        ('proofreading', 'queued'): f'{chapter_label}待校对',
         ('proofreading', 'in_progress'): f'{chapter_label}校对中',
         ('proofreading', 'awaiting_user_review'): f'{chapter_label}审核中',
         ('proofreading', 'completed'): f'{chapter_label}已完成',
@@ -150,12 +170,16 @@ def append_progress_event(
     blockers: list[str] | None = None,
 ) -> dict:
     normalize_progress_batch(batch)
+    created_at = now_iso()
     event = {
+        'eventId': f'{phase}-{chapter_label}-{uuid4().hex}',
         'chapterLabel': chapter_label,
         'phase': phase,
         'phaseStatus': phase_status,
         'summary': summary,
         'blockers': list(blockers or []),
+        'createdAt': created_at,
+        'reportedAt': None,
     }
     batch['pendingProgressItems'].append(event)
     return event
@@ -196,9 +220,94 @@ def has_pending_progress_event(
     return False
 
 
+def build_progress_report(events: list[dict]) -> dict:
+    latest_by_chapter: dict[str, tuple[int, dict]] = {}
+
+    for index, item in enumerate(events):
+        if not isinstance(item, dict):
+            continue
+        if item.get('reportedAt') is not None:
+            continue
+        chapter_label = item.get('chapterLabel')
+        if not chapter_label:
+            continue
+        latest_by_chapter[chapter_label] = (index, item)
+
+    latest_events = sorted(
+        latest_by_chapter.values(),
+        key=lambda pair: ((pair[1].get('createdAt') or ''), pair[0]),
+    )
+    selected_events = [item for _, item in latest_events]
+
+    return {
+        'eventIds': [progress_event_id(item, index) for index, item in latest_events],
+        'summary': '；'.join(item.get('summary') or '' for item in selected_events if item.get('summary')),
+    }
+
+
+def mark_progress_items_reported(batch: dict, event_ids: list[str]) -> list[str]:
+    normalize_progress_batch(batch)
+    requested = {event_id for event_id in event_ids if event_id}
+    if not requested:
+        return []
+
+    reported_at = now_iso()
+    marked: list[str] = []
+    for index, item in enumerate(batch['pendingProgressItems']):
+        if not isinstance(item, dict):
+            continue
+        event_id = progress_event_id(item, index)
+        if event_id not in requested:
+            continue
+        if item.get('reportedAt') is not None:
+            continue
+        if not item.get('eventId'):
+            item['eventId'] = event_id
+        item['reportedAt'] = reported_at
+        marked.append(event_id)
+    return marked
+
+
+def advance_chapters_after_gate(batch: dict, gate: str) -> dict:
+    normalize_progress_batch(batch)
+    transitions = {
+        'waiting_draft_feedback': ('drafting', 'polishing', 'queued'),
+        'waiting_polishing_feedback': ('polishing', 'proofreading', 'queued'),
+        'waiting_proofreading_feedback': ('proofreading', 'proofreading', 'completed'),
+    }
+    transition = transitions.get(gate)
+    if not transition:
+        return batch
+
+    current_phase, next_phase, next_status = transition
+    timestamp = now_iso()
+    for task in batch['chapterTasks']:
+        if task.get('phase') != current_phase:
+            continue
+        if task.get('phaseStatus') != 'awaiting_user_review':
+            continue
+        chapter_label = task.get('chapterLabel')
+        if not chapter_label:
+            continue
+        summary = human_summary(chapter_label, next_phase, next_status)
+        task['phase'] = next_phase
+        task['phaseStatus'] = next_status
+        task['blockers'] = []
+        task['lastSummary'] = summary
+        task['updatedAt'] = timestamp
+        append_progress_event(batch, chapter_label, next_phase, next_status, summary)
+    return batch
+
+
+def render_chapter_progress(batch: dict) -> str:
+    normalize_progress_batch(batch)
+    summaries = [task.get('lastSummary') for task in batch['chapterTasks'] if task.get('lastSummary')]
+    return '；'.join(summaries) if summaries else '无'
+
+
 def mark_dispatch_started(batch: dict, phase: str, chapter_labels: list[str], target_files: list[str]) -> dict:
     normalize_progress_batch(batch)
-    timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+    timestamp = now_iso()
 
     manuscript_paths_by_label: dict[str, str] = {}
     if phase in {'drafting', 'polishing'}:
@@ -244,7 +353,7 @@ def apply_result_to_chapters(
     result: dict,
 ) -> dict:
     normalize_progress_batch(batch)
-    timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+    timestamp = now_iso()
     status = result.get('status')
 
     manuscript_paths_by_label: dict[str, str] = {}

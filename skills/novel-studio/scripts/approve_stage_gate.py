@@ -4,6 +4,14 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from autopilot_utils import (
+    is_goal_chapter_proofreading_completed,
+    normalize_bool,
+    record_autopilot_progress,
+    stop_autopilot,
+    summarize_chapter_progress,
+)
+from chapter_progress_utils import advance_chapters_after_gate
 from revision_utils import load_state, save_state
 
 APPROVAL_TRANSITIONS = {
@@ -27,38 +35,48 @@ def final_review_ready_for_approval(review: dict) -> bool:
     return not list(review.get('finalBlockingIssues') or [])
 
 
-def main() -> int:
-    if len(sys.argv) < 3:
-        print('Usage: approve_stage_gate.py <项目目录> <gate>')
-        return 1
+def proofreading_ready_for_approval(batch: dict) -> bool:
+    return normalize_bool(batch.get('proofreadingComplete'), default=False)
 
-    project = Path(sys.argv[1]).expanduser()
-    gate = sys.argv[2].strip()
 
-    if not project.exists():
-        print(f'ERROR: project not found: {project}', file=sys.stderr)
-        return 2
-
+def gate_approval_error(state: dict, gate: str) -> str | None:
     if gate not in APPROVAL_TRANSITIONS:
-        print(f'ERROR: unsupported gate: {gate}', file=sys.stderr)
-        return 2
+        return f'unsupported gate: {gate}'
 
-    state = load_state(project)
     review = state['review']
     current_gate = review.get('currentGate')
     if current_gate != gate:
-        print(
-            f'ERROR: gate mismatch, expected currentGate={current_gate or "None"}, got {gate}',
-            file=sys.stderr,
-        )
-        return 2
+        return f'gate mismatch, expected currentGate={current_gate or "None"}, got {gate}'
 
-    stage, approval_key, next_stage = APPROVAL_TRANSITIONS[gate]
     if gate == 'waiting_final_review_feedback' and not final_review_ready_for_approval(review):
-        print('ERROR: final review is not ready for approval', file=sys.stderr)
-        return 2
+        return 'final review is not ready for approval'
+    if gate == 'waiting_proofreading_feedback' and not proofreading_ready_for_approval(state.get('batch', {})):
+        return 'proofreading is not ready for approval'
+    return None
+
+
+def approve_gate_in_state(state: dict, gate: str) -> dict:
+    error = gate_approval_error(state, gate)
+    if error:
+        raise ValueError(error)
+
+    review = state['review']
+    stage, approval_key, next_stage = APPROVAL_TRANSITIONS[gate]
+    approved_chapter_labels = [
+        task.get('chapterLabel')
+        for task in state.get('batch', {}).get('chapterTasks', [])
+        if isinstance(task, dict)
+        and task.get('phase') == stage
+        and task.get('phaseStatus') == 'awaiting_user_review'
+        and task.get('chapterLabel')
+    ]
+    proofreading_accepted = gate != 'waiting_proofreading_feedback' or proofreading_ready_for_approval(
+        state.get('batch', {})
+    )
 
     state['approvals'][approval_key] = True
+    if proofreading_accepted:
+        advance_chapters_after_gate(state['batch'], gate)
 
     workflow = state['workflow']
     if gate == 'waiting_opening_feedback':
@@ -72,7 +90,42 @@ def main() -> int:
     review['currentGate'] = None
     review['pendingArtifactPaths'] = []
 
+    if proofreading_accepted:
+        record_autopilot_progress(state, summarize_chapter_progress(state.get('batch', {}), approved_chapter_labels))
+    if gate == 'waiting_proofreading_feedback' and proofreading_accepted and is_goal_chapter_proofreading_completed(state):
+        stop_autopilot(state, 'goal_reached')
+
+    return state
+
+
+def approve_gate(project: Path, gate: str) -> dict:
+    project = Path(project).expanduser()
+    if not project.exists():
+        raise FileNotFoundError(f'project not found: {project}')
+
+    state = load_state(project)
+    approve_gate_in_state(state, gate)
     save_state(project, state)
+    return load_state(project)
+
+
+def main() -> int:
+    if len(sys.argv) < 3:
+        print('Usage: approve_stage_gate.py <项目目录> <gate>')
+        return 1
+
+    project = Path(sys.argv[1]).expanduser()
+    gate = sys.argv[2].strip()
+
+    try:
+        approve_gate(project, gate)
+    except FileNotFoundError as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        return 2
+
     print(f'APPROVED: {gate}')
     return 0
 

@@ -5,18 +5,18 @@ Use this as a quick reference for important `.novel-state.json` fields.
 ```json
 {
   "workflow": {
-    "currentStage": "drafting",
-    "currentSubstage": "opening-review",
-    "lastCompletedStage": "character-system",
-    "nextStage": "drafting",
+    "currentStage": "polishing",
+    "currentSubstage": null,
+    "lastCompletedStage": "drafting",
+    "nextStage": "proofreading",
     "status": "awaiting_user_approval"
   },
   "approvals": {
     "discoveryApproved": true,
     "planningApproved": true,
     "characterApproved": true,
-    "openingApproved": false,
-    "draftingApproved": false,
+    "openingApproved": true,
+    "draftingApproved": true,
     "polishingApproved": false,
     "proofreadingApproved": false,
     "finalApproved": false,
@@ -46,19 +46,43 @@ Use this as a quick reference for important `.novel-state.json` fields.
   },
   "batch": {
     "active": true,
-    "chapterRange": "第1章-第3章",
-    "chapterCount": 3,
+    "chapterRange": "第1章",
+    "chapterCount": 1,
     "scopeConfirmed": true,
     "chapterPlanExists": true,
     "chapterPlanApproved": true,
     "draftComplete": true,
-    "polishingComplete": false,
+    "polishingComplete": true,
     "proofreadingComplete": false,
     "recapUpdated": false,
     "awaitingNextBatchDecision": false,
     "focus": "开篇立钩子 + 主角气质建立",
     "attractionPoints": ["隐藏实力", "打脸前奏"],
-    "climaxTarget": "第3章结尾反转"
+    "climaxTarget": "第3章结尾反转",
+    "chapterTasks": [
+      {
+        "chapterLabel": "第1章",
+        "manuscriptPath": "manuscript/第1章_你配不上我.md",
+        "phase": "polishing",
+        "phaseStatus": "awaiting_user_review",
+        "lastSummary": "第1章润色待审核",
+        "blockers": [],
+        "updatedAt": "2026-03-28T10:00:00Z"
+      }
+    ],
+    "pendingProgressItems": []
+  },
+  "autoPilot": {
+    "active": true,
+    "goalChapter": "第10章",
+    "goalCondition": "proofreading_completed",
+    "startedAt": "2026-03-29T09:00:00Z",
+    "startedBy": "后续你来主控，继续到第10章结束",
+    "lastProgressAt": "2026-03-29T10:00:00Z",
+    "lastProgressSummary": "第3章润色中",
+    "stopReason": null,
+    "stoppedAt": null,
+    "awaitingManualResume": false
   },
   "review": {
     "currentGate": "waiting_polishing_feedback",
@@ -103,3 +127,8 @@ Use this as a quick reference for important `.novel-state.json` fields.
   ]
 }
 ```
+
+Autopilot notes:
+- `goalChapter` stores the normalized terminal chapter label, while `goalCondition` records the completion contract.
+- `lastProgressAt` / `lastProgressSummary` capture the latest merged progress surfaced during automation.
+- `stopReason` stays `null` while automation is active; when stopped, record explicit values such as `blocked: 人物口吻漂移`, `user_interruption`, or `goal_reached`.

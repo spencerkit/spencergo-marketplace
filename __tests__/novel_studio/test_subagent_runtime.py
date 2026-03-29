@@ -2573,6 +2573,197 @@ class NovelStudioSubagentRuntimeTest(unittest.TestCase):
             events.index('set:lastDelegatedStage'),
         )
 
+    def test_apply_stage_execution_result_stops_active_autopilot_on_blocked_result(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            relpath = 'manuscript/第1章_开端.md'
+            project = self.create_runtime_project(
+                root,
+                current_stage='polishing',
+                batch={'draftComplete': True},
+                manuscript_files={relpath: '# 第一章\n\n正文'},
+            )
+            state_path = project / '.novel-state.json'
+            state = json.loads(state_path.read_text(encoding='utf-8'))
+            state['autoPilot'] = {
+                'active': True,
+                'goalChapter': '第10章',
+                'goalCondition': 'proofreading_completed',
+                'startedAt': '2026-03-29T10:00:00Z',
+                'startedBy': '继续到第10章结束',
+                'lastProgressAt': '2026-03-29T10:10:00Z',
+                'lastProgressSummary': '第1章初稿待审核',
+                'stopReason': None,
+                'stoppedAt': None,
+                'awaitingManualResume': False,
+            }
+            state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
+
+            bundle_file = root / 'bundle.json'
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'polishing',
+                '--batch-range',
+                '第1章',
+                '--polishing-focus',
+                '压缩开篇节奏',
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            result_file = root / 'result.json'
+            self.write_json(
+                result_file,
+                {
+                    'status': 'blocked',
+                    'changedFiles': [],
+                    'createdFiles': [],
+                    'blockedReasons': ['人物口吻漂移'],
+                    'summary': '润色被阻塞',
+                    'notesForNextStage': '',
+                    'risks': [],
+                },
+            )
+
+            apply_result = run_script(
+                'apply_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertEqual(apply_result.returncode, 0, apply_result.stderr)
+
+            saved = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertFalse(saved['autoPilot']['active'])
+            self.assertEqual(saved['autoPilot']['stopReason'], 'blocked: 人物口吻漂移')
+            self.assertTrue(saved['autoPilot']['awaitingManualResume'])
+            self.assertIsNotNone(saved['autoPilot']['stoppedAt'])
+
+    def test_apply_stage_execution_result_updates_autopilot_progress_for_completed_result(self):
+        module = self.load_script_module('apply_stage_execution_result')
+
+        data = {
+            'batch': {
+                'draftComplete': False,
+                'polishingComplete': False,
+                'proofreadingComplete': False,
+            },
+            'workflow': {},
+            'review': {},
+            'artifacts': {},
+            'autoPilot': {
+                'active': True,
+                'goalChapter': '第10章',
+                'goalCondition': 'proofreading_completed',
+                'startedAt': '2026-03-29T10:00:00Z',
+                'startedBy': '继续到第10章结束',
+                'lastProgressAt': None,
+                'lastProgressSummary': None,
+                'stopReason': None,
+                'stoppedAt': None,
+                'awaitingManualResume': False,
+            },
+        }
+        validated = {
+            'stage': 'drafting',
+            'package': {
+                'batchRange': '第1章',
+                'targetFiles': ['manuscript/第1章_开端.md'],
+                'requiredInputs': {'chapterLabels': ['第1章']},
+            },
+            'result': {
+                'status': 'completed',
+                'summary': '已完成第1章初稿',
+                'risks': [],
+                'blockedReasons': [],
+            },
+        }
+
+        module.apply_validated_state(data, validated)
+
+        self.assertTrue(data['autoPilot']['active'])
+        self.assertIsNone(data['autoPilot']['stopReason'])
+        self.assertEqual(data['autoPilot']['lastProgressSummary'], '第1章初稿待审核')
+        self.assertIsNotNone(data['autoPilot']['lastProgressAt'])
+
+    def test_apply_stage_execution_result_does_not_persist_blocked_autopilot_state_when_inactive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            relpath = 'manuscript/第1章_开端.md'
+            project = self.create_runtime_project(
+                root,
+                current_stage='polishing',
+                batch={'draftComplete': True},
+                manuscript_files={relpath: '# 第一章\n\n正文'},
+            )
+            state_path = project / '.novel-state.json'
+            state = json.loads(state_path.read_text(encoding='utf-8'))
+            state['autoPilot'] = {
+                'active': False,
+                'goalChapter': '第10章',
+                'goalCondition': 'proofreading_completed',
+                'startedAt': '2026-03-29T10:00:00Z',
+                'startedBy': '继续到第10章结束',
+                'lastProgressAt': '2026-03-29T10:10:00Z',
+                'lastProgressSummary': '第1章初稿待审核',
+                'stopReason': None,
+                'stoppedAt': None,
+                'awaitingManualResume': False,
+            }
+            state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
+
+            bundle_file = root / 'bundle.json'
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'polishing',
+                '--batch-range',
+                '第1章',
+                '--polishing-focus',
+                '压缩开篇节奏',
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            result_file = root / 'result.json'
+            self.write_json(
+                result_file,
+                {
+                    'status': 'blocked',
+                    'changedFiles': [],
+                    'createdFiles': [],
+                    'blockedReasons': ['人物口吻漂移'],
+                    'summary': '润色被阻塞',
+                    'notesForNextStage': '',
+                    'risks': [],
+                },
+            )
+
+            apply_result = run_script(
+                'apply_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertEqual(apply_result.returncode, 0, apply_result.stderr)
+
+            saved = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertFalse(saved['autoPilot']['active'])
+            self.assertIsNone(saved['autoPilot']['stopReason'])
+            self.assertFalse(saved['autoPilot']['awaitingManualResume'])
+            self.assertIsNone(saved['autoPilot']['stoppedAt'])
+
     def test_status_shows_opening_gate_when_drafting_not_ready(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = self.create_runtime_project(

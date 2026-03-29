@@ -25,6 +25,7 @@
 **文件优先** — 阶段成果必须持久化到项目文件，不接受仅存在于对话中的临时内容。
 
 **Supervisor-first 落盘** — 父 agent 负责流程掌控、审批解释、落盘决策和 subagent 调度。一旦正式文件被写入或刷新，立即进入对应审批门，不再把它当作“还在讨论”。
+**章节级进度持久化** — 章节执行进度必须进入 `.novel-state.json`，例如 `第1章初稿中`、`第1章初稿待审核`、`第2章润色中`、`第3章审核中`、`第4章已完成`，不再只靠聊天记忆判断。
 
 **拒绝敷衍** — 不能因为"有东西存在"就判定阶段完成，必须达到可用标准。大纲要具体到情节点，人物要具体到动机和冲突。
 
@@ -58,6 +59,7 @@
 - **情节进展**：已写章节摘要、伏笔埋设、待回收线索
 - **项目状态**：当前阶段、批次编号、审批状态
 - **正式落盘状态**：待审批文件、最后一次正式落盘阶段、是否处于 brainstorming 分支模式
+- **自动推进状态**：`autoPilot` 是否开启、终点章节、最近进度、停止原因
 
 写作中断后，重新启动时 Agent 会读取记忆文件，自动恢复上下文，无需复述。
 
@@ -68,6 +70,16 @@
 2. 评估影响范围（仅影响当前批次 / 需追溯前文 / 涉及大纲调整）
 3. 询问是否记录为正式反馈
 4. 在对应阶段范围内修改，不做未授权的大范围改动
+
+### Autopilot 自动推进
+
+- 默认仍是手动审批。没有明确授权时，所有审批门继续人工确认。
+- 只有用户给出显式、带终点章节的授权才会开启 autopilot，例如 `后续你来主控，继续到第10章结束`。单独一句 `继续` 不算。
+- 自动推进不改变职责分工：父 agent 仍负责流程控制、审批解释、状态落盘和进度汇报；`drafting` / `polishing` / `proofreading` 仍由各自 subagent 执行。
+- `advance_autopilot.py` 每次只前进一步：补 `scopeConfirmed`、在 `05_本轮章节规划.md` 可安全解析时批准 `chapterPlanApproved` 并重建 `chapterTasks`、或代批 `waiting_draft_feedback` / `waiting_polishing_feedback` / `waiting_proofreading_feedback`。
+- 自动推进期间仍持续汇报章节进度；不会因为进入 autopilot 就停止 `chapterTasks` / `pendingProgressItems` 的更新和对外汇报。
+- 以下情况必须停下并给出明确原因：子 agent 返回 `blocked`、用户发来实质性打断、目标章节达到经批准的 proofreading 完成状态、或用户改成新的终点章节。
+- `waiting_final_review_feedback` 永远不自动批准；最终审校和最终交付仍是人工决定。
 
 ## 7 阶段流水线
 
@@ -139,6 +151,7 @@ prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `man
 - 所有 `bundle` / `prompt` / `manifest` / `child-response` / `result` / `validated` 中间产物都必须放在项目根目录之外
 - 只把 `executionPackage` 发给子 agent
 - `validationContext` 只留在父 agent
+- 章节范围必须同时以 `requiredInputs.chapterLabels` 的结构化列表进入 dispatch package
 - `drafting` / `polishing` 的 `targetFiles` 必须非空且位于 `manuscript/` 下
 - `outputContract.requiredReturnFields` 必须严格等于协议字段列表，`outputContract.mustWriteFiles` 必须严格等于 `targetFiles`
 - `completed` 结果必须真实触达本次 dispatch 的全部 `outputContract.mustWriteFiles`
@@ -155,6 +168,12 @@ prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `man
 - `proofreading` 若 judgment=`conditionally acceptable`，`blockers` 必须为空且 `risks` 必须非空
 - 父 agent 只有在 extract、validate 都通过后才能 apply 结果
 - 如果子 agent 返回 prose、多个 JSON、空输出或非法 JSON，按协议失败处理，不得静默兜底
+
+章节进度汇报：
+- 父 agent 会把章节级状态变化落到 `.novel-state.json` 的 `chapterTasks` 和 `pendingProgressItems`
+- 默认汇报文案会合并成类似 `第1章初稿待审核；第2章润色中`
+- 读取待汇报摘要：`python3 skills/novel-studio/scripts/chapter_progress_report.py <项目目录>`
+- 汇报成功后确认这些事件已发送：`python3 skills/novel-studio/scripts/chapter_progress_report.py <项目目录> --ack <event-id>`
 
 `staging/` 只用于明确要求的脑暴 / 分支探索。only explicit brainstorming mode may write to `staging/`
 

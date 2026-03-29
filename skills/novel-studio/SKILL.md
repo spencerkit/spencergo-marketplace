@@ -18,6 +18,9 @@ Use a supervisor-first model:
 - the parent agent must not leave canonical stage artifacts only in chat once they are usable
 - only explicit brainstorming mode may write to `staging/`
 - when brainstorming ends and one branch is selected, copy accepted content back into canonical files and delete stale staging branches immediately
+- chapter progress becomes an explicit part of `.novel-state.json`
+- report chapter progress from state transitions rather than chat memory
+- after dispatch start, accepted child result, and approval transitions, surface merged chapter progress to the user
 
 Do not jump forward casually.
 Do not skip key checkpoints unless the user explicitly asks to skip them.
@@ -54,6 +57,17 @@ Default order:
 - validate delegated outputs before advancing workflow state
 - fail closed on protocol or content failure
 - no silent inline fallback for these stages
+
+## Autopilot approval defaults
+
+- default remains manual approval at every gate
+- autopilot activates only after explicit bounded user authorization with a terminal chapter goal such as `继续到第10章结束`
+- vague approval like `继续` or `好` does not activate autopilot
+- autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still belong to their subagents
+- progress updates continue during automation; keep surfacing merged chapter progress after dispatch start, accepted child results, and approval transitions
+- stop automation with an explicit stop reason when a delegated result is blocked, the user sends a substantive interruption, the goal chapter reaches approved proofreading completion, or the user replaces the bounded goal
+- if the user replaces the bounded goal, stop the previous run with `superseded_by_new_user_goal` before starting the new one
+- final review and final delivery remain manual; never auto-approve `waiting_final_review_feedback`
 
 ## Explicit exploration-mode rule
 

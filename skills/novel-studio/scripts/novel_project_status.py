@@ -2,12 +2,15 @@
 from pathlib import Path
 import json, sys
 
+from chapter_progress_utils import build_progress_report, render_chapter_progress
+from revision_utils import normalize_state
+
 
 def load_state(project: Path):
     state_file = project / '.novel-state.json'
     if not state_file.exists():
         return None
-    return json.loads(state_file.read_text(encoding='utf-8'))
+    return normalize_state(json.loads(state_file.read_text(encoding='utf-8')), project)
 
 
 def exists(path: Path):
@@ -64,6 +67,23 @@ def delegation_text(batch):
     if not stage or not status:
         return '无'
     return f'{stage} / {status} / {scope or "无范围"}'
+
+
+def autopilot_state_text(auto_pilot):
+    if auto_pilot.get('active'):
+        return '运行中'
+    if auto_pilot.get('awaitingManualResume'):
+        return '已停止'
+    return '未开启'
+
+
+def autopilot_goal_text(auto_pilot):
+    goal_chapter = auto_pilot.get('goalChapter')
+    if goal_chapter is None:
+        return '无'
+    if str(goal_chapter).endswith('结束'):
+        return str(goal_chapter)
+    return f'{goal_chapter}结束'
 
 
 def rollback_stage_text(state):
@@ -163,6 +183,7 @@ def main():
     batch = state.get('batch', {})
     review = state.get('review', {})
     revision = state.get('revision', {})
+    auto_pilot = state.get('autoPilot', {})
     blockers = state.get('blockingIssues', [])
     current_gate = review.get('currentGate') or revision.get('currentRevisionGate')
     if workflow.get('currentStage') == 'drafting' and not approvals.get('openingApproved', False):
@@ -178,6 +199,14 @@ def main():
         if pending_artifacts:
             print(f'待审批文件：{", ".join(pending_artifacts)}')
         print(f'当前批次范围：{batch.get("chapterRange") or "无"}')
+        print(f'章节进度：{render_chapter_progress(batch)}')
+        print(f'自动流程：{autopilot_state_text(auto_pilot)}')
+        print(f'自动目标：{autopilot_goal_text(auto_pilot)}')
+        print(f'自动流程最近进度：{auto_pilot.get("lastProgressSummary") or "无"}')
+        print(f'自动流程停止原因：{auto_pilot.get("stopReason") or "无"}')
+        pending_report = build_progress_report(batch.get('pendingProgressItems', []))
+        if pending_report['summary']:
+            print(f'待汇报变更：{pending_report["summary"]}')
         print(f'终审结论：{review_decision_text(review)}')
         print(f'可交付：{review_delivery_text(review)}')
         print(f'终审摘要：{review_summary_text(review)}')
@@ -212,6 +241,16 @@ def main():
     print(f'委派摘要：{batch.get("lastDelegationSummary") or "无"}')
     print(f'委派阻塞：{", ".join(batch.get("lastDelegationBlockers", [])) or "无"}')
     print(f'委派风险：{", ".join(batch.get("lastDelegationRisks", [])) or "无"}')
+    print(f'自动流程：{autopilot_state_text(auto_pilot)}')
+    print(f'自动目标：{autopilot_goal_text(auto_pilot)}')
+    print(f'自动流程最近进度：{auto_pilot.get("lastProgressSummary") or "无"}')
+    print(f'自动流程停止原因：{auto_pilot.get("stopReason") or "无"}')
+    print()
+
+    print('[章节进度]')
+    print(f'当前章节摘要：{render_chapter_progress(batch)}')
+    pending_report = build_progress_report(batch.get('pendingProgressItems', []))
+    print(f'待汇报变更：{pending_report["summary"] or "无"}')
     print()
 
     print('[审批状态]')

@@ -4,7 +4,7 @@ This reference defines the shared parent-orchestrated subagent protocol for `dra
 
 The execution package is runtime-only. Canonical workflow state remains file-backed.
 Do not persist runtime subagent ids, session ids, raw execution packages, or raw subagent conversation history.
-If anything must survive interruption, persist only lightweight execution summaries.
+If anything must survive interruption, persist only lightweight execution summaries and lightweight progress events.
 
 ## 1. Parent role
 - parent agent is the orchestrator
@@ -14,6 +14,13 @@ If anything must survive interruption, persist only lightweight execution summar
 - parent agent validates results before advancing state
 
 The parent owns stage gating, package construction, dispatch, result validation, and workflow state transitions.
+
+Autopilot does not change this ownership model:
+- bounded automation does not turn the parent into the inline drafting / polishing / proofreading executor
+- `drafting`, `polishing`, and `proofreading` still belong to their subagents even when autopilot is active
+- parent-side automation may only advance safe gates; final review remains manual
+- keep surfacing merged chapter progress during automation from file-backed state
+- if a child returns `blocked` or `needs_clarification`, stop autopilot with an explicit reason and wait for manual resume
 
 ## 2. Execution Package
 Every child dispatch must include an inline execution package with these fields:
@@ -43,10 +50,13 @@ Execution package shape rules:
 - `proofreading` must set `overwrite flag` to `false`
 - `required inputs` must be a structured named map, not freeform prose
 - `required inputs.batchRange` must match `batch range`
+- `required inputs.chapterLabels` must be a non-empty ordered chapter label list for this dispatch
 - every stage package must include non-empty `outline`, `batchPlan`, and `characterFiles`
 - every stage package must include non-empty `styleBible`, `mainlineSpec`, `platformProfile`, `trackGuide`, and `ledgerSnapshot`
 - every stage package should also carry the approved `openingDesign` once the project enters prose drafting
 - file-backed `required inputs` content must match the parent snapshot captured in `validationContext.baselineFiles`
+- `drafting` and `polishing` `required inputs.chapterLabels` must exactly match `target files` order
+- `proofreading` `required inputs.chapterLabels` must cover the full approved batch scope
 - `polishing` packages must include non-empty `polishingFocus`
 - `polishing` `required inputs.manuscriptFiles` must exactly match `target files`
 - `polishing` `target files` must already exist in the baseline snapshot
@@ -117,6 +127,7 @@ Before advancing canonical file-backed workflow state, the parent must:
 - reject incomplete, malformed, or out-of-bounds results
 - persist only accepted workflow state updates to file-backed state
 - avoid persisting runtime subagent ids
+- update file-backed chapter progress from accepted dispatch transitions rather than chat memory
 
 If acceptance fails, the parent must stop, surface the failure clearly, and wait for an explicit next action instead of silently continuing inline.
 
