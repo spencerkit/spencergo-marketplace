@@ -253,7 +253,7 @@ def reconstruct(project: Path):
         },
     }
 
-    if any(
+    if all(
         exists_nonempty(artifact)
         for artifact in (
             timeline_artifact,

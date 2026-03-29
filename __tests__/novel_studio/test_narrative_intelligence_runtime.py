@@ -31,6 +31,12 @@ class NarrativeIntelligenceRuntimeTest(unittest.TestCase):
             encoding='utf-8',
         )
 
+    def load_reconstructed_state(self, project: Path) -> dict:
+        self.assertFalse((project / '.novel-state.json').exists())
+        result = run_script('load_project_state.py', str(project))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+
     def test_approving_planning_feedback_initializes_parent_owned_intelligence_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'
@@ -74,6 +80,30 @@ class NarrativeIntelligenceRuntimeTest(unittest.TestCase):
                 artifact = project / artifact_name
                 self.assertTrue(artifact.exists(), f'missing artifact: {artifact_name}')
                 self.assertTrue(artifact.read_text(encoding='utf-8').strip(), f'empty artifact: {artifact_name}')
+
+    def test_load_project_state_enables_timeline_when_full_canonical_artifact_set_exists(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+
+            for artifact_name in NARRATIVE_ARTIFACTS:
+                (project / artifact_name).write_text(f'# {artifact_name}\n\n已初始化\n', encoding='utf-8')
+
+            state = self.load_reconstructed_state(project)
+
+            self.assertTrue(state['narrativeIntelligence']['timeline']['enabled'])
+
+    def test_load_project_state_keeps_timeline_disabled_when_artifact_set_is_partial(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+
+            for artifact_name in NARRATIVE_ARTIFACTS[:2]:
+                (project / artifact_name).write_text(f'# {artifact_name}\n\n部分初始化\n', encoding='utf-8')
+
+            state = self.load_reconstructed_state(project)
+
+            self.assertFalse(state['narrativeIntelligence']['timeline']['enabled'])
 
 
 if __name__ == '__main__':
