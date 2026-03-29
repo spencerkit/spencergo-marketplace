@@ -154,6 +154,9 @@ For Cliche Exhaustion Loop continuity, keep these fields explicit under `review.
 - `review.selectedBranch`
 
 Rules:
+- use `review.brainstormMode: "cliche_exhaustion"` for this loop slice
+- `review.brainstormRound` is a round label string such as `mutation` or `enumeration`, not a numeric counter
+- `review.selectedBranch` should use the stage-prefixed branch key form used elsewhere, for example `story-planning/版本B`
 - `review.selectedBranch` should point to the branch whose `05_定稿结论.md` authorized canonical backfill
 - if Story Planning activated the deep anti-cliche pass, planning approval should not be recorded until that retained conclusion exists in the selected branch
 
@@ -220,6 +223,8 @@ Rules:
 - refresh timeline / CFPG / ToM metadata after accepted drafting, polishing, and proofreading
 - accepted proofreading may refresh `consistency.*` and stop autopilot with an explicit blocker reason
 - accepted proofreading may refresh `narrativeIntelligence.styleRisk.*` parent-side
+- default `narrativeIntelligence.styleRisk.noveltyAxes` to `[]`
+- default `narrativeIntelligence.styleRisk.lastClicheScanStage` to `null`
 - do not let subagents write `.novel-state.json` or `05F`–`05I` directly
 
 ---

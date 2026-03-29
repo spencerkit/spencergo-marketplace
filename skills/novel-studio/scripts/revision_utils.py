@@ -24,6 +24,10 @@ def default_review() -> dict:
         'lastPersistedStage': None,
         'lastPersistedAt': None,
         'brainstormActive': False,
+        'brainstormMode': None,
+        'brainstormFocus': None,
+        'brainstormRound': None,
+        'selectedBranch': None,
         'activeBranches': [],
         'lastUserFeedbackSummary': None,
         'lastRevisionFocus': None,
@@ -149,6 +153,8 @@ def default_narrative_intelligence() -> dict:
         'styleRisk': {
             'clichePatterns': [],
             'lastCokeScore': None,
+            'noveltyAxes': [],
+            'lastClicheScanStage': None,
         },
     }
 
@@ -271,6 +277,7 @@ def normalize_state(data: dict, project: Path) -> dict:
     style_risk = default_narrative_intelligence()['styleRisk']
     style_risk.update(narrative_intelligence.get('styleRisk', {}))
     style_risk['clichePatterns'] = list(style_risk.get('clichePatterns', []))
+    style_risk['noveltyAxes'] = list(style_risk.get('noveltyAxes', []))
     narrative_intelligence['styleRisk'] = style_risk
 
     normalized['narrativeIntelligence'] = narrative_intelligence

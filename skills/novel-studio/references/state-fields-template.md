@@ -86,10 +86,10 @@ Use this as a quick reference for important `.novel-state.json` fields.
   },
   "review": {
     "currentGate": "waiting_polishing_feedback",
-    "brainstormMode": "cliche_exhaustion_deep",
-    "brainstormFocus": "保留规则异变都市题材的新鲜轴",
-    "brainstormRound": 2,
-    "selectedBranch": "planning-branch-b",
+    "brainstormMode": "cliche_exhaustion",
+    "brainstormFocus": "story_engine",
+    "brainstormRound": "mutation",
+    "selectedBranch": "story-planning/版本B",
     "lastUserFeedbackSummary": "语气还不够稳，主角魅力不足",
     "lastRevisionFocus": "加强主角吸引点和场景语气统一",
     "lastDriftRiskSummary": "第3章旁白开始变得过于中性",
@@ -132,6 +132,8 @@ Use this as a quick reference for important `.novel-state.json` fields.
       "openCriticalIssues": []
     },
     "styleRisk": {
+      "clichePatterns": ["重复使用隐藏实力钩子"],
+      "lastCokeScore": 0.37,
       "noveltyAxes": ["规则显形方式", "主角解决问题的代价结构"],
       "lastClicheScanStage": "proofreading"
     },
@@ -175,6 +177,9 @@ Autopilot notes:
 Cliche Exhaustion Loop notes:
 - branch selection, canonical backfill, and cleanup stay parent-owned supervisor actions.
 - use staging branch artifacts as review scaffolding only; only a branch `05_定稿结论.md` may authorize canonical backfill.
+- `brainstormMode` stays `cliche_exhaustion` in this slice.
+- `brainstormRound` stores a round label such as `mutation` or `enumeration`, not a numeric counter.
+- `selectedBranch` uses the stage-prefixed branch key form, for example `story-planning/版本B`.
 - keep `review.brainstormMode`, `review.brainstormFocus`, `review.brainstormRound`, and `review.selectedBranch` explicit when the overlay is active.
 - keep `narrativeIntelligence.styleRisk.noveltyAxes` and `narrativeIntelligence.styleRisk.lastClicheScanStage` explicit so later tasks extend one contract instead of inventing a new one.
 

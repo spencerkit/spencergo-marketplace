@@ -44,6 +44,31 @@ class SupervisorPersistenceTest(unittest.TestCase):
             self.assertFalse(state['review']['brainstormActive'])
             self.assertEqual(state['review']['activeBranches'], [])
 
+    def test_load_state_adds_cliche_exhaustion_review_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {'currentStage': 'story-planning'},
+                    'review': {},
+                    'narrativeIntelligence': {'styleRisk': {}},
+                },
+            )
+
+            result = run_script('load_project_state.py', str(project))
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertIsNone(state['review']['brainstormMode'])
+            self.assertIsNone(state['review']['brainstormFocus'])
+            self.assertIsNone(state['review']['brainstormRound'])
+            self.assertIsNone(state['review']['selectedBranch'])
+            self.assertEqual(state['narrativeIntelligence']['styleRisk']['noveltyAxes'], [])
+            self.assertIsNone(state['narrativeIntelligence']['styleRisk']['lastClicheScanStage'])
+
     def test_status_summary_prefers_discovery_feedback_gate_after_persistence(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'
@@ -546,6 +571,36 @@ class SupervisorPersistenceTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('章节进度：第1章润色中；第2章已完成', result.stdout)
             self.assertIn('待汇报变更：第1章润色中', result.stdout)
+
+    def test_status_brief_shows_brainstorm_focus_and_cliche_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / '测试小说'
+            project.mkdir()
+            self.write_state(
+                project,
+                {
+                    'project': {'title': '测试小说', 'rootPath': str(project)},
+                    'workflow': {'currentStage': 'story-planning', 'status': 'brainstorming'},
+                    'review': {
+                        'brainstormActive': True,
+                        'brainstormMode': 'cliche_exhaustion',
+                        'brainstormFocus': 'story_engine',
+                        'brainstormRound': 'mutation',
+                    },
+                    'narrativeIntelligence': {
+                        'styleRisk': {
+                            'clichePatterns': ['重复使用隐藏实力钩子'],
+                            'noveltyAxes': ['desire_inversion'],
+                        }
+                    },
+                },
+            )
+
+            result = run_script('novel_project_status.py', str(project), '--brief')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('脑暴模式：cliche_exhaustion', result.stdout)
+            self.assertIn('脑暴焦点：story_engine / mutation', result.stdout)
+            self.assertIn('套路风险：1 条 / 新意轴：1 条', result.stdout)
 
     def test_promote_branch_copies_selected_artifact_and_cleans_other_branches(self):
         with tempfile.TemporaryDirectory() as tmp:

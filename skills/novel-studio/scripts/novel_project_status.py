@@ -67,6 +67,19 @@ def narrative_summary_text(state: dict) -> str:
     return f'{critical} 条关键问题 / {temporal} 条时间风险'
 
 
+def brainstorm_focus_text(review: dict) -> str:
+    focus = review.get('brainstormFocus') or '无'
+    round_label = review.get('brainstormRound') or '无'
+    return f'{focus} / {round_label}'
+
+
+def style_risk_summary_text(state: dict) -> str:
+    style_risk = state.get('narrativeIntelligence', {}).get('styleRisk', {})
+    cliche_count = len(style_risk.get('clichePatterns', []))
+    novelty_count = len(style_risk.get('noveltyAxes', []))
+    return f'{cliche_count} 条 / 新意轴：{novelty_count} 条'
+
+
 def delegation_text(batch):
     stage = batch.get('lastDelegatedStage')
     status = batch.get('lastDelegationStatus')
@@ -205,6 +218,9 @@ def main():
         pending_artifacts = list(review.get('pendingArtifactPaths') or [])
         if pending_artifacts:
             print(f'待审批文件：{", ".join(pending_artifacts)}')
+        if review.get('brainstormActive'):
+            print(f'脑暴模式：{review.get("brainstormMode") or "无"}')
+            print(f'脑暴焦点：{brainstorm_focus_text(review)}')
         print(f'当前批次范围：{batch.get("chapterRange") or "无"}')
         print(f'章节进度：{render_chapter_progress(batch)}')
         print(f'自动流程：{autopilot_state_text(auto_pilot)}')
@@ -212,6 +228,7 @@ def main():
         print(f'自动流程最近进度：{auto_pilot.get("lastProgressSummary") or "无"}')
         print(f'自动流程停止原因：{auto_pilot.get("stopReason") or "无"}')
         print(f'叙事智能：{narrative_summary_text(state)}')
+        print(f'套路风险：{style_risk_summary_text(state)}')
         pending_report = build_progress_report(batch.get('pendingProgressItems', []))
         if pending_report['summary']:
             print(f'待汇报变更：{pending_report["summary"]}')

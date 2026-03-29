@@ -76,6 +76,8 @@ class NarrativeIntelligenceStateTest(unittest.TestCase):
                     'styleRisk': {
                         'clichePatterns': [],
                         'lastCokeScore': None,
+                        'noveltyAxes': [],
+                        'lastClicheScanStage': None,
                     },
                 },
             )
@@ -158,6 +160,8 @@ class NarrativeIntelligenceStateTest(unittest.TestCase):
             )
             self.assertEqual(narrative_intelligence['styleRisk']['clichePatterns'], [])
             self.assertEqual(narrative_intelligence['styleRisk']['lastCokeScore'], 0.42)
+            self.assertEqual(narrative_intelligence['styleRisk']['noveltyAxes'], [])
+            self.assertIsNone(narrative_intelligence['styleRisk']['lastClicheScanStage'])
 
 
 if __name__ == '__main__':
