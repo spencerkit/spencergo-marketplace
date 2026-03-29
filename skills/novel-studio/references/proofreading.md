@@ -5,6 +5,7 @@
 Run consistency, logic, continuity, and OOC checks on the current approved batch before batch-level final pass.
 
 Proofreading in this workflow is batch-scoped and should help determine whether the current batch is ready to be accepted, revised again, or rolled back.
+Within the Cliche Exhaustion Loop, proofreading only performs lightweight backslide detection and reporting.
 
 Default execution mechanism: proofreading uses a bounded proofreading subagent. The parent agent remains the orchestrator.
 The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, and accept or reject the returned proofreading report before reporting stage progress.
@@ -90,6 +91,7 @@ At minimum, check:
 - whether important side plots or relationship lines produce actual consequence rather than decorative presence
 - whether core characters remain attractive, differentiated, and scene-effective rather than collapsing into interchangeable delivery tools
 - whether each chapter has visible dramatic movement rather than only transport or exposition
+- whether the batch has slid back toward previously enumerated cliché samples or dropped retained novelty axes
 
 ---
 

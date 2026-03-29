@@ -89,6 +89,15 @@ Do not advance to the next stage unless:
 - if the user replaces the bounded goal, stop the old run with `superseded_by_new_user_goal` before starting the new one
 - never auto-approve `waiting_final_review_feedback`; `advance_autopilot.py` returns `final_review_manual` and final review stays manual
 
+### 2.6 Cliche Exhaustion Loop overlay
+- treat the Cliche Exhaustion Loop as a supervisor-side protocol layer, not a new workflow stage
+- `Discovery` uses `quick` mode to expose the intuitive cliché version before topic approval
+- `Story Planning` uses `deep` mode to enumerate cliché samples, retained novelty axes, and fallback risks for the chosen direction
+- planning approval should not occur until the retained direction has completed the deep anti-cliche pass and a supervisor-side conclusion records what novelty axes survived
+- `Opening` validates retained novelty axes instead of reopening broad ideation
+- `Proofreading` only reports lightweight backslide detection in this slice
+- the parent remains the sole owner of `.novel-state.json`, staging branch selection, canonical backfill, and stale-branch cleanup
+
 ---
 
 ## 3. Stage 1: Discovery stage
@@ -183,6 +192,7 @@ This stage is complete only if:
 - outline contains at least three major turning points
 - early chapter direction exists
 - escalation path is visible
+- the retained direction has passed the deep anti-cliche pre-approval gate
 - the user explicitly approves the planning result
 
 After planning approval, the parent may initialize derived narrative-intelligence artifacts `05F`–`05I`.
@@ -191,6 +201,7 @@ After planning approval, the parent may initialize derived narrative-intelligenc
 - the outline is still summary-only
 - major conflict progression is missing
 - early chapter direction is absent
+- the retained direction has not completed deep anti-cliche review
 - the user has unresolved objections
 - user approval to advance is missing
 

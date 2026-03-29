@@ -164,6 +164,10 @@ Autopilot notes:
 - `lastProgressAt` / `lastProgressSummary` capture the latest merged progress surfaced during automation.
 - `stopReason` stays `null` while automation is active; when stopped, record explicit values such as `blocked: 人物口吻漂移`, `user_interruption`, or `goal_reached`.
 
+Cliche Exhaustion Loop notes:
+- branch selection, canonical backfill, and cleanup stay parent-owned supervisor actions.
+- use staging branch artifacts as review scaffolding only; only a branch `05_定稿结论.md` may authorize canonical backfill.
+
 Narrative-intelligence notes:
 - `narrativeIntelligence.*` is parent-owned derived state. Subagents do not write these fields directly.
 - `timeline` / `cfpg` / `theoryOfMind` refresh on accepted drafting, polishing, and proofreading results.

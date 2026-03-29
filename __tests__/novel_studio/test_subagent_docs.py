@@ -542,6 +542,24 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         self.assertIn('brainstormActive', state_management)
         self.assertIn('activeBranches', state_management)
 
+    def test_docs_define_cliche_exhaustion_reference_and_workflow_hooks(self):
+        skill = self.read_required_doc(SKILL)
+        workflow = self.read_required_doc(WORKFLOW)
+        outlining = self.read_required_doc(ROOT / 'skills/novel-studio/references/outlining.md')
+        cliche = self.read_required_doc(ROOT / 'skills/novel-studio/references/cliche-exhaustion.md')
+
+        self.assertIn('Cliche Exhaustion Loop', skill)
+        self.assertIn('`Discovery` uses `quick`', cliche)
+        self.assertIn('`Story Planning` uses `deep`', cliche)
+        self.assertIn('planning approval should not occur until the retained direction has', workflow)
+        self.assertIn('cliché samples were enumerated', outlining)
+
+    def test_file_structure_mentions_cliche_exhaustion_branch_artifacts(self):
+        file_structure = self.read_required_doc(FILE_STRUCTURE)
+        self.assertIn('00_脑暴任务卡.md', file_structure)
+        self.assertIn('01_直觉俗套清单.md', file_structure)
+        self.assertIn('05_定稿结论.md', file_structure)
+
     def test_docs_define_chapter_progress_reporting_contract(self):
         skill = self.read_required_doc(SKILL)
         self.assertIn('chapter progress becomes an explicit part of `.novel-state.json`', skill)

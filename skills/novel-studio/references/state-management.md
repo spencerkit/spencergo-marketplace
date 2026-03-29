@@ -73,6 +73,7 @@ This includes:
 Do not persist runtime subagent ids in `.novel-state.json`.
 Do not persist session ids, raw execution packages, or raw subagent conversation history in `.novel-state.json`.
 Persist only lightweight execution summaries and autopilot progress/stop fields when drafting, polishing, or proofreading ran through subagent execution.
+Parent ownership is exclusive in this slice: only the parent may update `.novel-state.json`, choose a staging branch for promotion, authorize canonical backfill, or clean up stale Cliche Exhaustion branches.
 
 ---
 

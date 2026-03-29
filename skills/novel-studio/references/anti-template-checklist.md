@@ -22,6 +22,10 @@ Run this checklist at least three times:
 - during the opening gate
 - during proofreading
 
+When the Cliche Exhaustion Loop is active:
+- `quick` mode in Discovery should surface the obvious default version fast
+- `deep` mode in Story Planning should test whether the retained direction is only “a slightly decorated cliché”
+
 ## Chapter-level check
 
 Ask:

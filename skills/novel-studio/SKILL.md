@@ -22,6 +22,14 @@ Use a supervisor-first model:
 - report chapter progress from state transitions rather than chat memory
 - after dispatch start, accepted child result, and approval transitions, surface merged chapter progress to the user
 
+Apply the Cliche Exhaustion Loop as a supervisor-side protocol layer:
+- it is not a new workflow stage
+- `Discovery` uses `quick` mode
+- `Story Planning` uses `deep` mode with a hard anti-cliche pre-approval gate
+- `Opening` validates retained novelty axes instead of reopening broad ideation
+- `Proofreading` only performs lightweight backslide detection/reporting in this slice
+- only the parent may select a staging branch, authorize canonical backfill, and clean up stale branches
+
 Do not jump forward casually.
 Do not skip key checkpoints unless the user explicitly asks to skip them.
 Do not treat partially completed work as finished.
@@ -203,6 +211,7 @@ Use these reference files as **hard operational guidance**, not optional inspira
 - `references/hot-search-scan.md` — hot-search / trend-scan logic, search-source priority, and pre-decision market signal scan
 - `references/market-research.md` — topic analysis, market positioning, title generation, title confirmation, discovery-stage hard gates, and final topic-report requirements
 - `references/topic-report-template.md` — default report template for `00_选题报告.md`
+- `references/cliche-exhaustion.md` — supervisor-side quick/deep anti-cliche protocol, staging branch artifact layout, and canonical-backfill rule
 - `references/opening-design.md` — opening-gate rules, first-3/10/20 chapter objectives, and opening approval standard
 - `references/style-bible.md` — style-lock contract, drift-control rules, and revision path for voice changes
 - `references/platform-profiles.md` — 起点 / 番茄 / 通用 platform modes and their structural implications

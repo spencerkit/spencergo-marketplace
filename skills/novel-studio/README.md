@@ -40,6 +40,13 @@
 - planning 通过后可初始化 `05F` 到 `05I`；accepted 的 drafting / polishing / proofreading 会刷新 `narrativeIntelligence.*`。
 - accepted proofreading 会额外刷新 `05I` 和 `openCriticalIssues`；若存在证据支撑的关键一致性问题，会明确停掉 autopilot，而不是吞掉停止原因。
 
+**Cliche Exhaustion Loop** — 这是 supervisor 侧的反俗套协议层，不是新阶段。
+- `Discovery` 用 `quick`：先把直觉俗套版本摊开，再保留值得继续的“新鲜轴”。
+- `Story Planning` 用 `deep`：planning 审批前必须完成更深一轮反俗套穷举，不能只写抽象提醒。
+- `Opening` 只验证保留下来的新鲜轴有没有真正落到前 3 / 10 / 20 章，不重开大范围脑暴。
+- `Proofreading` 在本 slice 里只做轻量回滑检测 / 报告，不单独重开 planning。
+- `.novel-state.json`、staging 分支选择、canonical 回填、分支清理仍然只归父 agent。
+
 ## 三大核心机制
 
 ### 往复式写作
@@ -130,6 +137,16 @@ Novel Studio 现在把市场调研里最关键的四件事硬化成流程要求�
 - `05C_伏笔回收台账.md`
 - `05D_关系状态表.md`
 - `05E_能力与资源变化表.md`
+
+如果显式进入脑暴 / 分支探索，并且要跑反俗套穷举分支，`staging/<stage>/<branch-id>/` 下推荐固定放：
+- `00_脑暴任务卡.md`
+- `01_直觉俗套清单.md`
+- `02_反向拆解.md`
+- `03_保留的新鲜轴.md`
+- `04_风险与淘汰理由.md`
+- `05_定稿结论.md`
+
+只有 `05_定稿结论.md` 可以授权把该分支结论回填到 canonical 文件；没有这份结论，就不允许把探索分支当正式方向。
 
 ## Subagent 执行接入
 

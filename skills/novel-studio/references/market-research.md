@@ -91,6 +91,11 @@ At minimum, the following three records should exist by the end of Discovery:
 Do not rely only on chat memory for these three layers.
 They must be written to files so the project can resume after interruption.
 
+Discovery also runs the Cliche Exhaustion Loop in `quick` mode:
+- surface the intuitive cliché version for each serious candidate
+- preserve only the novelty axes worth carrying forward into planning
+- keep the branch-level anti-cliche scratch work under `staging/` unless a supervisor-approved branch conclusion authorizes backfill
+
 ---
 
 ## 8. Completion standard

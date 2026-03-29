@@ -51,7 +51,11 @@ The opening gate passes only if:
 - the first three chapters have distinct tasks, not one blurred “推进剧情”
 - the first ten chapters prove the protagonist has durable motivation
 - the first twenty chapters show a usable volume-level mainline and cost system
+- the retained novelty axes from the Cliche Exhaustion Loop are still visible in the opening package
 - the user explicitly approves `04A_开篇设计.md`
+
+Opening validation is not a license to restart wide ideation.
+Use it to confirm delivery of retained novelty axes, not to reopen broad lane exploration.
 
 ## Common failure patterns
 

@@ -25,6 +25,7 @@ Before starting planning, prioritize these sections from `00_选题报告.md`:
 - 一句话核心钩子
 - 项目方向结论
 - 风险提醒
+- Cliche Exhaustion Loop retained novelty axes
 
 Treat these as planning anchors, not optional background notes.
 
@@ -65,6 +66,11 @@ Do not generate the formal outline until these planning-level preferences are us
 
 If the user’s preference is still unstable, remain in clarification and continue discussing.
 
+Before planning approval, the retained direction must also complete the supervisor-side deep anti-cliche pass:
+- cliché samples were enumerated
+- retained novelty axes were named explicitly
+- the outline states what default genre rail it is refusing to fall back into
+
 ---
 
 ## 6. Required outline elements
@@ -100,6 +106,7 @@ This stage is complete only if:
 - the outline contains at least three major turning points
 - escalation path is visible
 - early chapter direction exists
+- the retained direction has passed deep anti-cliche review with named novelty axes
 - important side plots have explicit function and feedback paths into the main line
 - the line structure does not rely on a single flat story rail
 - the user explicitly approves the planning result
@@ -114,6 +121,7 @@ Do not advance to character bible or drafting if:
 - suspense or climax logic is absent
 - early chapter direction is absent
 - planning clarification is still incomplete
+- cliché samples were not enumerated for the retained direction
 - the user has unresolved objections
 - user approval to advance is missing
 
