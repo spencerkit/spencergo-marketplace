@@ -35,6 +35,8 @@
 
 **长篇账本** — 长篇稳定不靠记忆硬扛。必须维护世界规则、伏笔、关系、资源四类账本，避免中后期崩设定。
 
+**叙事智能层** — 在现有状态文件、账本、审校链之上，外挂统一真相源、动态状态追踪、矛盾配对、证据链、角色认知追踪、伏笔三元组追踪等能力；它负责“检查与索引”，不替代主控审批，也不替代 subagent 写审校。
+
 ## 三大核心机制
 
 ### 往复式写作
@@ -234,6 +236,10 @@ applied = finalize_dispatch(project_root, dispatch_dir=dispatch_dir)
 如果你只想理解运行时协议，先看：
 - `references/subagent-execution.md`
 - `references/subagent-dispatch-template.md`
+
+如果你要继续把一致性检查做深，再看：
+- `references/cfpg-tracker.md`
+- `references/narrative-intelligence.md`
 
 ## 使用方式
 

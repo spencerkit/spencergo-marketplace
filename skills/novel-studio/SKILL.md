@@ -199,6 +199,7 @@ Use these reference files as **hard operational guidance**, not optional inspira
 - `references/continuity-ledgers.md` — world rules, foreshadow, relationship, and resource ledgers for long-form stability
 - `references/outlining.md` — idea expansion, world setup, plot structure, outline design, and planning-stage hard gates
 - `references/plot-weaving.md` — how to interweave main plot, side plots, relationship lines, suspense lines, and payoff structure
+- `references/narrative-intelligence.md` — unified truth source, dynamic narrative-state tracking, checker layering, ToM / CFPG / timeline / evidence-chain mapping, and staged implementation order
 - `references/character-bible.md` — character profiles, motivation, arc, relationship structure, and drafting gate requirements
 - `references/character-craft.md` — attraction design, contradiction, scene-based characterization, environment/other-character contrast, and memorable-role construction
 - `references/drafting.md` — chapter drafting rules, pacing, hooks, anti-perfunctory drafting rules, and polishing gate requirements
