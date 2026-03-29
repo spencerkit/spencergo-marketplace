@@ -43,6 +43,14 @@ def delegation_blockers(validated: dict[str, object]) -> list[str]:
     return list(result.get('blockedReasons') or [])
 
 
+def should_sync_narrative_intelligence(stage: str, result: dict[str, object], batch: dict) -> bool:
+    if result.get('status') != 'completed':
+        return False
+    if stage != 'proofreading':
+        return True
+    return bool(batch.get('proofreadingComplete'))
+
+
 def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
     stage = validated['stage']
     package = validated['package']
@@ -89,7 +97,7 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
         review['lastPersistedAt'] = now_iso()
         artifacts['proofreadingReport'] = True
 
-    if result['status'] == 'completed' and stage in {'drafting', 'polishing', 'proofreading'}:
+    if should_sync_narrative_intelligence(stage, result, batch):
         project_root = data.get('project', {}).get('rootPath')
         if project_root:
             sync_narrative_intelligence(

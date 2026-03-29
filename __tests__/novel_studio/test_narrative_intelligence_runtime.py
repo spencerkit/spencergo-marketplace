@@ -337,6 +337,68 @@ class NarrativeIntelligenceRuntimeTest(unittest.TestCase):
             self.assertEqual(narrative_intelligence['theoryOfMind']['lastUpdatedBatch'], '第1章')
             self.assertEqual(narrative_intelligence['consistency']['lastCheckStage'], 'proofreading')
 
+    def test_apply_nonaccepted_proofreading_result_does_not_refresh_narrative_intelligence_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project = self.create_stage_runtime_project(root, current_stage='proofreading')
+            bundle_file = root / 'proofreading-bundle.json'
+            result_file = root / 'proofreading-result.json'
+
+            prepare = run_script(
+                'prepare_stage_subagent_dispatch.py',
+                str(project),
+                'proofreading',
+                '--batch-range',
+                '第1章',
+                '--bundle-file',
+                str(bundle_file),
+                '--dispatch-dir',
+                str(root / 'dispatch'),
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stderr)
+
+            (project / '05A_本轮校对报告.md').write_text(
+                '# 05A_本轮校对报告\n\n- judgment: needs revision\n- summary: 需要回修\n',
+                encoding='utf-8',
+            )
+            self.write_json(
+                result_file,
+                {
+                    'status': 'completed',
+                    'changedFiles': [],
+                    'createdFiles': ['05A_本轮校对报告.md'],
+                    'blockedReasons': [],
+                    'summary': '本轮校对完成，但需要回修',
+                    'notesForNextStage': '等待审核后回修',
+                    'risks': [],
+                    'judgment': 'needs revision',
+                    'continuity': '存在断点',
+                    'logic': '存在漏洞',
+                    'characterOOC': '轻微',
+                    'blockers': ['结尾信息缺口'],
+                    'fixDirection': '补足关键解释并重写结尾段落',
+                },
+            )
+
+            apply_result = run_script(
+                'apply_stage_execution_result.py',
+                str(project),
+                '--bundle-file',
+                str(bundle_file),
+                '--result-file',
+                str(result_file),
+            )
+            self.assertEqual(apply_result.returncode, 0, apply_result.stderr)
+
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            narrative_intelligence = state['narrativeIntelligence']
+
+            self.assertIsNone(narrative_intelligence['timeline']['lastUpdatedBatch'])
+            self.assertEqual(narrative_intelligence['timeline']['lastTouchedChapters'], [])
+            self.assertIsNone(narrative_intelligence['cfpg']['lastUpdatedBatch'])
+            self.assertIsNone(narrative_intelligence['theoryOfMind']['lastUpdatedBatch'])
+            self.assertIsNone(narrative_intelligence['consistency']['lastCheckStage'])
+
 
 if __name__ == '__main__':
     unittest.main()
