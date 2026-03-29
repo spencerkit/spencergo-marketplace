@@ -8,6 +8,7 @@ from pathlib import Path
 
 from autopilot_utils import record_autopilot_progress, stop_autopilot_with_blockers, summarize_chapter_progress
 from chapter_progress_utils import apply_result_to_chapters
+from narrative_intelligence_utils import sync_narrative_intelligence
 from revision_utils import load_state, save_state
 from stage_execution_utils import (
     base_result_summary_fields,
@@ -87,6 +88,16 @@ def apply_validated_state(data: dict, validated: dict[str, object]) -> None:
         review['lastPersistedStage'] = 'proofreading'
         review['lastPersistedAt'] = now_iso()
         artifacts['proofreadingReport'] = True
+
+    if result['status'] == 'completed' and stage in {'drafting', 'polishing', 'proofreading'}:
+        project_root = data.get('project', {}).get('rootPath')
+        if project_root:
+            sync_narrative_intelligence(
+                Path(project_root),
+                data,
+                stage=stage,
+                chapter_labels=chapter_labels,
+            )
 
     if result['status'] == 'completed':
         record_autopilot_progress(data, autopilot_progress_summary)

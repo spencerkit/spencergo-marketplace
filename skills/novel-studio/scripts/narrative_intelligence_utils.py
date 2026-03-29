@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from revision_utils import default_narrative_intelligence
+
 TIMELINE_ARTIFACT = '05F_时间与事件图谱.md'
 FORESHADOW_TRIPLES_ARTIFACT = '05G_伏笔三元组账本.md'
 THEORY_OF_MIND_ARTIFACT = '05H_角色认知与误判表.md'
@@ -60,3 +62,30 @@ def ensure_narrative_artifacts(project: Path) -> list[str]:
         created.append(filename)
 
     return created
+
+
+def sync_narrative_intelligence(project: Path, state: dict, *, stage: str, chapter_labels: list[str]) -> dict:
+    ensure_narrative_artifacts(project)
+
+    narrative_intelligence = state.setdefault('narrativeIntelligence', default_narrative_intelligence())
+    timeline = narrative_intelligence.setdefault('timeline', default_narrative_intelligence()['timeline'])
+    cfpg = narrative_intelligence.setdefault('cfpg', default_narrative_intelligence()['cfpg'])
+    theory_of_mind = narrative_intelligence.setdefault(
+        'theoryOfMind',
+        default_narrative_intelligence()['theoryOfMind'],
+    )
+    consistency = narrative_intelligence.setdefault('consistency', default_narrative_intelligence()['consistency'])
+
+    batch_range = state.get('batch', {}).get('lastDelegatedScope') or state.get('batch', {}).get('chapterRange')
+    normalized_chapter_labels = list(chapter_labels)
+
+    timeline['enabled'] = True
+    timeline['lastUpdatedBatch'] = batch_range
+    timeline['lastTouchedChapters'] = normalized_chapter_labels
+    cfpg['lastUpdatedBatch'] = batch_range
+    theory_of_mind['lastUpdatedBatch'] = batch_range
+
+    if stage == 'proofreading':
+        consistency['lastCheckStage'] = 'proofreading'
+
+    return state
