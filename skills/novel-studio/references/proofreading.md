@@ -5,7 +5,7 @@
 Run consistency, logic, continuity, and OOC checks on the current approved batch before batch-level final pass.
 
 Proofreading in this workflow is batch-scoped and should help determine whether the current batch is ready to be accepted, revised again, or rolled back.
-Within the Cliche Exhaustion Loop, proofreading only performs lightweight backslide detection and reporting.
+Within the Cliche Exhaustion Loop, lightweight backslide detection is parent-side only in this slice.
 
 Default execution mechanism: proofreading uses a bounded proofreading subagent. The parent agent remains the orchestrator.
 The parent agent must verify preconditions before delegation, dispatch with `fork_context = false`, and accept or reject the returned proofreading report before reporting stage progress.
@@ -13,10 +13,12 @@ Preferred parent runtime loop: `prepare_dispatch -> spawn(message=childPrompt) -
 The child still receives prompt text only; proofreading dispatch artifacts stay parent-side.
 The only canonical file proofreading may write is `05A_本轮校对报告.md`.
 Execution mechanism changes do not change proofreading-stage semantics.
+The child proofreading bundle/result contract does not change because of this slice.
 
 Accepted proofreading has a parent-side post-processing hook:
 - refresh `narrativeIntelligence.timeline` / `cfpg` / `theoryOfMind`
 - refresh `05I_证据链与矛盾对照表.md` plus `narrativeIntelligence.consistency.*`
+- accepted proofreading may trigger a parent-side style-risk refresh
 - if evidence-backed critical issues remain, stop autopilot with an explicit blocker reason
 - do not silently rewrite the child report; checker output is parent-owned derived state
 

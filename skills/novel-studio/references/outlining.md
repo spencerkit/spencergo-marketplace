@@ -70,6 +70,7 @@ Before planning approval, the retained direction must also complete the supervis
 - cliché samples were enumerated
 - retained novelty axes were named explicitly
 - the outline states what default genre rail it is refusing to fall back into
+- when the supervisor activates that pass, the retained conclusion is persisted in `05_定稿结论.md`
 
 ---
 
@@ -107,6 +108,7 @@ This stage is complete only if:
 - escalation path is visible
 - early chapter direction exists
 - the retained direction has passed deep anti-cliche review with named novelty axes
+- any activated deep anti-cliche pass has a persisted `05_定稿结论.md` conclusion
 - important side plots have explicit function and feedback paths into the main line
 - the line structure does not rely on a single flat story rail
 - the user explicitly approves the planning result
@@ -122,6 +124,7 @@ Do not advance to character bible or drafting if:
 - early chapter direction is absent
 - planning clarification is still incomplete
 - cliché samples were not enumerated for the retained direction
+- the supervisor activated deep anti-cliche review but no `05_定稿结论.md` records the retained conclusion
 - the user has unresolved objections
 - user approval to advance is missing
 

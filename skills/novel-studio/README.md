@@ -42,9 +42,9 @@
 
 **Cliche Exhaustion Loop** — 这是 supervisor 侧的反俗套协议层，不是新阶段。
 - `Discovery` 用 `quick`：先把直觉俗套版本摊开，再保留值得继续的“新鲜轴”。
-- `Story Planning` 用 `deep`：planning 审批前必须完成更深一轮反俗套穷举，不能只写抽象提醒。
+- `Story Planning` 用 `deep`：planning 审批前必须完成更深一轮反俗套穷举，不能只写抽象提醒；如果 supervisor 启动了这轮 deep pass，必须先在所选分支的 `05_定稿结论.md` 里落结论，才能批准 planning。
 - `Opening` 只验证保留下来的新鲜轴有没有真正落到前 3 / 10 / 20 章，不重开大范围脑暴。
-- `Proofreading` 在本 slice 里只做轻量回滑检测 / 报告，不单独重开 planning。
+- `Proofreading` 在本 slice 里只做父侧轻量回滑检测 / 报告，不单独重开 planning，也不改 child proofreading 协议。
 - `.novel-state.json`、staging 分支选择、canonical 回填、分支清理仍然只归父 agent。
 
 ## 三大核心机制
@@ -141,9 +141,9 @@ Novel Studio 现在把市场调研里最关键的四件事硬化成流程要求�
 如果显式进入脑暴 / 分支探索，并且要跑反俗套穷举分支，`staging/<stage>/<branch-id>/` 下推荐固定放：
 - `00_脑暴任务卡.md`
 - `01_直觉俗套清单.md`
-- `02_反向拆解.md`
-- `03_保留的新鲜轴.md`
-- `04_风险与淘汰理由.md`
+- `02_反驳与否认.md`
+- `03_变异候选.md`
+- `04_保留候选.md`
 - `05_定稿结论.md`
 
 只有 `05_定稿结论.md` 可以授权把该分支结论回填到 canonical 文件；没有这份结论，就不允许把探索分支当正式方向。

@@ -551,14 +551,46 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         self.assertIn('Cliche Exhaustion Loop', skill)
         self.assertIn('`Discovery` uses `quick`', cliche)
         self.assertIn('`Story Planning` uses `deep`', cliche)
+        self.assertIn('must be recorded through the staging branch conclusion (`05_定稿结论.md`) before planning approval', cliche)
         self.assertIn('planning approval should not occur until the retained direction has', workflow)
+        self.assertIn('`05_定稿结论.md`', workflow)
         self.assertIn('cliché samples were enumerated', outlining)
 
     def test_file_structure_mentions_cliche_exhaustion_branch_artifacts(self):
         file_structure = self.read_required_doc(FILE_STRUCTURE)
         self.assertIn('00_脑暴任务卡.md', file_structure)
         self.assertIn('01_直觉俗套清单.md', file_structure)
+        self.assertIn('02_反驳与否认.md', file_structure)
+        self.assertIn('03_变异候选.md', file_structure)
+        self.assertIn('04_保留候选.md', file_structure)
         self.assertIn('05_定稿结论.md', file_structure)
+
+    def test_state_docs_define_cliche_exhaustion_brainstorm_and_style_risk_fields(self):
+        state_management = self.read_required_doc(ROOT / 'skills/novel-studio/references/state-management.md')
+        self.assertIn('review.brainstormMode', state_management)
+        self.assertIn('review.brainstormFocus', state_management)
+        self.assertIn('review.brainstormRound', state_management)
+        self.assertIn('review.selectedBranch', state_management)
+        self.assertIn('narrativeIntelligence.styleRisk.noveltyAxes', state_management)
+        self.assertIn('narrativeIntelligence.styleRisk.lastClicheScanStage', state_management)
+
+        state_fields = self.read_required_doc(ROOT / 'skills/novel-studio/references/state-fields-template.md')
+        self.assertIn('"brainstormMode":', state_fields)
+        self.assertIn('"brainstormFocus":', state_fields)
+        self.assertIn('"brainstormRound":', state_fields)
+        self.assertIn('"selectedBranch":', state_fields)
+        self.assertIn('"styleRisk": {', state_fields)
+        self.assertIn('"noveltyAxes":', state_fields)
+        self.assertIn('"lastClicheScanStage":', state_fields)
+
+    def test_proofreading_docs_define_parent_side_cliche_refresh_boundary(self):
+        proofreading = self.read_required_doc(ROOT / 'skills/novel-studio/references/proofreading.md')
+        self.assertIn('lightweight backslide detection is parent-side only in this slice', proofreading)
+        self.assertIn('accepted proofreading may trigger a parent-side style-risk refresh', proofreading)
+        self.assertIn('The child proofreading bundle/result contract does not change because of this slice.', proofreading)
+
+        state_management = self.read_required_doc(ROOT / 'skills/novel-studio/references/state-management.md')
+        self.assertIn('accepted proofreading may refresh `narrativeIntelligence.styleRisk.*` parent-side', state_management)
 
     def test_docs_define_chapter_progress_reporting_contract(self):
         skill = self.read_required_doc(SKILL)

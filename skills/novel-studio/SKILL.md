@@ -27,7 +27,8 @@ Apply the Cliche Exhaustion Loop as a supervisor-side protocol layer:
 - `Discovery` uses `quick` mode
 - `Story Planning` uses `deep` mode with a hard anti-cliche pre-approval gate
 - `Opening` validates retained novelty axes instead of reopening broad ideation
-- `Proofreading` only performs lightweight backslide detection/reporting in this slice
+- `Proofreading` only performs lightweight parent-side backslide detection/reporting in this slice
+- when the supervisor activates the deep anti-cliche pass, it must be recorded in the selected branch `05_定稿结论.md` before planning approval
 - only the parent may select a staging branch, authorize canonical backfill, and clean up stale branches
 
 Do not jump forward casually.

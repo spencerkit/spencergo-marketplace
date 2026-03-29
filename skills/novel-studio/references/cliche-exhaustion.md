@@ -18,7 +18,7 @@ Parent ownership remains unchanged:
 - `Discovery` uses `quick` mode
 - `Story Planning` uses `deep` mode
 - `Opening` validates retained novelty axes rather than reopening broad ideation
-- `Proofreading` only does lightweight backslide detection and reporting in this slice
+- `Proofreading` only does lightweight parent-side backslide detection and reporting in this slice
 
 ## `quick` mode for Discovery
 
@@ -45,15 +45,17 @@ Minimum checks:
 
 Hard rule:
 - planning approval must not occur until the retained direction has gone through deep anti-cliche review and the branch conclusion states which novelty axes survived
+- when the supervisor activates the deep anti-cliche pass, it must be recorded through the staging branch conclusion (`05_定稿结论.md`) before planning approval
+- do not treat an unpersisted discussion-only deep pass as sufficient planning-gate evidence
 
 ## Staging branch artifact layout
 
 When explicit brainstorming mode creates a Cliche Exhaustion staging branch, use this layout under `staging/<stage>/<branch-id>/`:
 - `00_脑暴任务卡.md`
 - `01_直觉俗套清单.md`
-- `02_反向拆解.md`
-- `03_保留的新鲜轴.md`
-- `04_风险与淘汰理由.md`
+- `02_反驳与否认.md`
+- `03_变异候选.md`
+- `04_保留候选.md`
 - `05_定稿结论.md`
 
 Rules:
@@ -75,11 +77,16 @@ Do not use the opening review to restart wide ideation.
 
 ## Proofreading hook
 
-Proofreading only does lightweight backslide detection in this slice.
+Proofreading only does lightweight parent-side backslide detection in this slice.
 
 It may report:
 - where a batch slides back toward the previously enumerated cliché samples
 - which retained novelty axes weakened
 - whether drift is cosmetic, moderate, or blocking
+
+Rules:
+- lightweight backslide detection is parent-side only in this slice
+- accepted proofreading may trigger a parent-side style-risk refresh
+- the child proofreading bundle/result contract does not change because of this slice
 
 It does not reopen Discovery or Story Planning by itself.

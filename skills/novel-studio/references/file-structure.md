@@ -68,9 +68,9 @@ Use this layout by default:
 │   └── [stage]/[branch-id]/
 │       ├── 00_脑暴任务卡.md
 │       ├── 01_直觉俗套清单.md
-│       ├── 02_反向拆解.md
-│       ├── 03_保留的新鲜轴.md
-│       ├── 04_风险与淘汰理由.md
+│       ├── 02_反驳与否认.md
+│       ├── 03_变异候选.md
+│       ├── 04_保留候选.md
 │       └── 05_定稿结论.md
 └── manuscript/
     ├── [章节文件].md
@@ -267,6 +267,7 @@ Directory:
 - only explicit brainstorming mode may write to `staging/`
 - keep branches under `staging/<stage>/<branch-id>/`
 - when a Cliche Exhaustion branch exists, use `00_脑暴任务卡.md` through `05_定稿结论.md` as the default artifact layout
+- use the authoritative branch filenames `00_脑暴任务卡.md`, `01_直觉俗套清单.md`, `02_反驳与否认.md`, `03_变异候选.md`, `04_保留候选.md`, and `05_定稿结论.md`
 - only `05_定稿结论.md` may authorize canonical backfill from that branch
 - after one branch is promoted, copy selected content back into canonical files
 - after promotion, delete sibling branches and stale branch files immediately

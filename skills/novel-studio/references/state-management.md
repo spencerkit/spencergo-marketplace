@@ -38,6 +38,8 @@ The state system must record at least:
 - lane / track choice
 - ledger artifact existence
 - parent-owned `narrativeIntelligence.*` summary, including timeline risk, open critical issues, and revision actions
+- review-side brainstorming overlay status, including `review.brainstormMode`, `review.brainstormFocus`, `review.brainstormRound`, and `review.selectedBranch`
+- parent-owned style-risk anti-cliche summary, including `narrativeIntelligence.styleRisk.noveltyAxes` and `narrativeIntelligence.styleRisk.lastClicheScanStage`
 - autopilot goal / latest progress / stop reason state when bounded automation is active
 
 ---
@@ -145,6 +147,16 @@ These fields must be explicit enough for interruption recovery.
 
 The revision entry point may also prefill scope / plan from `narrativeIntelligence.revisionActions` when open critical findings already exist.
 
+For Cliche Exhaustion Loop continuity, keep these fields explicit under `review.*`:
+- `review.brainstormMode`
+- `review.brainstormFocus`
+- `review.brainstormRound`
+- `review.selectedBranch`
+
+Rules:
+- `review.selectedBranch` should point to the branch whose `05_定稿结论.md` authorized canonical backfill
+- if Story Planning activated the deep anti-cliche pass, planning approval should not be recorded until that retained conclusion exists in the selected branch
+
 ---
 
 ## 9. Autopilot-state tracking
@@ -200,11 +212,14 @@ State must record at least:
 - the latest consistency-check stage
 - evidence-backed open critical issues
 - revision actions derived from open critical issues when applicable
+- `narrativeIntelligence.styleRisk.noveltyAxes`
+- `narrativeIntelligence.styleRisk.lastClicheScanStage`
 
 Rules:
 - initialize `05F`–`05I` after planning approval
 - refresh timeline / CFPG / ToM metadata after accepted drafting, polishing, and proofreading
 - accepted proofreading may refresh `consistency.*` and stop autopilot with an explicit blocker reason
+- accepted proofreading may refresh `narrativeIntelligence.styleRisk.*` parent-side
 - do not let subagents write `.novel-state.json` or `05F`–`05I` directly
 
 ---

@@ -86,6 +86,10 @@ Use this as a quick reference for important `.novel-state.json` fields.
   },
   "review": {
     "currentGate": "waiting_polishing_feedback",
+    "brainstormMode": "cliche_exhaustion_deep",
+    "brainstormFocus": "保留规则异变都市题材的新鲜轴",
+    "brainstormRound": 2,
+    "selectedBranch": "planning-branch-b",
     "lastUserFeedbackSummary": "语气还不够稳，主角魅力不足",
     "lastRevisionFocus": "加强主角吸引点和场景语气统一",
     "lastDriftRiskSummary": "第3章旁白开始变得过于中性",
@@ -127,6 +131,10 @@ Use this as a quick reference for important `.novel-state.json` fields.
       "lastCheckStage": "proofreading",
       "openCriticalIssues": []
     },
+    "styleRisk": {
+      "noveltyAxes": ["规则显形方式", "主角解决问题的代价结构"],
+      "lastClicheScanStage": "proofreading"
+    },
     "revisionActions": []
   },
   "revision": {
@@ -167,6 +175,8 @@ Autopilot notes:
 Cliche Exhaustion Loop notes:
 - branch selection, canonical backfill, and cleanup stay parent-owned supervisor actions.
 - use staging branch artifacts as review scaffolding only; only a branch `05_定稿结论.md` may authorize canonical backfill.
+- keep `review.brainstormMode`, `review.brainstormFocus`, `review.brainstormRound`, and `review.selectedBranch` explicit when the overlay is active.
+- keep `narrativeIntelligence.styleRisk.noveltyAxes` and `narrativeIntelligence.styleRisk.lastClicheScanStage` explicit so later tasks extend one contract instead of inventing a new one.
 
 Narrative-intelligence notes:
 - `narrativeIntelligence.*` is parent-owned derived state. Subagents do not write these fields directly.
