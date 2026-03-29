@@ -12,6 +12,7 @@ from autopilot_utils import (
     summarize_chapter_progress,
 )
 from chapter_progress_utils import advance_chapters_after_gate
+from narrative_intelligence_utils import ensure_narrative_artifacts
 from revision_utils import load_state, save_state
 
 APPROVAL_TRANSITIONS = {
@@ -105,6 +106,9 @@ def approve_gate(project: Path, gate: str) -> dict:
 
     state = load_state(project)
     approve_gate_in_state(state, gate)
+    if gate == 'waiting_planning_feedback':
+        ensure_narrative_artifacts(project)
+        state['narrativeIntelligence']['timeline']['enabled'] = True
     save_state(project, state)
     return load_state(project)
 

@@ -4,6 +4,12 @@ import json, sys
 import re
 
 from autopilot_utils import default_autopilot
+from narrative_intelligence_utils import (
+    CONSISTENCY_ARTIFACT,
+    FORESHADOW_TRIPLES_ARTIFACT,
+    THEORY_OF_MIND_ARTIFACT,
+    TIMELINE_ARTIFACT,
+)
 from revision_utils import (
     default_batch,
     default_narrative_intelligence,
@@ -161,6 +167,10 @@ def reconstruct(project: Path):
     foreshadow_ledger = project / '05C_伏笔回收台账.md'
     relationship_ledger = project / '05D_关系状态表.md'
     resource_ledger = project / '05E_能力与资源变化表.md'
+    timeline_artifact = project / TIMELINE_ARTIFACT
+    foreshadow_triples_artifact = project / FORESHADOW_TRIPLES_ARTIFACT
+    theory_of_mind_artifact = project / THEORY_OF_MIND_ARTIFACT
+    consistency_artifact = project / CONSISTENCY_ARTIFACT
 
     track_text = track_decision.read_text(encoding='utf-8') if exists_nonempty(track_decision) else None
     style_text = style_bible.read_text(encoding='utf-8') if exists_nonempty(style_bible) else None
@@ -242,6 +252,17 @@ def reconstruct(project: Path):
             'styleBibleVersion': 'v1' if exists_nonempty(style_bible) else None,
         },
     }
+
+    if any(
+        exists_nonempty(artifact)
+        for artifact in (
+            timeline_artifact,
+            foreshadow_triples_artifact,
+            theory_of_mind_artifact,
+            consistency_artifact,
+        )
+    ):
+        state['narrativeIntelligence']['timeline']['enabled'] = True
 
     a = state['artifacts']
     if a['topicReport']:
