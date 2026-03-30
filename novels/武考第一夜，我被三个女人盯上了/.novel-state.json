@@ -8,7 +8,7 @@
     "currentSubstage": null,
     "lastCompletedStage": "character-system",
     "nextStage": "drafting",
-    "status": "producing_artifact"
+    "status": "awaiting_user_approval"
   },
   "approvals": {
     "discoveryApproved": true,
@@ -205,6 +205,10 @@
       "drafting"
     ],
     "affectedFiles": [
+      "01B_总主线与卷级推进.md",
+      "02_大纲.md",
+      "04A_开篇设计.md",
+      "04_章节骨架.md",
       "manuscript/第1章_武考第一，不给你当狗了.md",
       "manuscript/第2章_第一夜，城裂开了.md",
       "manuscript/第3章_借残印，杀出去.md",
@@ -281,7 +285,7 @@
     }
   },
   "blockingIssues": [
-    "Formal revision active: awaiting_revision_result_approval"
+    "Formal revision active: awaiting_revision_plan_approval"
   ],
   "notes": {
     "workingTitle": "武考第一夜，我被三个女人盯上了",
@@ -291,5 +295,5 @@
     "secondaryFlavor": "都市守夜 / 神灾入侵 / 成神失控 / 多女主",
     "styleBibleVersion": "v1"
   },
-  "updatedAt": "2026-03-30T08:19:33Z"
+  "updatedAt": "2026-03-30T10:34:49Z"
 }
