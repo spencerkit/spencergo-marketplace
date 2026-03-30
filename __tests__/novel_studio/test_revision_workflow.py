@@ -33,7 +33,13 @@ class RevisionWorkflowTest(unittest.TestCase):
         )
         return project
 
-    def create_stage_boundary_ready_project(self, root: Path, *, revision_gate: str) -> Path:
+    def create_stage_boundary_ready_project(
+        self,
+        root: Path,
+        *,
+        revision_gate: str | None = None,
+        legacy_revision_gate: str | None = None,
+    ) -> Path:
         project = root / '测试小说'
         project.mkdir()
         manuscript = project / 'manuscript'
@@ -92,6 +98,7 @@ class RevisionWorkflowTest(unittest.TestCase):
             'revision': {
                 'active': True,
                 'currentRevisionGate': revision_gate,
+                'currentGate': legacy_revision_gate,
                 'awaitingUserApproval': True,
             },
             'blockingIssues': [],
@@ -477,6 +484,20 @@ class RevisionWorkflowTest(unittest.TestCase):
                     self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
                     self.assertIn('READY: YES', result.stdout)
                     self.assertNotIn('Current revision gate is still open', result.stdout)
+
+    def test_polishing_readiness_uses_legacy_revision_gate_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_stage_boundary_ready_project(
+                Path(tmp),
+                legacy_revision_gate='awaiting_revision_plan_approval',
+            )
+
+            result = run_script('check_stage_ready.py', str(project), 'polishing')
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('READY: NO', result.stdout)
+            self.assertIn('Current revision gate is still open', result.stdout)
+            self.assertIn('awaiting_revision_plan_approval', result.stdout)
 
     def test_load_project_state_reconstructs_last_closed_revision_from_revision_doc_when_state_missing(self):
         with tempfile.TemporaryDirectory() as tmp:
