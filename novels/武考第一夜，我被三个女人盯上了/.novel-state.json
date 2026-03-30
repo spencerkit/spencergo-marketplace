@@ -216,7 +216,7 @@
     "conflictSummary": "不把作品改成纯案件文，不削掉爽、狠、热血和后宫气质，不新增大段解释性设定，不改前五章已确认的爆点职责；所有改动都必须服务“宁烬为什么要查、现在为什么查不了、接下来必须先拿什么”。",
     "revisionPlanSummary": "先改 01B 与 02 锁主线合同，再改 04A 与 04 锁开篇执行口径，最后回写第1章至第5章的内心驱动、查案钩子和章尾方向，并在统一校准后送入 awaiting_revision_result_approval。",
     "resultSummary": null,
-    "currentRevisionGate": "awaiting_revision_result_approval",
+    "currentRevisionGate": "awaiting_revision_plan_approval",
     "awaitingUserApproval": true,
     "lastClosedRevision": null
   },
