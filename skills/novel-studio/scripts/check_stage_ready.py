@@ -49,7 +49,7 @@ def state_gate_errors(state, stage):
         errs.append(f'Pending artifacts still await approval: {", ".join(pending_artifacts)}')
 
     revision_gate = revision.get('currentRevisionGate') or revision.get('currentGate')
-    if revision_gate and stage in {'drafting', 'polishing', 'proofreading', 'final-review'}:
+    if revision.get('active') and revision_gate and stage in {'drafting', 'polishing', 'proofreading', 'final-review'}:
         errs.append(f'Current revision gate is still open: {revision_gate}')
 
     if stage == 'story-planning' and not approvals.get('discoveryApproved', False):

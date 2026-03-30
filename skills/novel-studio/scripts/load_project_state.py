@@ -20,6 +20,16 @@ from revision_utils import (
 )
 from stage_persistence_utils import PROOFREADING_REPORT, WORKFLOW_STATUSES, normalize_path_list
 
+WORKFLOW_STAGE_ORDER = (
+    'discovery',
+    'story-planning',
+    'character-system',
+    'drafting',
+    'polishing',
+    'proofreading',
+    'final-review',
+)
+
 
 def exists_nonempty(path: Path) -> bool:
     return path.exists() and path.is_file() and path.read_text(encoding='utf-8').strip() != ''
@@ -165,9 +175,14 @@ def apply_active_revision_workflow_override(state: dict):
     affected_stages = revision.get('affectedStages') or []
 
     if revision.get('active') and current_gate and affected_stages:
-        stage = affected_stages[0]
+        stage_positions = {stage: index for index, stage in enumerate(WORKFLOW_STAGE_ORDER)}
+        known_stages = [stage for stage in affected_stages if stage in stage_positions]
+        stage = min(known_stages, key=stage_positions.get) if known_stages else affected_stages[0]
         workflow['currentStage'] = stage
         workflow['nextStage'] = stage
+        workflow['currentSubstage'] = None
+        stage_index = stage_positions.get(stage)
+        workflow['lastCompletedStage'] = WORKFLOW_STAGE_ORDER[stage_index - 1] if stage_index and stage_index > 0 else None
         workflow['status'] = 'awaiting_user_approval'
 
 
