@@ -158,6 +158,19 @@ def apply_revision_doc_state(project: Path, state: dict):
             state['review']['lastUserFeedbackSummary'] = state['revision']['lastClosedRevision'].get('feedbackSummary')
 
 
+def apply_active_revision_workflow_override(state: dict):
+    revision = state.get('revision', {})
+    workflow = state.setdefault('workflow', {})
+    current_gate = revision.get('currentRevisionGate') or revision.get('currentGate')
+    affected_stages = revision.get('affectedStages') or []
+
+    if revision.get('active') and current_gate and affected_stages:
+        stage = affected_stages[0]
+        workflow['currentStage'] = stage
+        workflow['nextStage'] = stage
+        workflow['status'] = 'awaiting_user_approval'
+
+
 def reconstruct(project: Path):
     track_decision = project / '00C_底盘与切口决策.md'
     style_bible = project / '01A_风格圣经.md'
@@ -322,6 +335,7 @@ def reconstruct(project: Path):
         state['batch']['proofreadingComplete'] = True
 
     apply_revision_doc_state(project, state)
+    apply_active_revision_workflow_override(state)
     return state
 
 
@@ -343,6 +357,7 @@ def normalize_supervisor_state(normalized: dict):
     if review['pendingArtifactPaths']:
         workflow['status'] = 'awaiting_user_approval'
 
+    apply_active_revision_workflow_override(normalized)
     return normalized
 
 

@@ -311,6 +311,35 @@ class RevisionWorkflowTest(unittest.TestCase):
                 state['blockingIssues'],
             )
 
+    def test_load_project_state_recovers_workflow_from_active_revision_doc_when_state_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_revision_ready_project(Path(tmp))
+            run_script('record_revision_feedback.py', str(project), 'character_feedback', 'override', '第3章主角性格发虚')
+            run_script(
+                'update_revision_scope.py',
+                str(project),
+                '--affected-stages',
+                'drafting,polishing',
+                '--affected-files',
+                '05_本轮章节规划.md,manuscript/chapter-01.md',
+                '--scope-summary',
+                '回改章节规划和第一章人物状态',
+                '--conflict-summary',
+                '覆盖旧的人物语气设定',
+                '--plan-summary',
+                '先改规划，再改正文，再复核润色判断',
+            )
+            (project / '.novel-state.json').unlink()
+
+            result = run_script('load_project_state.py', str(project))
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((project / '.novel-state.json').read_text(encoding='utf-8'))
+            self.assertEqual(state['workflow']['currentStage'], 'drafting')
+            self.assertEqual(state['workflow']['nextStage'], 'drafting')
+            self.assertEqual(state['workflow']['status'], 'awaiting_user_approval')
+            self.assertEqual(state['revision']['currentRevisionGate'], 'awaiting_revision_plan_approval')
+
     def test_final_review_readiness_fails_when_active_revision_is_reconstructed_from_revision_doc(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = self.create_revision_ready_project(Path(tmp))
@@ -323,6 +352,32 @@ class RevisionWorkflowTest(unittest.TestCase):
             self.assertIn('READY: NO', result.stdout)
             self.assertIn('Current revision gate is still open', result.stdout)
             self.assertIn('awaiting_revision_scope_confirmation', result.stdout)
+
+    def test_polishing_readiness_fails_when_active_revision_gate_is_open(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_revision_ready_project(Path(tmp))
+            run_script('record_revision_feedback.py', str(project), 'character_feedback', 'override', '第3章主角性格发虚')
+            run_script(
+                'update_revision_scope.py',
+                str(project),
+                '--affected-stages',
+                'drafting,polishing',
+                '--affected-files',
+                '05_本轮章节规划.md,manuscript/chapter-01.md',
+                '--scope-summary',
+                '回改章节规划和第一章人物状态',
+                '--conflict-summary',
+                '覆盖旧的人物语气设定',
+                '--plan-summary',
+                '先改规划，再改正文，再复核润色判断',
+            )
+
+            result = run_script('check_stage_ready.py', str(project), 'polishing')
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('READY: NO', result.stdout)
+            self.assertIn('Current revision gate is still open', result.stdout)
+            self.assertIn('awaiting_revision_plan_approval', result.stdout)
 
     def test_load_project_state_reconstructs_last_closed_revision_from_revision_doc_when_state_missing(self):
         with tempfile.TemporaryDirectory() as tmp:
