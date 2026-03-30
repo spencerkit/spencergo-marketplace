@@ -33,6 +33,76 @@ class RevisionWorkflowTest(unittest.TestCase):
         )
         return project
 
+    def create_stage_boundary_ready_project(self, root: Path, *, revision_gate: str) -> Path:
+        project = root / '测试小说'
+        project.mkdir()
+        manuscript = project / 'manuscript'
+        manuscript.mkdir()
+        (manuscript / 'chapter-01.md').write_text('# 第一章\n\n正文', encoding='utf-8')
+        (project / '00_选题报告.md').write_text('# 选题报告\n\n## 推荐方向\n- 规则异变都市\n', encoding='utf-8')
+        (project / '02_大纲.md').write_text('# 大纲\n\n## 剧情\n- 开篇冲突\n\n## 冲突\n- 主角受压制\n', encoding='utf-8')
+        (project / '03_人物小传.md').write_text('# 人物小传\n\n- 主角\n', encoding='utf-8')
+        (project / '04A_开篇设计.md').write_text('# 开篇设计\n\n- 冷开场\n', encoding='utf-8')
+        (project / '05A_本轮校对报告.md').write_text('# 05A_本轮校对报告\n\n- judgment: acceptable\n- summary: 通过\n', encoding='utf-8')
+        (project / '05_前情回顾.md').write_text(
+            '## 当前已推进到的位置\n'
+            '- 第一卷中段\n\n'
+            '## 最近一轮发生的关键事件\n'
+            '- 主角得知真相\n\n'
+            '## 当前未回收的伏笔 / 悬念\n'
+            '- 黑箱来源未揭示\n\n'
+            '## 下一轮写作必须记住的点\n'
+            '- 保持人物关系连续\n',
+            encoding='utf-8',
+        )
+        for name in (
+            '00C_底盘与切口决策.md',
+            '01A_风格圣经.md',
+            '01B_总主线与卷级推进.md',
+            '05B_世界规则账本.md',
+            '05C_伏笔回收台账.md',
+            '05D_关系状态表.md',
+            '05E_能力与资源变化表.md',
+        ):
+            (project / name).write_text(f'# {name}\n\n- 已完成\n', encoding='utf-8')
+
+        state = {
+            'project': {'title': '测试小说', 'rootPath': str(project)},
+            'workflow': {
+                'currentStage': 'drafting',
+                'currentSubstage': None,
+                'lastCompletedStage': 'character-system',
+                'nextStage': 'polishing',
+                'status': 'in_progress',
+            },
+            'approvals': {
+                'discoveryApproved': True,
+                'planningApproved': True,
+                'characterApproved': True,
+                'openingApproved': True,
+            },
+            'artifacts': {},
+            'batch': {
+                'active': False,
+                'draftComplete': True,
+                'polishingComplete': True,
+                'proofreadingComplete': True,
+            },
+            'review': {},
+            'revision': {
+                'active': True,
+                'currentRevisionGate': revision_gate,
+                'awaitingUserApproval': True,
+            },
+            'blockingIssues': [],
+            'notes': {},
+        }
+        (project / '.novel-state.json').write_text(
+            json.dumps(state, ensure_ascii=False, indent=2),
+            encoding='utf-8',
+        )
+        return project
+
     def test_record_feedback_creates_state_and_revision_doc(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp) / '测试小说'
@@ -378,6 +448,35 @@ class RevisionWorkflowTest(unittest.TestCase):
             self.assertIn('READY: NO', result.stdout)
             self.assertIn('Current revision gate is still open', result.stdout)
             self.assertIn('awaiting_revision_plan_approval', result.stdout)
+
+    def test_downstream_stages_are_blocked_by_open_revision_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_stage_boundary_ready_project(
+                Path(tmp),
+                revision_gate='awaiting_revision_plan_approval',
+            )
+
+            for stage in ('drafting', 'polishing', 'proofreading', 'final-review'):
+                with self.subTest(stage=stage):
+                    result = run_script('check_stage_ready.py', str(project), stage)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn('READY: NO', result.stdout)
+                    self.assertIn('Current revision gate is still open', result.stdout)
+                    self.assertIn('awaiting_revision_plan_approval', result.stdout)
+
+    def test_upstream_stages_are_not_blocked_solely_by_open_revision_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = self.create_stage_boundary_ready_project(
+                Path(tmp),
+                revision_gate='awaiting_revision_plan_approval',
+            )
+
+            for stage in ('story-planning', 'character-system'):
+                with self.subTest(stage=stage):
+                    result = run_script('check_stage_ready.py', str(project), stage)
+                    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+                    self.assertIn('READY: YES', result.stdout)
+                    self.assertNotIn('Current revision gate is still open', result.stdout)
 
     def test_load_project_state_reconstructs_last_closed_revision_from_revision_doc_when_state_missing(self):
         with tempfile.TemporaryDirectory() as tmp:
