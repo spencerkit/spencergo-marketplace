@@ -151,48 +151,37 @@ Novel Studio 现在把市场调研里最关键的四件事硬化成流程要求�
 
 只有 `05_定稿结论.md` 可以授权把该分支结论回填到 canonical 文件；没有这份结论，就不允许把探索分支当正式方向。
 
-## Subagent 执行接入
+## Isolated Dispatch 执行接入
 
-`drafting` / `polishing` / `proofreading` 默认走父 agent 编排 + subagent 执行。
+`drafting` / `polishing` / `proofreading` 默认走父 agent 编排 + isolated dispatch 执行。
 
-标准父流程是 `prepare -> spawn -> extract -> finalize`：
-- `scripts/prepare_stage_subagent_dispatch.py`
-- `spawn_agent(..., fork_context=false)`
-- `scripts/extract_stage_subagent_result.py`
-- `scripts/finalize_stage_subagent_dispatch.py`
+核心机制：父 agent 调 `scripts/run_isolated_dispatch.py`，该脚本内部启动一个独立的 `claude -p` 子 session 来完成阶段任务。子 session：
+- 零父 session 聊天历史
+- `Agent` 工具被禁用（不能再 spawn 孙 session）
+- 不保存 session 历史（`--no-session-persistence`）
+- 只接收 prompt 中嵌入的文件内容作为上下文
 
-`prepare_stage_subagent_dispatch.py` 支持 `--dispatch-dir` 生成标准化 dispatch workspace。
-prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `manifestFile` / `rawFile` / `resultFile` / `validatedFile`，父 agent 不必再手写整套临时文件路径。
-标准布局固定为 `bundle.json` / `prompt.txt` / `manifest.json` / `child-response.txt` / `result.json` / `validated.json`。
-如果你显式传了 `bundleFile` / `promptFile` / `manifestFile`，且三者位于同一个父目录，prepare 也会自动把这个目录当成 `dispatchDir`，继续为 `rawFile` / `resultFile` / `validatedFile` 生成标准路径。
-`extract_stage_subagent_result.py` 和 `finalize_stage_subagent_dispatch.py` 也支持直接吃 `--dispatch-dir`。
-显式传入的 `rawFile` / `resultFile` / `bundleFile` / `manifestFile` / `validatedFile` 会覆盖 `dispatchDir` 默认路径。
-如果父 agent 用 Python 编排，可以直接 import `scripts/subagent_dispatch_runtime.py`。
-`prepare_dispatch(...)` 负责生成 `childPrompt`，也就是发给子 agent 的 prompt。
-`record_child_output(...)` 只负责记录子 agent 的原始输出。
-`finalize_dispatch(...)` 会串起 extract + validate + apply。
+标准父流程：
+- `scripts/run_isolated_dispatch.py` — 一步完成构建 bundle、启动子 session、提取结果
+- `scripts/validate_stage_execution_result.py` — 校验子 session 返回
+- `scripts/apply_stage_execution_result.py` — 应用校验通过的结果
 
 运行规则：
-- 所有 `bundle` / `prompt` / `manifest` / `child-response` / `result` / `validated` 中间产物都必须放在项目根目录之外
-- 只把 `executionPackage` 发给子 agent
-- `validationContext` 只留在父 agent
-- 章节范围必须同时以 `requiredInputs.chapterLabels` 的结构化列表进入 dispatch package
+- 子 session 在物理隔离的 `claude -p` 进程中运行
+- 子 session 只接收 prompt 中嵌入的文件内容，无聊天记忆
+- 子 session 的 `Agent` 工具被 `--disallowed-tools` 禁用
 - `drafting` / `polishing` 的 `targetFiles` 必须非空且位于 `manuscript/` 下
 - `outputContract.requiredReturnFields` 必须严格等于协议字段列表，`outputContract.mustWriteFiles` 必须严格等于 `targetFiles`
 - `completed` 结果必须真实触达本次 dispatch 的全部 `outputContract.mustWriteFiles`
 - `proofreading` 必须只写 `05A_本轮校对报告.md`，且 `overwriteFlag=true`
 - `targetFiles` / `mustNotModify` / `changedFiles` / `createdFiles` 等 path list 不允许重复项
-- `validationContext.executionPackageDigest` / `baselineFilesDigest` / `bundleFingerprint` 必须和当前 bundle 内容一致；一旦手改过 bundle，应直接重建
-- `prepare_stage_subagent_dispatch.py` 默认会写出 sidecar `manifest`
-- sidecar `manifest` 会同时记录 `bundle` 摘要，以及可选 `promptFile` / `promptSha256` 完整性信息
-- `finalize_stage_subagent_dispatch.py` 可以用 `--manifest-file` 先校验 bundle sidecar
-- 子 agent 只允许返回一个 JSON object
+- 子 session 只允许返回一个 JSON object
 - `blocked` / `needs_clarification` 必须带非空 `blockedReasons`；`completed` 必须保持 `blockedReasons=[]`
 - `proofreading` 的 `completed` 结果必须给出非空的 `continuity` / `logic` / `characterOOC` / `fixDirection`；若 judgment=`needs revision`，`blockers` 也必须非空
 - `proofreading` 若 judgment=`acceptable`，`blockers` 必须为空
 - `proofreading` 若 judgment=`conditionally acceptable`，`blockers` 必须为空且 `risks` 必须非空
-- 父 agent 只有在 extract、validate 都通过后才能 apply 结果
-- 如果子 agent 返回 prose、多个 JSON、空输出或非法 JSON，按协议失败处理，不得静默兜底
+- 父 agent 只有在 validate 通过后才能 apply 结果
+- 如果子 session 返回 prose、多个 JSON、空输出或非法 JSON，按协议失败处理，不得静默兜底
 
 章节进度汇报：
 - 父 agent 会把章节级状态变化落到 `.novel-state.json` 的 `chapterTasks` 和 `pendingProgressItems`
@@ -206,55 +195,67 @@ prepare 的返回结果会带 `dispatchDir` / `bundleFile` / `promptFile` / `man
 Drafting 示例：
 
 ```bash
-python3 skills/novel-studio/scripts/prepare_stage_subagent_dispatch.py \
+python3 skills/novel-studio/scripts/run_isolated_dispatch.py \
   "$PROJECT_ROOT" \
   drafting \
-  --batch-range "第1章" \
+  --batch-range "第1章-第3章" \
   --target-file "manuscript/第1章_开端.md" \
-  --dispatch-dir "$TMP_DIR"
+  --target-file "manuscript/第2章_转折.md" \
+  --target-file "manuscript/第3章_反转.md" \
+  --model sonnet \
+  --timeout 300 \
+  --max-budget-usd 3
 ```
 
-父 agent 可以直接读取 prepare 返回的 `childPrompt`，或使用 prepare 输出的 `promptFile`。
-
-拿到 child 原始输出后：
+拿到 dispatch 结果后，校验并应用：
 
 ```bash
-python3 skills/novel-studio/scripts/extract_stage_subagent_result.py \
-  --dispatch-dir "$TMP_DIR" \
-  --project-root "$PROJECT_ROOT"
-
-python3 skills/novel-studio/scripts/finalize_stage_subagent_dispatch.py \
+# 校验结果
+python3 skills/novel-studio/scripts/validate_stage_execution_result.py \
   "$PROJECT_ROOT" \
-  --dispatch-dir "$TMP_DIR"
-```
+  --bundle-file /tmp/bundle.json \
+  --result-file /tmp/result.json
 
-如果你不走标准布局，仍然可以显式传 `--raw-file` / `--result-file` / `--bundle-file` / `--manifest-file` / `--validated-file` 覆盖默认解析。
+# 应用通过校验的结果
+python3 skills/novel-studio/scripts/apply_stage_execution_result.py \
+  "$PROJECT_ROOT" \
+  --bundle-file /tmp/bundle.json \
+  --result-file /tmp/result.json
+```
 
 Python 父 agent 也可以直接写成：
 
 ```python
+import subprocess
+import json
 from pathlib import Path
 
-from subagent_dispatch_runtime import finalize_dispatch, prepare_dispatch, record_child_output
+SCRIPTS = Path(__file__).parent / 'scripts'
 
+def dispatch_stage(project_root, stage, target_files, batch_range=None, polishing_focus=None):
+    cmd = [
+        'python3', str(SCRIPTS / 'run_isolated_dispatch.py'),
+        str(project_root), stage,
+    ]
+    if batch_range:
+        cmd.extend(['--batch-range', batch_range])
+    for f in target_files:
+        cmd.extend(['--target-file', f])
+    if polishing_focus:
+        cmd.extend(['--polishing-focus', polishing_focus])
 
-payload = prepare_dispatch(
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    if result.returncode != 0:
+        raise RuntimeError(f'dispatch failed: {result.stderr}')
+    return json.loads(result.stdout)
+
+# 使用示例
+dispatch_result = dispatch_stage(
     project_root,
-    "drafting",
-    batch_range="第1章",
-    target_files=["manuscript/第1章_开端.md"],
-    dispatch_dir=tmp_dir,
+    'drafting',
+    target_files=['manuscript/第1章_开端.md'],
+    batch_range='第1章',
 )
-
-child = spawn_agent(
-    agent_type="worker",
-    fork_context=False,
-    message=payload["childPrompt"],
-)
-child_done = wait_agent(ids=[child.id], timeout_ms=180000)
-dispatch_dir = Path(payload["dispatchDir"])
-record_child_output(project_root, child_done["final_message"], dispatch_dir=dispatch_dir)
-applied = finalize_dispatch(project_root, dispatch_dir=dispatch_dir)
 ```
 
 如果你只想理解运行时协议，先看：
@@ -321,15 +322,17 @@ Agent 会基于项目状态文件给出可读的进度报告。
 /plugin install spencergo@spencerkit/spencergo-marketplace
 ```
 
-### OpenClaw（ClawHub）
+### 其他平台
 
-```bash
-# 安装 ClawHub CLI
-npm i -g clawhub
+Novel Studio 使用跨平台的 `run_isolated_dispatch.py` 调度脚本，自动检测并适配 Claude Code / Qwen Code / OpenCode / Codex CLI 等运行时。
 
-# 或直接从市场安装
-clawhub install novel-studio
-```
+确保以下任一 CLI 在 PATH 上：
+- `claude` (Claude Code)
+- `qwen` (Qwen Code)
+- `opencode` (OpenCode)
+- `codex` (Codex CLI)
+
+可通过 `--cli-binary` 强制指定工具。首次选择后自动记住。
 
 ## License
 

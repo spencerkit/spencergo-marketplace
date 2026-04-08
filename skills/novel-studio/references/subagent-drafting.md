@@ -1,11 +1,12 @@
-# Subagent Drafting
+# Isolated Dispatch Drafting
 
 ## Default Mode
-- drafting must use a drafting subagent by default
-- one subagent handles the approved current batch
-- parent runtime should prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`
-- parent dispatch still uses `fork_context = false`
-- child receives prompt text only; dispatch artifacts stay parent-side
+- drafting must use isolated dispatch by default
+- one isolated `claude -p` session handles the approved current batch
+- parent runs `scripts/run_isolated_dispatch.py` to build, launch, and extract
+- the child session has zero parent chat history
+- the child session cannot spawn grandchildren (`Agent` tool is disabled)
+- the child receives prompt text with embedded file contents only; dispatch artifacts stay parent-side
 
 ## Allowed Writes
 - only parent-approved target manuscript files
@@ -27,7 +28,6 @@
 - character package usable
 - batch scope explicit
 - no open approval gate blocks execution
-- use `scripts/subagent_dispatch_runtime.py` when the parent is coordinating this stage in Python
 
 ## Acceptance Checklist
 - only allowed files changed

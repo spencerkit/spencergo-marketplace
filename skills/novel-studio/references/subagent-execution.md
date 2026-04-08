@@ -1,23 +1,36 @@
-# Subagent Execution
+# Isolated Dispatch Protocol
 
-This reference defines the shared parent-orchestrated subagent protocol for `drafting`, `polishing`, and `proofreading`.
+This reference defines the shared parent-orchestrated isolated dispatch protocol for `drafting`, `polishing`, and `proofreading`.
 
 The execution package is runtime-only. Canonical workflow state remains file-backed.
-Do not persist runtime subagent ids, session ids, raw execution packages, or raw subagent conversation history.
+Do not persist runtime session ids, raw execution packages, or raw child session conversation history.
 If anything must survive interruption, persist only lightweight execution summaries and lightweight progress events.
 
 ## 1. Parent role
 - parent agent is the orchestrator
 - parent agent validates preconditions
 - parent agent assembles curated context
-- parent agent dispatches with `fork_context = false`
+- parent agent runs `scripts/run_isolated_dispatch.py` to launch a physically separate child session
 - parent agent validates results before advancing state
 
 The parent owns stage gating, package construction, dispatch, result validation, and workflow state transitions.
 
+Isolation guarantees:
+- the child session runs in a separate agent process with zero parent chat history
+- the child session is launched by the platform's own CLI with non-interactive flags
+- the parent agent's environment variables are stripped from the child process
+- the child receives only the file contents embedded in the prompt, not any discussion context
+
+Supported platforms (auto-detected):
+- Claude Code (`CLAUDECODE` env) → `claude -p ... --no-session-persistence --disallowed-tools Agent`
+- Qwen Code (`QWEN_CODE` env) → `qwen -p ... --yolo --approval-mode auto-edit`
+- OpenCode (`OPENCODE` env) → `opencode run ...`
+- Codex CLI (`CODEX_SESSION_ID` env) → `codex -p ...`
+- Custom binary via `--cli-binary` flag
+
 Autopilot does not change this ownership model:
 - bounded automation does not turn the parent into the inline drafting / polishing / proofreading executor
-- `drafting`, `polishing`, and `proofreading` still belong to their subagents even when autopilot is active
+- `drafting`, `polishing`, and `proofreading` still belong to isolated dispatch even when autopilot is active
 - parent-side automation may only advance safe gates; final review remains manual
 - keep surfacing merged chapter progress during automation from file-backed state
 - if a child returns `blocked` or `needs_clarification`, stop autopilot with an explicit reason and wait for manual resume
@@ -126,32 +139,22 @@ Before advancing canonical file-backed workflow state, the parent must:
 - verify any stage-specific judgment separately from protocol `status`
 - reject incomplete, malformed, or out-of-bounds results
 - persist only accepted workflow state updates to file-backed state
-- avoid persisting runtime subagent ids
 - update file-backed chapter progress from accepted dispatch transitions rather than chat memory
 
 If acceptance fails, the parent must stop, surface the failure clearly, and wait for an explicit next action instead of silently continuing inline.
 
 ## 6. Parent Runtime Loop
-1. run `scripts/build_stage_execution_package.py`
-2. send only `executionPackage` to the child
-3. keep `validationContext` parent-side only
-4. run `scripts/extract_stage_subagent_result.py` on the child raw response
-5. run `scripts/validate_stage_execution_result.py`
-6. run `scripts/apply_stage_execution_result.py` only after validation passes
+1. run `scripts/run_isolated_dispatch.py` to build the bundle, launch the isolated child, and extract the result
+2. run `scripts/validate_stage_execution_result.py` on the returned result
+3. run `scripts/apply_stage_execution_result.py` only after validation passes
 
 The parent runtime loop is strict:
 - keep `taskType`, `stage`, and `validationContext.stage` aligned for the same dispatch
-- build the bundle immediately before dispatch
-- keep `validationContext.baselineFiles` as a parent-generated snapshot of normalized relative paths mapped to `{ sha256, size }`
-- each `baselineFiles` entry must use a 64-character lowercase hex `sha256` and a non-negative integer `size`
-- if a sidecar manifest is present, validate it against the bundle file before trusting the bundle contents
-- if `manifest.promptFile` and `manifest.promptSha256` are present, validate the prompt file contents before trusting the dispatch artifacts
-- do not modify project files after bundle build and before validation finishes
-- if parent-side files changed or the session was interrupted, discard the old bundle and rebuild a fresh one
+- `run_isolated_dispatch.py` builds the bundle and launches the child in one step
+- the child session runs with `--disallowed-tools "Agent"` and `--no-session-persistence`
+- the child receives only file-embedded context, no parent chat history
 - treat non-JSON child output as protocol failure before validation
-- never send `validationContext` to the child
 - never apply a child result before validation succeeds
-- never persist the raw execution bundle into canonical project state
 
 ## 7. Child Prompt Contract
 - return one structured result only
@@ -159,7 +162,8 @@ The parent runtime loop is strict:
 - do not claim completion without populated protocol fields
 - if the package is insufficient, return `needs_clarification` with zero file writes
 
-When prompting the child:
+When prompting the child (handled by `run_isolated_dispatch.py`):
+- embed all required file contents directly in the prompt (no chat history)
 - restate the stage-specific write boundary
 - restate the must-not-modify list
 - require the child to return the shared protocol fields exactly once

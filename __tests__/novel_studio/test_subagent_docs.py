@@ -31,84 +31,37 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         )
         return path.read_text(encoding='utf-8')
 
-    def test_skill_makes_three_stages_default_to_subagent_execution(self):
+    def test_skill_makes_three_stages_default_to_isolated_dispatch_execution(self):
         text = self.read_required_doc(SKILL)
-        self.assertIn('## Subagent execution defaults', text)
+        self.assertIn('## Isolated dispatch defaults', text)
         self.assertIn(
-            '- `drafting`, `polishing`, and `proofreading` default to subagent execution',
+            '- `drafting`, `polishing`, and `proofreading` default to isolated dispatch execution',
             text,
         )
         self.assertIn('- the parent agent is the orchestrator', text)
-        self.assertIn('- assemble a curated execution package before delegation', text)
-        self.assertIn('- delegate with `fork_context = false`', text)
-        self.assertIn('- prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch` as the parent runtime loop', text)
-        self.assertIn('- `scripts/subagent_dispatch_runtime.py` exposes `prepare_dispatch`, `record_child_output`, and `finalize_dispatch` for Python parents', text)
-        self.assertIn('- `prepare_dispatch(...)` generates the child prompt plus parent-side dispatch artifacts', text)
-        self.assertIn('- child agents still receive prompt text, not local artifact paths', text)
-        self.assertIn('- `record_child_output(...)` stores raw child output parent-side only', text)
-        self.assertIn('- `finalize_dispatch(...)` runs extract + validate + apply before state advancement', text)
-        self.assertIn('- build the execution bundle with `scripts/build_stage_execution_package.py`', text)
-        self.assertIn('- extract the child JSON result with `scripts/extract_stage_subagent_result.py`', text)
-        self.assertIn('- validate child results with `scripts/validate_stage_execution_result.py`', text)
-        self.assertIn('- apply accepted results with `scripts/apply_stage_execution_result.py`', text)
         self.assertIn(
-            '- `references/subagent-dispatch-template.md` — concrete parent-agent dispatch skeleton, child prompt template, helper-based runtime loop, and validate/apply sequence',
+            '- isolated dispatch launches a physically separate child session via `scripts/run_isolated_dispatch.py`',
             text,
         )
         self.assertIn(
-            '- `references/opening-design.md` — opening-gate rules, first-3/10/20 chapter objectives, and opening approval standard',
+            '- the platform is auto-detected from environment variables',
             text,
         )
-        self.assertIn(
-            '- `references/style-bible.md` — style-lock contract, drift-control rules, and revision path for voice changes',
-            text,
-        )
-        self.assertIn(
-            '- `references/platform-profiles.md` — 起点 / 番茄 / 通用 platform modes and their structural implications',
-            text,
-        )
-        self.assertIn(
-            '- `references/anti-template-checklist.md` — anti-template checks for topic choice, opening quality, and chapter-level drift',
-            text,
-        )
-        self.assertIn(
-            '- `references/continuity-ledgers.md` — world rules, foreshadow, relationship, and resource ledgers for long-form stability',
-            text,
-        )
-        self.assertIn(
-            '- validate delegated outputs before advancing workflow state',
-            text,
-        )
-        self.assertIn('- fail closed on protocol or content failure', text)
+        self.assertIn('- the child session has zero parent chat history', text)
         self.assertIn('- no silent inline fallback for these stages', text)
+        self.assertIn('- fail closed on protocol or content failure', text)
 
-    def test_readme_exposes_parent_orchestrated_subagent_flow(self):
+    def test_readme_exposes_parent_orchestrated_isolated_dispatch_flow(self):
         text = self.read_required_doc(README)
-        self.assertIn('## Subagent 执行接入', text)
-        self.assertIn('`drafting` / `polishing` / `proofreading` 默认走父 agent 编排 + subagent 执行', text)
+        self.assertIn('## Isolated Dispatch 执行接入', text)
+        self.assertIn('`drafting` / `polishing` / `proofreading` 默认走父 agent 编排 + isolated dispatch 执行', text)
         self.assertIn('开篇门是 drafting 之前的强制前置审批门', text)
-        self.assertIn('`scripts/prepare_stage_subagent_dispatch.py`', text)
-        self.assertIn('`scripts/extract_stage_subagent_result.py`', text)
-        self.assertIn('`scripts/finalize_stage_subagent_dispatch.py`', text)
-        self.assertIn('所有 `bundle` / `prompt` / `manifest` / `child-response` / `result` / `validated` 中间产物都必须放在项目根目录之外', text)
-        self.assertIn('只把 `executionPackage` 发给子 agent', text)
-        self.assertIn('`validationContext` 只留在父 agent', text)
-        self.assertIn('`spawn_agent(..., fork_context=false)`', text)
-        self.assertIn('`prepare -> spawn -> extract -> finalize`', text)
-        self.assertIn('`prepare_stage_subagent_dispatch.py` 默认会写出 sidecar `manifest`', text)
-        self.assertIn('`finalize_stage_subagent_dispatch.py` 可以用 `--manifest-file` 先校验 bundle sidecar', text)
-        self.assertIn('`prepare_stage_subagent_dispatch.py` 支持 `--dispatch-dir` 生成标准化 dispatch workspace', text)
-        self.assertIn('prepare 的返回结果会带 `dispatchDir`', text)
-        self.assertIn('标准布局固定为 `bundle.json` / `prompt.txt` / `manifest.json` / `child-response.txt` / `result.json` / `validated.json`', text)
-        self.assertIn('`rawFile` / `resultFile` / `validatedFile`', text)
-        self.assertIn('如果你显式传了 `bundleFile` / `promptFile` / `manifestFile`，且三者位于同一个父目录，prepare 也会自动把这个目录当成 `dispatchDir`', text)
-        self.assertIn('`extract_stage_subagent_result.py` 和 `finalize_stage_subagent_dispatch.py` 也支持直接吃 `--dispatch-dir`', text)
-        self.assertIn('显式传入的 `rawFile` / `resultFile` / `bundleFile` / `manifestFile` / `validatedFile` 会覆盖 `dispatchDir` 默认路径', text)
-        self.assertIn('如果父 agent 用 Python 编排，可以直接 import `scripts/subagent_dispatch_runtime.py`', text)
-        self.assertIn('`prepare_dispatch(...)` 负责生成 `childPrompt`', text)
-        self.assertIn('`record_child_output(...)` 只负责记录子 agent 的原始输出', text)
-        self.assertIn('`finalize_dispatch(...)` 会串起 extract + validate + apply', text)
-        self.assertIn('sidecar `manifest` 会同时记录 `bundle` 摘要，以及可选 `promptFile` / `promptSha256` 完整性信息', text)
+        self.assertIn('`scripts/run_isolated_dispatch.py`', text)
+        self.assertIn('`scripts/validate_stage_execution_result.py`', text)
+        self.assertIn('`scripts/apply_stage_execution_result.py`', text)
+        self.assertIn('零父 session 聊天历史', text)
+        self.assertIn('`Agent` 工具被禁用', text)
+        self.assertIn('不保存 session 历史', text)
         self.assertIn('`completed` 结果必须真实触达本次 dispatch 的全部 `outputContract.mustWriteFiles`', text)
         self.assertIn('`blocked` / `needs_clarification` 必须带非空 `blockedReasons`；`completed` 必须保持 `blockedReasons=[]`', text)
         self.assertIn('`proofreading` 的 `completed` 结果必须给出非空的 `continuity` / `logic` / `characterOOC` / `fixDirection`；若 judgment=`needs revision`，`blockers` 也必须非空', text)
@@ -119,7 +72,10 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         text = self.read_required_doc(SUBAGENT_EXEC)
         self.assertIn('## 1. Parent role', text)
         self.assertIn('- parent agent is the orchestrator', text)
-        self.assertIn('- parent agent dispatches with `fork_context = false`', text)
+        self.assertIn(
+            '- parent agent runs `scripts/run_isolated_dispatch.py` to launch a physically separate child session',
+            text,
+        )
         self.assertIn('## 2. Execution Package', text)
         self.assertIn(
             '- `task type` must be one of `drafting`, `polishing`, or `proofreading`',
@@ -190,7 +146,7 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
             text,
         )
         self.assertIn(
-            'Do not persist runtime subagent ids, session ids, raw execution packages, or raw subagent conversation history.',
+            'Do not persist runtime session ids, raw execution packages, or raw child session conversation history.',
             text,
         )
         self.assertIn(
@@ -198,21 +154,12 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
             text,
         )
         self.assertIn('## 6. Parent Runtime Loop', text)
-        self.assertIn('1. run `scripts/build_stage_execution_package.py`', text)
-        self.assertIn('2. send only `executionPackage` to the child', text)
-        self.assertIn('3. keep `validationContext` parent-side only', text)
-        self.assertIn('4. run `scripts/extract_stage_subagent_result.py` on the child raw response', text)
-        self.assertIn('5. run `scripts/validate_stage_execution_result.py`', text)
-        self.assertIn('6. run `scripts/apply_stage_execution_result.py` only after validation passes', text)
+        self.assertIn('1. run `scripts/run_isolated_dispatch.py` to build the bundle, launch the isolated child, and extract the result', text)
+        self.assertIn('2. run `scripts/validate_stage_execution_result.py` on the returned result', text)
+        self.assertIn('3. run `scripts/apply_stage_execution_result.py` only after validation passes', text)
         self.assertIn('- keep `taskType`, `stage`, and `validationContext.stage` aligned for the same dispatch', text)
-        self.assertIn('- build the bundle immediately before dispatch', text)
-        self.assertIn('- do not modify project files after bundle build and before validation finishes', text)
-        self.assertIn('- if `manifest.promptFile` and `manifest.promptSha256` are present, validate the prompt file contents before trusting the dispatch artifacts', text)
-        self.assertIn('- verify completed results actually touched every required `outputContract.mustWriteFiles` path', text)
-        self.assertIn(
-            '- if parent-side files changed or the session was interrupted, discard the old bundle and rebuild a fresh one',
-            text,
-        )
+        self.assertIn('- `run_isolated_dispatch.py` builds the bundle and launches the child in one step', text)
+        self.assertIn('- the child session runs with `--disallowed-tools "Agent"` and `--no-session-persistence`', text)
         self.assertIn('- treat non-JSON child output as protocol failure before validation', text)
         self.assertIn('## 7. Child Prompt Contract', text)
         self.assertIn('- return one structured result only', text)
@@ -220,64 +167,31 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         self.assertIn('- do not claim completion without populated protocol fields', text)
         self.assertIn('- if the package is insufficient, return `needs_clarification` with zero file writes', text)
 
-    def test_parent_dispatch_template_exists_and_covers_spawn_validate_apply(self):
+    def test_parent_dispatch_template_exists_and_covers_isolated_validate_apply(self):
         text = self.read_required_doc(SUBAGENT_TEMPLATE)
         self.assertIn('## 1. Parent-side invariants', text)
-        self.assertIn('- send only `executionPackage` to the child', text)
-        self.assertIn('- keep `validationContext` parent-side only', text)
-        self.assertIn('- delegate with `fork_context = false`', text)
-        self.assertIn('- `scripts/prepare_stage_subagent_dispatch.py` prepares a reusable bundle file plus the child prompt', text)
-        self.assertIn('- `scripts/prepare_stage_subagent_dispatch.py` can also emit a sidecar manifest for bundle integrity checks', text)
-        self.assertIn('- `scripts/prepare_stage_subagent_dispatch.py` can return a standard dispatch workspace layout via `dispatchDir` plus raw/result/validated artifact paths', text)
-        self.assertIn('- the standard `dispatchDir` layout is `bundle.json`, `prompt.txt`, `manifest.json`, `child-response.txt`, `result.json`, and `validated.json`', text)
-        self.assertIn('- if explicit `bundleFile`, `promptFile`, and `manifestFile` share one parent directory, infer that parent as `dispatchDir` for the remaining artifacts', text)
-        self.assertIn('- `scripts/extract_stage_subagent_result.py` turns the child raw response into exactly one JSON result object', text)
-        self.assertIn('- `scripts/extract_stage_subagent_result.py` can read `rawFile` and write `resultFile` directly from `dispatchDir`', text)
-        self.assertIn('- `scripts/finalize_stage_subagent_dispatch.py` validates the child result and applies accepted state updates', text)
-        self.assertIn('- `scripts/finalize_stage_subagent_dispatch.py` can read `bundleFile` / `manifestFile` / `resultFile` and write `validatedFile` directly from `dispatchDir`', text)
-        self.assertIn('- `scripts/subagent_dispatch_runtime.py` exposes `prepare_dispatch`, `record_child_output`, and `finalize_dispatch` for Python parents', text)
-        self.assertIn('- all dispatch artifacts must stay outside project root', text)
-        self.assertIn(
-            '- do not add hidden requirements outside `requiredInputs`; if context is missing, fix the bundle builder or rebuild the package',
-            text,
-        )
-        self.assertIn('## 2. Build the execution bundle', text)
-        self.assertIn('build_stage_execution_package.py', text)
-        self.assertIn('--dispatch-dir "$TMP_DIR"', text)
+        self.assertIn('run `scripts/run_isolated_dispatch.py` to build, launch, and extract in one step', text)
+        self.assertIn('- the child session runs in a physically separate `claude -p` process', text)
+        self.assertIn('- the child session has zero parent chat history', text)
+        self.assertIn('- the child session cannot spawn grandchildren', text)
+        self.assertIn('- the child session cannot persist its history', text)
+        self.assertIn('- the child receives only file-embedded context in the prompt', text)
+        self.assertIn('## 2. Running an isolated dispatch', text)
+        self.assertIn('run_isolated_dispatch.py', text)
         self.assertIn('## 3. Parent dispatch skeleton', text)
-        self.assertIn('spawn_agent(', text)
-        self.assertIn('fork_context=False', text)
-        self.assertIn('Return exactly one JSON object and nothing else.', text)
-        self.assertIn('## 4. Child prompt template', text)
-        self.assertIn(
-            '- proofreading: read-only only; do not modify any project file; include judgment, continuity, logic, characterOOC, blockers, and fixDirection',
-            text,
-        )
+        self.assertIn('def run_isolated_dispatch(', text)
+        self.assertIn('## 4. Child prompt (auto-generated)', text)
         self.assertIn('## 5. Parent result handling skeleton', text)
-        self.assertIn('extract_stage_subagent_result.py', text)
-        self.assertIn('finalize_stage_subagent_dispatch.py', text)
-        self.assertIn('--dispatch-dir "$TMP_DIR"', text)
-        self.assertIn('If you need to deviate from the standard layout, pass explicit file arguments and let them override the `dispatchDir` defaults.', text)
-        self.assertIn(
-            '- if the child returns prose, multiple JSON blocks, or malformed JSON, treat it as protocol failure',
-            text,
-        )
+        self.assertIn('validate_stage_execution_result.py', text)
+        self.assertIn('apply_stage_execution_result.py', text)
+        self.assertIn('if validation fails, stop and surface the failure', text)
         self.assertIn('- if the child returns `blocked` or `needs_clarification`, require non-empty `blockedReasons`', text)
         self.assertIn('- if the child returns `completed`, require empty `blockedReasons`', text)
         self.assertIn('- if the child returns `completed`, require every `outputContract.mustWriteFiles` path to be touched by the dispatch', text)
         self.assertIn('- if `proofreading` returns `completed`, require non-empty judgment fields; if judgment is `needs revision`, require non-empty blockers', text)
         self.assertIn('- if `proofreading` returns `completed` with judgment `acceptable`, require empty blockers', text)
         self.assertIn('- if `proofreading` returns `completed` with judgment `conditionally acceptable`, require empty blockers and non-empty risks', text)
-        self.assertIn('## 6. End-to-End Parent Example', text)
-        self.assertIn('from subagent_dispatch_runtime import finalize_dispatch, prepare_dispatch, record_child_output', text)
-        self.assertIn('payload = prepare_dispatch(', text)
-        self.assertIn('message=payload["childPrompt"]', text)
-        self.assertIn('record_child_output(', text)
-        self.assertIn('applied = finalize_dispatch(', text)
-        self.assertIn('child_done = wait_agent(ids=[child.id], timeout_ms=180000)', text)
-        self.assertIn('dispatch_dir = Path(payload["dispatchDir"])', text)
-        self.assertIn('record_child_output(project_root, child_done["final_message"], dispatch_dir=dispatch_dir)', text)
-        self.assertIn('- if `wait_agent` times out or returns no usable final message, treat it as infrastructure failure and retry at most once', text)
+        self.assertIn('## 6. What makes this different from inline work', text)
 
     def test_state_fields_template_mentions_narrative_intelligence(self):
         state_fields = self.read_required_doc(ROOT / 'skills/novel-studio/references/state-fields-template.md')
@@ -294,11 +208,14 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
     def test_drafting_reference_defines_required_boundaries(self):
         text = self.read_required_doc(SUBAGENT_DRAFTING)
         self.assertIn('## Default Mode', text)
-        self.assertIn('- drafting must use a drafting subagent by default', text)
-        self.assertIn('- one subagent handles the approved current batch', text)
-        self.assertIn('- parent runtime should prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`', text)
-        self.assertIn('- parent dispatch still uses `fork_context = false`', text)
-        self.assertIn('- child receives prompt text only; dispatch artifacts stay parent-side', text)
+        self.assertIn('- drafting must use isolated dispatch by default', text)
+        self.assertIn(
+            '- parent runs `scripts/run_isolated_dispatch.py` to build, launch, and extract',
+            text,
+        )
+        self.assertIn('- the child session has zero parent chat history', text)
+        self.assertIn('- the child session cannot spawn grandchildren', text)
+        self.assertIn('- the child receives prompt text with embedded file contents only; dispatch artifacts stay parent-side', text)
         self.assertIn('## Allowed Writes', text)
         self.assertIn('- only parent-approved target manuscript files', text)
         self.assertIn('## Overwrite Rule', text)
@@ -313,10 +230,14 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
     def test_polishing_reference_defines_required_boundaries(self):
         text = self.read_required_doc(SUBAGENT_POLISHING)
         self.assertIn('## Default Mode', text)
-        self.assertIn('- polishing must use a polishing subagent by default', text)
-        self.assertIn('- parent runtime should prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`', text)
-        self.assertIn('- parent dispatch still uses `fork_context = false`', text)
-        self.assertIn('- child receives prompt text only; dispatch artifacts stay parent-side', text)
+        self.assertIn('- polishing must use isolated dispatch by default', text)
+        self.assertIn(
+            '- parent runs `scripts/run_isolated_dispatch.py` to build, launch, and extract',
+            text,
+        )
+        self.assertIn('- the child session has zero parent chat history', text)
+        self.assertIn('- the child session cannot spawn grandchildren', text)
+        self.assertIn('- the child receives prompt text with embedded file contents only; dispatch artifacts stay parent-side', text)
         self.assertIn('## Required Input', text)
         self.assertIn('- every execution package must include `polishingFocus`', text)
         self.assertIn('## Allowed Writes', text)
@@ -331,10 +252,14 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
     def test_proofreading_reference_defines_required_boundaries(self):
         text = self.read_required_doc(SUBAGENT_PROOFREADING)
         self.assertIn('## Default Mode', text)
-        self.assertIn('- proofreading must use a proofreading subagent by default', text)
-        self.assertIn('- parent runtime should prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`', text)
-        self.assertIn('- parent dispatch still uses `fork_context = false`', text)
-        self.assertIn('- child receives prompt text only; dispatch artifacts stay parent-side', text)
+        self.assertIn('- proofreading must use isolated dispatch by default', text)
+        self.assertIn(
+            '- parent runs `scripts/run_isolated_dispatch.py` to build, launch, and extract',
+            text,
+        )
+        self.assertIn('- the child session has zero parent chat history', text)
+        self.assertIn('- the child session cannot spawn grandchildren', text)
+        self.assertIn('- the child receives prompt text with embedded file contents only; dispatch artifacts stay parent-side', text)
         self.assertIn('## Read-Only Rule', text)
         self.assertIn('- this role is read-only', text)
         self.assertIn('- must not modify manuscript files', text)
@@ -621,7 +546,7 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
         self.assertIn('- default remains manual approval at every gate', skill)
         self.assertIn('- autopilot activates only after explicit bounded user authorization with a terminal chapter goal such as `继续到第10章结束`', skill)
         self.assertIn('- vague approval like `继续` or `好` does not activate autopilot', skill)
-        self.assertIn('- autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still belong to their subagents', skill)
+        self.assertIn('- autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still belong to isolated dispatch', skill)
         self.assertIn('- after each `scripts/advance_autopilot.py` call, the parent must inspect the returned `report` object instead of guessing from raw state', skill)
         self.assertIn('- if `report.shouldNotify` is true, immediately send `report.userFacingMessage` to the user', skill)
         self.assertIn('- if `report.pendingEventIds` were surfaced, acknowledge them with `scripts/chapter_progress_report.py <项目目录> --ack <event-id>` after the message is sent, so the same update is not repeated forever', skill)
@@ -685,6 +610,6 @@ class NovelStudioSubagentDocsTest(unittest.TestCase):
 
         subagent_execution = self.read_required_doc(ROOT / 'skills/novel-studio/references/subagent-execution.md')
         self.assertIn('Autopilot does not change this ownership model:', subagent_execution)
-        self.assertIn('- `drafting`, `polishing`, and `proofreading` still belong to their subagents even when autopilot is active', subagent_execution)
+        self.assertIn('- `drafting`, `polishing`, and `proofreading` still belong to isolated dispatch even when autopilot is active', subagent_execution)
         self.assertIn('- keep surfacing merged chapter progress during automation from file-backed state', subagent_execution)
         self.assertIn('- if a child returns `blocked` or `needs_clarification`, stop autopilot with an explicit reason and wait for manual resume', subagent_execution)

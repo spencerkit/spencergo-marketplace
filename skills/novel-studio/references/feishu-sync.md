@@ -13,7 +13,7 @@ It is a mirrored project hierarchy that remains readable and maintainable.
 
 Default local source:
 
-`/root/.openclaw/novels/[小说名称]/`
+`./[小说名称]/`
 
 Default sync scope:
 - top-level project files

@@ -1,10 +1,12 @@
-# Subagent Proofreading
+# Isolated Dispatch Proofreading
 
 ## Default Mode
-- proofreading must use a proofreading subagent by default
-- parent runtime should prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch`
-- parent dispatch still uses `fork_context = false`
-- child receives prompt text only; dispatch artifacts stay parent-side
+- proofreading must use isolated dispatch by default
+- one isolated `claude -p` session handles the approved current batch
+- parent runs `scripts/run_isolated_dispatch.py` to build, launch, and extract
+- the child session has zero parent chat history
+- the child session cannot spawn grandchildren (`Agent` tool is disabled)
+- the child receives prompt text with embedded file contents only; dispatch artifacts stay parent-side
 
 ## Read-Only Rule
 - this role is read-only

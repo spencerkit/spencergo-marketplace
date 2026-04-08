@@ -47,20 +47,17 @@ Default order:
 6. Proofreading stage
 7. Final review and delivery stage
 
-## Subagent execution defaults
+## Isolated dispatch defaults
 
-- `drafting`, `polishing`, and `proofreading` default to subagent execution
+- `drafting`, `polishing`, and `proofreading` default to isolated dispatch execution
 - the parent agent is the orchestrator
-- assemble a curated execution package before delegation
-- delegate with `fork_context = false`
-- prefer `prepare_dispatch -> spawn(message=childPrompt) -> record_child_output -> finalize_dispatch` as the parent runtime loop
-- `scripts/subagent_dispatch_runtime.py` exposes `prepare_dispatch`, `record_child_output`, and `finalize_dispatch` for Python parents
-- `prepare_dispatch(...)` generates the child prompt plus parent-side dispatch artifacts
-- child agents still receive prompt text, not local artifact paths
-- `record_child_output(...)` stores raw child output parent-side only
-- `finalize_dispatch(...)` runs extract + validate + apply before state advancement
-- build the execution bundle with `scripts/build_stage_execution_package.py`
-- extract the child JSON result with `scripts/extract_stage_subagent_result.py`
+- isolated dispatch launches a physically separate child session via `scripts/run_isolated_dispatch.py`
+- the platform is auto-detected from environment variables (`CLAUDECODE`, `QWEN_CODE`, `OPENCODE`, `CODEX_SESSION_ID`)
+- the child session has zero parent chat history and receives only file-embedded context
+- the parent agent's environment variables are stripped from the child process
+- override the detected binary with `--cli-binary` if needed
+- the child must return exactly one JSON object with the required protocol fields
+- after `run_isolated_dispatch.py` returns, the parent validates and applies the result
 - validate child results with `scripts/validate_stage_execution_result.py`
 - apply accepted results with `scripts/apply_stage_execution_result.py`
 - validate delegated outputs before advancing workflow state
@@ -72,7 +69,7 @@ Default order:
 - default remains manual approval at every gate
 - autopilot activates only after explicit bounded user authorization with a terminal chapter goal such as `继续到第10章结束`
 - vague approval like `继续` or `好` does not activate autopilot
-- autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still belong to their subagents
+- autopilot does not change ownership: the parent remains the orchestrator, while `drafting`, `polishing`, and `proofreading` still belong to isolated dispatch
 - progress updates continue during automation; keep surfacing merged chapter progress after dispatch start, accepted child results, and approval transitions
 - after each `scripts/advance_autopilot.py` call, the parent must inspect the returned `report` object instead of guessing from raw state
 - if `report.shouldNotify` is true, immediately send `report.userFacingMessage` to the user
@@ -228,15 +225,15 @@ Use these reference files as **hard operational guidance**, not optional inspira
 - `references/character-bible.md` — character profiles, motivation, arc, relationship structure, and drafting gate requirements
 - `references/character-craft.md` — attraction design, contradiction, scene-based characterization, environment/other-character contrast, and memorable-role construction
 - `references/drafting.md` — chapter drafting rules, pacing, hooks, anti-perfunctory drafting rules, and polishing gate requirements
-- `references/subagent-drafting.md` — runtime drafting-subagent delegation defaults and parent acceptance requirements
+- `references/subagent-drafting.md` — runtime isolated dispatch delegation defaults and parent acceptance requirements
 - `references/language-and-rhetoric.md` — scene-function-based style choice, rhetoric usage, literary device control, and language misuse warnings
 - `references/narrative-techniques.md` — suppression/release, reversal, information-gap propulsion, pressure design, and chapter/arc narrative engines
 - `references/polishing.md` — language refinement, emotional density, readability, de-AI cleanup, and proofreading gate requirements
-- `references/subagent-polishing.md` — runtime polishing-subagent delegation defaults and parent acceptance requirements
+- `references/subagent-polishing.md` — runtime isolated dispatch delegation defaults and parent acceptance requirements
 - `references/proofreading.md` — consistency checks, logic review, OOC control, structural QA, and final-review gate requirements
-- `references/subagent-proofreading.md` — runtime proofreading-subagent delegation defaults and parent acceptance requirements
-- `references/subagent-execution.md` — shared subagent execution protocol, inline execution package rules, and fail-closed behavior
-- `references/subagent-dispatch-template.md` — concrete parent-agent dispatch skeleton, child prompt template, helper-based runtime loop, and validate/apply sequence
+- `references/subagent-proofreading.md` — runtime isolated dispatch delegation defaults and parent acceptance requirements
+- `references/subagent-execution.md` — isolated dispatch protocol, child prompt contract, and fail-closed behavior
+- `references/subagent-dispatch-template.md` — concrete parent-agent dispatch skeleton, isolated prompt template, helper-based runtime loop, and validate/apply sequence
 - `references/literary-diagnostics.md` — diagnosis of plot flatness, weak characterization, useless subplots, dull chapters, and ineffective language before revision
 - `references/scoring-rubric.md` — structured scoring for outlines, characters, chapters, and review readiness
 - `references/chapter-review-template.md` — fixed editor-style chapter/batch review template with diagnosis and repair priorities

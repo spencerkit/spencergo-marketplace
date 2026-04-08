@@ -22,11 +22,11 @@ They are not canonical project artifacts and should not be persisted as part of 
 
 Default root:
 
-`/root/.openclaw/novels/[小说名称]/`
+Current working directory (`./[小说名称]/`).
 
 Use the confirmed novel title or a normalized project title as the project folder name.
 
-Prefer a stable name once the title is confirmed.  
+Prefer a stable name once the title is confirmed.
 Avoid renaming the project directory repeatedly after downstream files already exist.
 
 ---
@@ -36,7 +36,7 @@ Avoid renaming the project directory repeatedly after downstream files already e
 Use this layout by default:
 
 ```text
-/root/.openclaw/novels/[小说名称]/
+./[小说名称]/
 ├── 00A_热点扫描.md
 ├── 00B_用户偏好.md
 ├── 00C_底盘与切口决策.md
