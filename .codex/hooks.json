@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "/bin/sh -lc 'cat >> /tmp/coder-studio-resume-noprompt-1774920909649.jsonl; printf \"\\n\" >> /tmp/coder-studio-resume-noprompt-1774920909649.jsonl'",
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "/bin/sh -lc 'cat >> /tmp/coder-studio-resume-noprompt-1774920909649.jsonl; printf \"\\n\" >> /tmp/coder-studio-resume-noprompt-1774920909649.jsonl'",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}
